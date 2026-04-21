@@ -1,0 +1,6 @@
+{
+  "remote.WSL2.showNotificationWhenInsufficientMemory": false,
+  "remote.WSL.diagnostics": false,
+  "extensions.autoUpdate": false,
+  "extensions.autoCheckUpdates": false
+}
