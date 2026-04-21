@@ -1,0 +1,40 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                String   @id @default(uuid())
+  clerkId           String   @unique
+  email             String   @unique
+  subscriptionStatus String  @default("free")
+  subscriptionId    String?
+  usageCount        Int      @default(0)
+  usageResetAt      DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  documents         Document[]
+}
+
+model Document {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  filename  String
+  fileSize  Int
+  pageCount Int
+  content   String   @db.Text
+  summary   String?  @db.Text
+  status    String   @default("processing")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+}
