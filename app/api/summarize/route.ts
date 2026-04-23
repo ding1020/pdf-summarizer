@@ -1,12 +1,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
+import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
 import { prisma } from "@/lib/db";
-
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: "https://api.deepseek.com/v1",
-});
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,7 +14,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { documentId, content } = await req.json();
+    const { documentId, content, provider = "deepseek", language = "multilingual" } = await req.json();
 
     if (!documentId || !content) {
       return NextResponse.json(
@@ -59,37 +54,84 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Truncate content if too long (DeepSeek has context limit)
+    // Truncate content if too long
     const maxLength = 15000;
     const truncatedContent = content.length > maxLength 
       ? content.substring(0, maxLength) + "..."
       : content;
 
-    // Generate summary using DeepSeek
-    const completion = await openai.chat.completions.create({
-      model: "deepseek-chat",
-      messages: [
-        {
-          role: "system",
-          content: `You are a professional document summarizer. Create a comprehensive summary of the provided document content.
+    // Get AI provider and generate summary
+    let summary: string;
+    let usedProvider: AIProvider;
 
-Requirements:
-1. Provide a brief overview (2-3 sentences)
-2. List 3-5 key points
-3. Format using markdown
-4. Be concise but informative
-5. Use the same language as the document`,
-        },
-        {
-          role: "user",
-          content: `Please summarize the following document:\n\n${truncatedContent}`,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-    });
-
-    const summary = completion.choices[0]?.message?.content || "Failed to generate summary";
+    // Try primary provider first
+    try {
+      const openai = getAIProvider(provider as AIProvider);
+      const completion = await openai.chat.completions.create({
+        model: openai.baseURL?.includes("groq") ? "llama-3.3-70b-versatile" : 
+               openai.baseURL?.includes("siliconflow") ? "Qwen/Qwen2.5-7B-Instruct" : "deepseek-chat",
+        messages: [
+          {
+            role: "system",
+            content: getSystemPrompt(language),
+          },
+          {
+            role: "user",
+            content: `Please summarize the following document:\n\n${truncatedContent}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 2000,
+      });
+      summary = completion.choices[0]?.message?.content || "Failed to generate summary";
+      usedProvider = provider as AIProvider;
+    } catch (primaryError) {
+      console.error("Primary provider failed, trying fallback:", primaryError);
+      
+      // Fallback to Groq if primary fails
+      try {
+        const openai = getAIProvider("groq");
+        const completion = await openai.chat.completions.create({
+          model: "llama-3.3-70b-versatile",
+          messages: [
+            {
+              role: "system",
+              content: getSystemPrompt(language),
+            },
+            {
+              role: "user",
+              content: `Please summarize the following document:\n\n${truncatedContent}`,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        });
+        summary = completion.choices[0]?.message?.content || "Failed to generate summary";
+        usedProvider = "groq";
+      } catch (groqError) {
+        console.error("Groq also failed, trying SiliconFlow:", groqError);
+        
+        // Final fallback to SiliconFlow
+        const openai = getAIProvider("siliconflow");
+        const completion = await openai.chat.completions.create({
+          model: "Qwen/Qwen2.5-7B-Instruct",
+          messages: [
+            {
+              role: "system",
+              content: getSystemPrompt(language),
+            },
+            {
+              role: "user",
+              content: `Please summarize the following document:\n\n${truncatedContent}`,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: 2000,
+        });
+        summary = completion.choices[0]?.message?.content || "Failed to generate summary";
+        usedProvider = "siliconflow";
+      }
+    }
 
     // Update document with summary
     await prisma.document.update({
@@ -110,6 +152,7 @@ Requirements:
       success: true,
       summary,
       documentId,
+      provider: usedProvider,
     });
   } catch (error) {
     console.error("Summarize error:", error);

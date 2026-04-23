@@ -1,11 +1,6 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: "https://api.deepseek.com/v1",
-});
+import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
 
 export async function POST(req: NextRequest) {
   try {
@@ -18,7 +13,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { content } = await req.json();
+    const { content, provider = "deepseek", language = "multilingual" } = await req.json();
 
     if (!content) {
       return new Response(
@@ -33,19 +28,18 @@ export async function POST(req: NextRequest) {
       ? content.substring(0, maxLength) + "..."
       : content;
 
+    // Get AI client
+    const openai = getAIProvider(provider as AIProvider);
+    
+    const model = openai.baseURL?.includes("groq") ? "llama-3.3-70b-versatile" : 
+                  openai.baseURL?.includes("siliconflow") ? "Qwen/Qwen2.5-7B-Instruct" : "deepseek-chat";
+
     const stream = await openai.chat.completions.create({
-      model: "deepseek-chat",
+      model,
       messages: [
         {
           role: "system",
-          content: `You are a professional document summarizer. Create a comprehensive summary of the provided document content.
-
-Requirements:
-1. Provide a brief overview (2-3 sentences)
-2. List 3-5 key points
-3. Format using markdown
-4. Be concise but informative
-5. Use the same language as the document`,
+          content: getSystemPrompt(language),
         },
         {
           role: "user",
