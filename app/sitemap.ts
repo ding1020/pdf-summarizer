@@ -2,7 +2,7 @@ import { MetadataRoute } from "next/types";
 
 const locales = ["en", "zh", "ja", "ko", "es", "fr", "de"];
 
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pdf-summarizer.vercel.app";
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const routes = ["", "/pricing", "/sign-in", "/sign-up"].flatMap((route) =>

@@ -1,7 +1,7 @@
 import { MetadataRoute } from "next/types";
 
 export default function robots(): MetadataRoute.Robots {
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://pdf-summarizer.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
   return {
     rules: [
