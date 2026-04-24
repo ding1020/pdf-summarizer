@@ -1,18 +1,10 @@
-import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
+import lemonSqueezy from "@lemonsqueezy/lemonsqueezy";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || "");
-
-const PRICES = {
-  pro: {
-    usd: process.env.STRIPE_PRO_PRICE_USD || "",
-    eur: process.env.STRIPE_PRO_PRICE_EUR || "",
-    jpy: process.env.STRIPE_PRO_PRICE_JPY || "",
-    cny: process.env.STRIPE_PRO_PRICE_CNY || "",
-    krw: process.env.STRIPE_PRO_PRICE_KRW || "",
-  },
-};
+const STORE_ID = process.env.LEMON_SQUEEZY_STORE_ID;
+const API_KEY = process.env.LEMON_SQUEEZY_API_KEY;
+const VARIANT_ID = process.env.LEMON_SQUEEZY_VARIANT_ID;
 
 export async function POST(req: NextRequest) {
   try {
@@ -34,58 +26,48 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Get currency from Accept-Language header or default to USD
-    const acceptLanguage = req.headers.get("accept-language") || "";
-    let currency = "usd";
-    let priceId = PRICES.pro.usd;
-
-    if (acceptLanguage.includes("zh")) {
-      currency = "cny";
-      priceId = PRICES.pro.cny;
-    } else if (acceptLanguage.includes("ja")) {
-      currency = "jpy";
-      priceId = PRICES.pro.jpy;
-    } else if (acceptLanguage.includes("ko")) {
-      currency = "krw";
-      priceId = PRICES.pro.krw;
-    } else if (acceptLanguage.includes("de") || acceptLanguage.includes("fr") || acceptLanguage.includes("es")) {
-      currency = "eur";
-      priceId = PRICES.pro.eur;
-    }
-
-    // If price ID is not configured, return a message
-    if (!priceId) {
+    if (!VARIANT_ID) {
       return NextResponse.json({
         message: "Payment integration coming soon",
-        currency,
         plan,
       });
     }
 
-    const session = await stripe.checkout.sessions.create({
-      mode: "subscription",
-      payment_method_types: ["card"],
-      line_items: [
-        {
-          price: priceId,
-          quantity: 1,
-        },
-      ],
-      metadata: {
-        clerkId,
-        plan,
-      },
-      subscription_data: {
-        metadata: {
-          clerkId,
-          plan,
+    // Configure Lemon Squeezy
+    lemonSqueezy.apiKey = API_KEY || "";
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+
+    // Create checkout session
+    const checkout = await lemonSqueezy.createCheckout(STORE_ID!, VARIANT_ID!, {
+      checkoutData: {
+        email: undefined, // Will be collected at checkout
+        custom: {
+          clerkId: clerkId,
+          plan: plan,
         },
       },
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/dashboard?success=true`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing?canceled=true`,
+      productOptions: {
+        redirectUrl: `${baseUrl}/dashboard?success=true`,
+        receiptButtonText: "Go to Dashboard",
+        receiptThankYouNote: "Thank you for your purchase!",
+      },
+      checkoutOptions: {
+        embed: false,
+        media: true,
+        logo: true,
+      },
     });
 
-    return NextResponse.json({ url: session.url });
+    if (checkout.error) {
+      console.error("Lemon Squeezy error:", checkout.error);
+      return NextResponse.json(
+        { error: "Failed to create checkout session" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json({ url: checkout.data?.data.attributes.url });
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json(
