@@ -1,10 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import lemonSqueezy from "@lemonsqueezy/lemonsqueezy";
 
-const STORE_ID = process.env.LEMON_SQUEEZY_STORE_ID;
-const API_KEY = process.env.LEMON_SQUEEZY_API_KEY;
-const VARIANT_ID = process.env.LEMON_SQUEEZY_VARIANT_ID;
+const PADDLE_PRODUCT_ID = process.env.PADDLE_PRODUCT_ID;
+const PADDLE_VENDOR_ID = process.env.PADDLE_VENDOR_ID;
 
 export async function POST(req: NextRequest) {
   try {
@@ -26,48 +24,19 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    if (!VARIANT_ID) {
+    if (!PADDLE_PRODUCT_ID || !PADDLE_VENDOR_ID) {
       return NextResponse.json({
         message: "Payment integration coming soon",
         plan,
       });
     }
 
-    // Configure Lemon Squeezy
-    lemonSqueezy.apiKey = API_KEY || "";
-
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
-    // Create checkout session
-    const checkout = await lemonSqueezy.createCheckout(STORE_ID!, VARIANT_ID!, {
-      checkoutData: {
-        email: undefined, // Will be collected at checkout
-        custom: {
-          clerkId: clerkId,
-          plan: plan,
-        },
-      },
-      productOptions: {
-        redirectUrl: `${baseUrl}/dashboard?success=true`,
-        receiptButtonText: "Go to Dashboard",
-        receiptThankYouNote: "Thank you for your purchase!",
-      },
-      checkoutOptions: {
-        embed: false,
-        media: true,
-        logo: true,
-      },
-    });
+    // Create Paddle checkout URL using their hosted checkout
+    const checkoutUrl = `https://checkout.paddle.com/subscription/checkout?product=${PADDLE_PRODUCT_ID}&vendor=${PADDLE_VENDOR_ID}&quantity=1&custom[clerkId]=${clerkId}&custom[plan]=${plan}&success=${encodeURIComponent(`${baseUrl}/dashboard?success=true`)}&step=completed`;
 
-    if (checkout.error) {
-      console.error("Lemon Squeezy error:", checkout.error);
-      return NextResponse.json(
-        { error: "Failed to create checkout session" },
-        { status: 500 }
-      );
-    }
-
-    return NextResponse.json({ url: checkout.data?.data.attributes.url });
+    return NextResponse.json({ url: checkoutUrl });
   } catch (error) {
     console.error("Checkout error:", error);
     return NextResponse.json(
