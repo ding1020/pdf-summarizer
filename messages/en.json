@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF Summary AI",
+    "getStarted": "Get Started Free",
+    "startFree": "Start Free - 5 Summaries/Day",
+    "viewPricing": "View Pricing",
+    "signIn": "Sign In",
+    "signUp": "Sign Up",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "learnMore": "Learn More",
+    "contact": "Contact Us"
+  },
+  "nav": {
+    "features": "Features",
+    "pricing": "Pricing",
+    "howItWorks": "How It Works",
+    "dashboard": "Dashboard",
+    "logout": "Log Out"
+  },
+  "hero": {
+    "badge": "Powered by Advanced AI",
+    "title1": "Transform PDF Documents into",
+    "title2": "Actionable Summaries",
+    "subtitle": "Upload any PDF and get instant AI-generated summaries. Extract key insights in seconds, not hours.",
+    "cta1": "Start Free - 5 Summaries/Day",
+    "cta2": "View Pricing",
+    "uploadPdf": "Upload PDF",
+    "aiAnalysis": "AI Analysis",
+    "getSummary": "Get Summary"
+  },
+  "trust": {
+    "secure": "Secure & Private",
+    "noCreditCard": "No Credit Card Required",
+    "fast": "Summaries in Seconds"
+  },
+  "features": {
+    "title": "Why Choose PDF Summary?",
+    "subtitle": "Our AI-powered platform makes document analysis faster and easier than ever.",
+    "fast": {
+      "title": "Lightning Fast",
+      "desc": "Get comprehensive summaries in seconds. Our optimized AI processes documents instantly, saving you hours of reading time."
+    },
+    "secure": {
+      "title": "Secure & Private",
+      "desc": "Your documents are encrypted and processed securely. We never share your data with third parties. Your privacy is our priority."
+    },
+    "free": {
+      "title": "Free to Start",
+      "desc": "Get 5 free summaries every day. No credit card required. Upgrade only when you need more. Simple, transparent pricing."
+    }
+  },
+  "howItWorks": {
+    "title": "How It Works",
+    "subtitle": "Three simple steps to get insights from your PDFs",
+    "step1Title": "Create Account",
+    "step1Desc": "Sign up in seconds with just your email. No credit card needed.",
+    "step2Title": "Upload PDF",
+    "step2Desc": "Drag and drop your PDF file or click to browse. Supports files up to 20MB.",
+    "step3Title": "Get Summary",
+    "step3Desc": "Receive a comprehensive AI-generated summary in seconds."
+  },
+  "cta": {
+    "title": "Ready to save time?",
+    "subtitle": "Join thousands of professionals who use PDF Summary to extract insights faster.",
+    "button": "Get Started Free"
+  },
+  "pricing": {
+    "title": "Simple, Transparent Pricing",
+    "subtitle": "Choose the plan that fits your needs. Upgrade anytime.",
+    "mostPopular": "Most Popular",
+    "free": {
+      "name": "Free",
+      "price": "$0",
+      "period": "forever",
+      "description": "Perfect for getting started",
+      "features": [
+        "5 PDF summaries per day",
+        "Basic AI summaries",
+        "Document history (7 days)",
+        "Email support"
+      ],
+      "limitations": [
+        "No long documents",
+        "No export features"
+      ],
+      "button": "Current Plan"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "$9",
+      "period": "/month",
+      "description": "For power users and professionals",
+      "features": [
+        "Unlimited PDF summaries",
+        "Advanced AI with better quality",
+        "Unlimited document history",
+        "Export to Word/PDF",
+        "Priority support",
+        "Longer documents (up to 200 pages)"
+      ],
+      "button": "Upgrade to Pro"
+    },
+    "faq": {
+      "title": "Frequently Asked Questions",
+      "cancel": "Can I cancel anytime?",
+      "cancelAnswer": "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.",
+      "payment": "What payment methods do you accept?",
+      "paymentAnswer": "We accept all major credit cards through our secure payment partner, Stripe.",
+      "trial": "Is there a free trial?",
+      "trialAnswer": "Our Free plan lets you try the service with no commitment. Upgrade to Pro when you're ready."
+    }
+  },
+  "dashboard": {
+    "welcome": "Welcome back",
+    "subtitle": "Upload PDF documents and get AI-powered summaries instantly.",
+    "uploadTitle": "Upload Your PDF",
+    "uploadSubtitle": "Supported format: PDF (max 20MB)",
+    "historyTitle": "Your Summaries",
+    "historySubtitle": "View and manage your previous PDF summaries",
+    "dailyLimit": "Free: 5 summaries/day",
+    "tips": {
+      "results": "Best Results",
+      "resultsDesc": "Use PDFs with clear text. Scanned documents may have lower accuracy.",
+      "secure": "Secure Processing",
+      "secureDesc": "Your documents are encrypted and automatically deleted after processing."
+    }
+  },
+  "upload": {
+    "dragDrop": "Click or drag PDF file here",
+    "maxSize": "Maximum file size: 20MB",
+    "onlyPdf": "Only PDF format supported",
+    "processing": "Processing PDF...",
+    "extracting": "Extracting text content",
+    "dropHere": "Drop your PDF here!",
+    "pages": "pages",
+    "uploaded": "Uploaded",
+    "aiSummary": "AI Summary",
+    "generating": "Generating...",
+    "analyzing": "Analyzing document...",
+    "analyzingDesc": "This may take a few seconds",
+    "summaryHere": "Summary will appear here"
+  },
+  "footer": {
+    "privacy": "Privacy",
+    "terms": "Terms",
+    "copyright": "PDF Summary. All rights reserved."
+  },
+  "seo": {
+    "homeTitle": "PDF Summarizer AI - Get Insights in Seconds",
+    "homeDesc": "Upload your PDF and get AI-powered summaries instantly. Save time and extract key insights from any document.",
+    "pricingTitle": "Pricing - PDF Summary AI",
+    "pricingDesc": "Simple, transparent pricing. Start free with 5 summaries per day, or upgrade to Pro for unlimited access."
+  }
+}

@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF Résumé IA",
+    "getStarted": "Commencer Gratuitement",
+    "startFree": "Gratuit - 5 Résumés/Jour",
+    "viewPricing": "Voir les Tarifs",
+    "signIn": "Se Connecter",
+    "signUp": "S'inscrire",
+    "loading": "Chargement...",
+    "error": "Erreur",
+    "success": "Succès",
+    "learnMore": "En Savoir Plus",
+    "contact": "Nous Contacter"
+  },
+  "nav": {
+    "features": "Fonctionnalités",
+    "pricing": "Tarifs",
+    "howItWorks": "Comment Ça Marche",
+    "dashboard": "Tableau de Bord",
+    "logout": "Déconnexion"
+  },
+  "hero": {
+    "badge": "Propulsé par l'IA Avancée",
+    "title1": "Transformez vos Documents PDF en",
+    "title2": "Résumés Actionnables",
+    "subtitle": "Téléchargez n'importe quel PDF et obtenez des résumés générés par IA instantanément. Extrayez les informations clés en secondes, pas en heures.",
+    "cta1": "Commencer Gratuitement - 5 Résumés/Jour",
+    "cta2": "Voir les Tarifs",
+    "uploadPdf": "Télécharger PDF",
+    "aiAnalysis": "Analyse IA",
+    "getSummary": "Obtenir le Résumé"
+  },
+  "trust": {
+    "secure": "Sécurisé et Privé",
+    "noCreditCard": "Sans Carte Bancaire",
+    "fast": "Résumés en Secondes"
+  },
+  "features": {
+    "title": "Pourquoi Choisir PDF Summary ?",
+    "subtitle": "Notre plateforme alimentée par l'IA rend l'analyse de documents plus rapide et plus facile que jamais.",
+    "fast": {
+      "title": "Ultra Rapide",
+      "desc": "Obtenez des résumés complets en quelques secondes. Notre IA optimisée traite les documents instantanément, vous faisant gagner des heures de lecture."
+    },
+    "secure": {
+      "title": "Sécurisé et Privé",
+      "desc": "Vos documents sont chiffrés et traités de manière sécurisée. Nous ne partageons jamais vos données avec des tiers."
+    },
+    "free": {
+      "title": "Gratuit pour Commencer",
+      "desc": "Obtenez 5 résumés gratuits chaque jour. Sans carte bancaire requise. Passez à un plan supérieur uniquement si vous en avez besoin."
+    }
+  },
+  "howItWorks": {
+    "title": "Comment Ça Marche",
+    "subtitle": "Trois étapes simples pour obtenir des informations de vos PDFs",
+    "step1Title": "Créer un Compte",
+    "step1Desc": "Inscrivez-vous en quelques secondes avec juste votre email. Sans carte bancaire.",
+    "step2Title": "Télécharger PDF",
+    "step2Desc": "Glissez-déposez votre fichier PDF ou cliquez pour parcourir. Supporte les fichiers jusqu'à 20 Mo.",
+    "step3Title": "Obtenir le Résumé",
+    "step3Desc": "Recevez un résumé complet généré par l'IA en quelques secondes."
+  },
+  "cta": {
+    "title": "Prêt à gagner du temps ?",
+    "subtitle": "Rejoignez des milliers de professionnels qui utilisent PDF Summary pour extraire des informations plus rapidement.",
+    "button": "Commencer Gratuitement"
+  },
+  "pricing": {
+    "title": "Tarification Simple et Transparente",
+    "subtitle": "Choisissez le plan qui correspond à vos besoins. Passez à un plan supérieur à tout moment.",
+    "mostPopular": "Le Plus Populaire",
+    "free": {
+      "name": "Gratuit",
+      "price": "€0",
+      "period": "pour toujours",
+      "description": "Parfait pour commencer",
+      "features": [
+        "5 résumés PDF par jour",
+        "Résumés IA basiques",
+        "Historique des documents (7 jours)",
+        "Support par email"
+      ],
+      "limitations": [
+        "Pas de longs documents",
+        "Pas de fonctions d'exportation"
+      ],
+      "button": "Plan Actuel"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "€9",
+      "period": "/mois",
+      "description": "Pour les utilisateurs avancés",
+      "features": [
+        "Résumés PDF illimités",
+        "IA avancée avec meilleure qualité",
+        "Historique des documents illimité",
+        "Exporter vers Word/PDF",
+        "Support prioritaire",
+        "Documents plus longs (jusqu'à 200 pages)"
+      ],
+      "button": "Passer à Pro"
+    },
+    "faq": {
+      "title": "Questions Fréquentes",
+      "cancel": "Puis-je annuler à tout moment ?",
+      "cancelAnswer": "Oui, vous pouvez annuler votre abonnement à tout moment. Vous continuerez à avoir accès jusqu'à la fin de votre période de facturation.",
+      "payment": "Quels modes de paiement acceptez-vous ?",
+      "paymentAnswer": "Nous acceptons toutes les principales cartes de crédit via notre partenaire de paiement sécurisé, Stripe.",
+      "trial": "Y a-t-il un essai gratuit ?",
+      "trialAnswer": "Notre plan Gratuit vous permet d'essayer le service sans engagement. Passez à Pro quand vous êtes prêt."
+    }
+  },
+  "dashboard": {
+    "welcome": "Bon retour",
+    "subtitle": "Téléchargez des documents PDF et obtenez des résumés alimentés par l'IA instantanément.",
+    "uploadTitle": "Téléchargez Votre PDF",
+    "uploadSubtitle": "Format supporté: PDF (max 20 Mo)",
+    "historyTitle": "Vos Résumés",
+    "historySubtitle": "Voir et gérer vos résumés de PDF précédents",
+    "dailyLimit": "Gratuit: 5 résumés/jour",
+    "tips": {
+      "results": "Meilleurs Résultats",
+      "resultsDesc": "Utilisez des PDFs avec du texte clair. Les documents scannés peuvent avoir une précision inférieure.",
+      "secure": "Traitement Sécurisé",
+      "secureDesc": "Vos documents sont chiffrés et automatiquement supprimés après le traitement."
+    }
+  },
+  "upload": {
+    "dragDrop": "Cliquez ou glissez le fichier PDF ici",
+    "maxSize": "Taille maximale: 20 Mo",
+    "onlyPdf": "Seul le format PDF est supporté",
+    "processing": "Traitement du PDF...",
+    "extracting": "Extraction du contenu textuel",
+    "dropHere": "Déposez votre PDF ici !",
+    "pages": "pages",
+    "uploaded": "Téléchargé",
+    "aiSummary": "Résumé IA",
+    "generating": "Génération...",
+    "analyzing": "Analyse du document...",
+    "analyzingDesc": "Cela peut prendre quelques secondes",
+    "summaryHere": "Le résumé apparaîtra ici"
+  },
+  "footer": {
+    "privacy": "Confidentialité",
+    "terms": "Conditions",
+    "copyright": "PDF Summary. Tous droits réservés."
+  },
+  "seo": {
+    "homeTitle": "PDF Résumé IA - Obtenez des Informations en Secondes",
+    "homeDesc": "Téléchargez votre PDF et obtenez des résumés générés par IA instantanément. Gagnez du temps et extrayez les informations clés de tout document.",
+    "pricingTitle": "Tarifs - PDF Résumé IA",
+    "pricingDesc": "Tarification simple et transparente. Commencez gratuitement avec 5 résumés par jour, ou passez à Pro pour un accès illimité."
+  }
+}

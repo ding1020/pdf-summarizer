@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF サマリー AI",
+    "getStarted": "無料ではじる",
+    "startFree": "無料 - 1日5回サマリー",
+    "viewPricing": "料金を見る",
+    "signIn": "ログイン",
+    "signUp": "新規登録",
+    "loading": "読み込み中...",
+    "error": "エラー",
+    "success": "成功",
+    "learnMore": "詳しく見る",
+    "contact": "お問い合わせ"
+  },
+  "nav": {
+    "features": "機能",
+    "pricing": "料金",
+    "howItWorks": "使い方",
+    "dashboard": "ダッシュボード",
+    "logout": "ログアウト"
+  },
+  "hero": {
+    "badge": "最先进的AI技术驱动",
+    "title1": "PDFドキュメントを",
+    "title2": "実用的なサマリーに",
+    "subtitle": "PDFをアップロードして、AI生成のサマリーを即座に取得。何時間もかけて読む代わりに、数秒で重要な情報を抽出。",
+    "cta1": "無料 - 1日5回サマリー",
+    "cta2": "料金を見る",
+    "uploadPdf": "PDFアップロード",
+    "aiAnalysis": "AI分析",
+    "getSummary": "サマリー取得"
+  },
+  "trust": {
+    "secure": "安全・プライバシー保護",
+    "noCreditCard": "クレジットカード不要",
+    "fast": "秒単位でサマリー生成"
+  },
+  "features": {
+    "title": "なぜPDFサマリー인가？",
+    "subtitle": "AI搭載プラットフォームでドキュメント分析をより速く、より簡単に。",
+    "fast": {
+      "title": "超高速",
+      "desc": "数秒で包括的なサマリーを取得。最適化されたAIがドキュメントを即座に処理し、読み取り時間を節約します。"
+    },
+    "secure": {
+      "title": "安全・プライバシー保護",
+      "desc": "ドキュメントは暗号化され、安全に処理されます。データを第三者と共有することは決してありません。"
+    },
+    "free": {
+      "title": "無料でスタート",
+      "desc": "毎日5回の無料サマリー。クレジットカード不要。もっと必要になったらアップグレード。シンプルで透明な価格設定。"
+    }
+  },
+  "howItWorks": {
+    "title": "使い方",
+    "subtitle": "3つの簡単なステップでPDFからインサイトを獲得",
+    "step1Title": "アカウント作成",
+    "step1Desc": "メールアドレスだけで数秒でサインアップ。クレジットカード不要。",
+    "step2Title": "PDFアップロード",
+    "step2Desc": "PDFファイルをドラッグ＆ドロップまたはクリックして選択 最大20MBまで対応。",
+    "step3Title": "サマリー取得",
+    "step3Desc": "数秒で包括的なAI生成サマリーを受け取る。"
+  },
+  "cta": {
+    "title": "時間を節約する準備はできましたか？",
+    "subtitle": "PDF Summaryを使ってより迅速にインサイトを抽出する、何千人ものプロフェッショナルに参加してください。",
+    "button": "無料ではじる"
+  },
+  "pricing": {
+    "title": "シンプルで透明な価格設定",
+    "subtitle": "あなたのニーズに合ったプランを選択してください。いつでもアップグレード可能。",
+    "mostPopular": "人気No.1",
+    "free": {
+      "name": "フリー",
+      "price": "¥0",
+      "period": "永久",
+      "description": "フリーライフに最適",
+      "features": [
+        "1日5回のPDFサマリー",
+        "基本的なAIサマリー",
+        "ドキュメント履歴（7日間）",
+        "メールサポート"
+      ],
+      "limitations": [
+        "長いドキュメント不可",
+        "エクスポート機能なし"
+      ],
+      "button": "現在のプラン"
+    },
+    "pro": {
+      "name": "プロ",
+      "price": "¥1,200",
+      "period": "/月",
+      "description": "パワーユーザー向け",
+      "features": [
+        "無制限のPDFサマリー",
+        "高品質な advanced AI",
+        "無制限のドキュメント履歴",
+        "Word/PDFエクスポート",
+        "優先サポート",
+        "長いドキュメント対応（最大200ページ）"
+      ],
+      "button": "プロにアップグレード"
+    },
+    "faq": {
+      "title": "よくある質問",
+      "cancel": "いつでもキャンセルできますか？",
+      "cancelAnswer": "はい、サブスクリプションはいつでもキャンセルできます。請求期間の終わりまでアクセス将继续されます。",
+      "payment": "どのような支払い方法に対応していますか？",
+      "paymentAnswer": "安全な決済パートナーStripeを通じて、すべての主要なクレジットカードを受け付けています。",
+      "trial": "無料試用はありますか？",
+      "trialAnswer": "無料プランでは、コミットメントなしでサービスを試すことができます。準備ができたらプロにアップグレードしてください。"
+    }
+  },
+  "dashboard": {
+    "welcome": "おかえりなさい",
+    "subtitle": "PDFドキュメントをアップロードして、AI駆動のサマリーを即座に取得。",
+    "uploadTitle": "PDFをアップロード",
+    "uploadSubtitle": "対応形式: PDF (最大20MB)",
+    "historyTitle": "あなたのサマリー",
+    "historySubtitle": "過去のPDFサマリーを表示・管理",
+    "dailyLimit": "フリー: 1日5回サマリー",
+    "tips": {
+      "results": "最適な結果",
+      "resultsDesc": "テキストが明確なPDFを使用してください。スキャンされたドキュメントは精度が低下する可能性があります。",
+      "secure": "安全な処理",
+      "secureDesc": "ドキュメントは暗号化され、処理後に自動的に削除されます。"
+    }
+  },
+  "upload": {
+    "dragDrop": "PDFファイルをここにクリックまたはドラッグ",
+    "maxSize": "最大ファイルサイズ: 20MB",
+    "onlyPdf": "PDF形式のみ対応",
+    "processing": "PDFを処理中...",
+    "extracting": "テキストコンテンツを抽出中",
+    "dropHere": "PDFをここにドロップ！",
+    "pages": "ページ",
+    "uploaded": "アップロード済み",
+    "aiSummary": "AIサマリー",
+    "generating": "生成中...",
+    "analyzing": "ドキュメントを分析中...",
+    "analyzingDesc": "数秒かかる場合があります",
+    "summaryHere": "サマリーはここに表示されます"
+  },
+  "footer": {
+    "privacy": "プライバシー",
+    "terms": "利用規約",
+    "copyright": "PDF Summary. 全著作権所有。"
+  },
+  "seo": {
+    "homeTitle": "PDF サマリー AI - 数秒でインサイトを獲得",
+    "homeDesc": "PDFをアップロードして、AI生成のサマリーを即座に取得。時間を節約し、数秒でドキュメントから重要な情報を抽出。",
+    "pricingTitle": "料金 - PDF サマリー AI",
+    "pricingDesc": "シンプルで透明な価格設定。1日5回の無料サマリーから、無制限アクセスまで。"
+  }
+}

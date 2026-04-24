@@ -1,9 +1,12 @@
-import { authMiddleware } from "@clerk/nextjs";
+import createMiddleware from 'next-intl/middleware';
+import { locales, defaultLocale } from './i18n';
 
-export default authMiddleware({
-  publicRoutes: ["/", "/sign-in", "/sign-up", "/api/webhook"],
+export default createMiddleware({
+  locales,
+  defaultLocale,
+  localePrefix: 'as-needed'
 });
 
 export const config = {
-  matcher: ["/((?!.*\\..*|_next).*)", "/", "/(api|trpc)(.*)"],
+  matcher: ['/((?!api|_next|_vercel|.*\\..*).*)']
 };
