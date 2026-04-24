@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF Resumen AI",
+    "getStarted": "Empezar Gratis",
+    "startFree": "Gratis - 5 Resúmenes/Día",
+    "viewPricing": "Ver Precios",
+    "signIn": "Iniciar Sesión",
+    "signUp": "Registrarse",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "learnMore": "Más Información",
+    "contact": "Contáctanos"
+  },
+  "nav": {
+    "features": "Características",
+    "pricing": "Precios",
+    "howItWorks": "Cómo Funciona",
+    "dashboard": "Panel",
+    "logout": "Cerrar Sesión"
+  },
+  "hero": {
+    "badge": "Potenciado por IA Avanzada",
+    "title1": "Transforma Documentos PDF en",
+    "title2": "Resúmenes Accionables",
+    "subtitle": "Sube cualquier PDF y obtén resúmenes generados por IA al instante. Extrae información clave en segundos, no en horas.",
+    "cta1": "Empezar Gratis - 5 Resúmenes/Día",
+    "cta2": "Ver Precios",
+    "uploadPdf": "Subir PDF",
+    "aiAnalysis": "Análisis IA",
+    "getSummary": "Obtener Resumen"
+  },
+  "trust": {
+    "secure": "Seguro y Privado",
+    "noCreditCard": "Sin Tarjeta de Crédito",
+    "fast": "Resúmenes en Segundos"
+  },
+  "features": {
+    "title": "¿Por Qué Elegir PDF Summary?",
+    "subtitle": "Nuestra plataforma impulsada por IA hace que el análisis de documentos sea más rápido y fácil que nunca.",
+    "fast": {
+      "title": "Ultra Rápido",
+      "desc": "Obtén resúmenes completos en segundos. Nuestra IA optimizada procesa documentos al instante, ahorrándote horas de lectura."
+    },
+    "secure": {
+      "title": "Seguro y Privado",
+      "desc": "Tus documentos están cifrados y se procesan de forma segura. Nunca compartimos tus datos con terceros."
+    },
+    "free": {
+      "title": "Gratis para Empezar",
+      "desc": "Obtén 5 resúmenes gratis cada día. Sin tarjeta de crédito requerida. Actualiza solo cuando lo necesites."
+    }
+  },
+  "howItWorks": {
+    "title": "Cómo Funciona",
+    "subtitle": "Tres simples pasos para obtener información de tus PDFs",
+    "step1Title": "Crear Cuenta",
+    "step1Desc": "Regístrate en segundos solo con tu email. Sin tarjeta de crédito.",
+    "step2Title": "Subir PDF",
+    "step2Desc": "Arrastra y suelta tu archivo PDF o haz clic para explorar. Soporta archivos hasta 20MB.",
+    "step3Title": "Obtener Resumen",
+    "step3Desc": "Recibe un resumen completo generado por IA en segundos."
+  },
+  "cta": {
+    "title": "¿Listo para ahorrar tiempo?",
+    "subtitle": "Únete a miles de profesionales que usan PDF Summary para extraer información más rápido.",
+    "button": "Empezar Gratis"
+  },
+  "pricing": {
+    "title": "Precios Simples y Transparentes",
+    "subtitle": "Elige el plan que se ajuste a tus necesidades. Actualiza cuando quieras.",
+    "mostPopular": "Más Popular",
+    "free": {
+      "name": "Gratis",
+      "price": "€0",
+      "period": "para siempre",
+      "description": "Perfecto para empezar",
+      "features": [
+        "5 resúmenes de PDF por día",
+        "Resúmenes IA básicos",
+        "Historial de documentos (7 días)",
+        "Soporte por email"
+      ],
+      "limitations": [
+        "Sin documentos largos",
+        "Sin funciones de exportación"
+      ],
+      "button": "Plan Actual"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "€9",
+      "period": "/mes",
+      "description": "Para usuarios avanzados",
+      "features": [
+        "Resúmenes PDF ilimitados",
+        "IA avanzada con mejor calidad",
+        "Historial de documentos ilimitado",
+        "Exportar a Word/PDF",
+        "Soporte prioritario",
+        "Documentos más largos (hasta 200 páginas)"
+      ],
+      "button": "Actualizar a Pro"
+    },
+    "faq": {
+      "title": "Preguntas Frecuentes",
+      "cancel": "¿Puedo cancelar en cualquier momento?",
+      "cancelAnswer": "Sí, puedes cancelar tu suscripción en cualquier momento. Seguirás teniendo acceso hasta el final de tu período de facturación.",
+      "payment": "¿Qué métodos de pago aceptan?",
+      "paymentAnswer": "Aceptamos todas las principales tarjetas de crédito a través de nuestro socio de pago seguro, Stripe.",
+      "trial": "¿Hay una prueba gratuita?",
+      "trialAnswer": "Nuestro plan Gratis te permite probar el servicio sin compromiso. Actualiza a Pro cuando estés listo."
+    }
+  },
+  "dashboard": {
+    "welcome": "Bienvenido de nuevo",
+    "subtitle": "Sube documentos PDF y obtén resúmenes impulsados por IA al instante.",
+    "uploadTitle": "Sube Tu PDF",
+    "uploadSubtitle": "Formato soportado: PDF (máx 20MB)",
+    "historyTitle": "Tus Resúmenes",
+    "historySubtitle": "Ver y gestionar tus resúmenes de PDF anteriores",
+    "dailyLimit": "Gratis: 5 resúmenes/día",
+    "tips": {
+      "results": "Mejores Resultados",
+      "resultsDesc": "Usa PDFs con texto claro. Los documentos escaneados pueden tener menor precisión.",
+      "secure": "Procesamiento Seguro",
+      "secureDesc": "Tus documentos están cifrados y se eliminan automáticamente después del procesamiento."
+    }
+  },
+  "upload": {
+    "dragDrop": "Haz clic o arrastra el archivo PDF aquí",
+    "maxSize": "Tamaño máximo: 20MB",
+    "onlyPdf": "Solo formato PDF soportado",
+    "processing": "Procesando PDF...",
+    "extracting": "Extrayendo contenido de texto",
+    "dropHere": "¡Suelta tu PDF aquí!",
+    "pages": "páginas",
+    "uploaded": "Subido",
+    "aiSummary": "Resumen IA",
+    "generating": "Generando...",
+    "analyzing": "Analizando documento...",
+    "analyzingDesc": "Esto puede tomar unos segundos",
+    "summaryHere": "El resumen aparecerá aquí"
+  },
+  "footer": {
+    "privacy": "Privacidad",
+    "terms": "Términos",
+    "copyright": "PDF Summary. Todos los derechos reservados."
+  },
+  "seo": {
+    "homeTitle": "PDF Resumen AI - Obtén Información en Segundos",
+    "homeDesc": "Sube tu PDF y obtén resúmenes generados por IA al instante. Ahorra tiempo y extrae información clave de cualquier documento.",
+    "pricingTitle": "Precios - PDF Resumen AI",
+    "pricingDesc": "Precios simples y transparentes. Comienza gratis con 5 resúmenes por día, o actualiza a Pro para acceso ilimitado."
+  }
+}

@@ -6,21 +6,23 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
 model User {
-  id                String   @id @default(uuid())
-  clerkId           String   @unique
-  email             String   @unique
-  subscriptionStatus String  @default("free")
-  subscriptionId    String?
-  usageCount        Int      @default(0)
-  usageResetAt      DateTime @default(now())
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  documents         Document[]
+  id                   String   @id @default(uuid())
+  clerkId              String   @unique
+  email                String   @unique
+  subscriptionStatus   String   @default("free")
+  subscriptionId       String?
+  stripeCustomerId     String?
+  stripeSubscriptionId String?
+  usageCount           Int      @default(0)
+  usageResetAt         DateTime @default(now())
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+  documents           Document[]
 }
 
 model Document {
@@ -30,8 +32,8 @@ model Document {
   filename  String
   fileSize  Int
   pageCount Int
-  content   String   @db.Text
-  summary   String?  @db.Text
+  content   String
+  summary   String?
   status    String   @default("processing")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

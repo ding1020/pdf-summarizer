@@ -144,14 +144,17 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   });
 
   return (
-    <div className="w-full max-w-3xl mx-auto space-y-6">
+    <div className="w-full space-y-6">
       {/* Upload Area */}
       <div
         {...getRootProps()}
         className={`
-          border-2 border-dashed rounded-lg p-12 text-center cursor-pointer
-          transition-colors duration-200
-          ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}
+          border-2 border-dashed rounded-xl p-8 md:p-12 text-center cursor-pointer
+          transition-all duration-200
+          ${isDragActive 
+            ? "border-blue-500 bg-blue-50 ring-4 ring-blue-100" 
+            : "border-gray-300 hover:border-blue-400 hover:bg-gray-50"
+          }
           ${isUploading || isSummarizing ? "opacity-50 cursor-not-allowed" : ""}
         `}
       >
@@ -159,39 +162,55 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         
         {isUploading ? (
           <div className="flex flex-col items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-            <p className="text-gray-600">Processing PDF...</p>
+            <div className="relative">
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
+              <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
+            </div>
+            <p className="mt-4 text-lg font-medium text-gray-700">Processing PDF...</p>
+            <p className="text-sm text-gray-500 mt-1">Extracting text content</p>
+          </div>
+        ) : isDragActive ? (
+          <div className="flex flex-col items-center">
+            <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <p className="text-lg font-semibold text-blue-600">Drop your PDF here!</p>
           </div>
         ) : (
-          <div>
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400 mb-4"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
-              aria-hidden="true"
-            >
-              <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <p className="text-lg font-medium text-gray-900 mb-2">
-              {isDragActive ? "Drop your PDF here" : "Drag & drop your PDF here"}
+          <div className="flex flex-col items-center">
+            <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <p className="text-lg font-semibold text-gray-900 mb-2">
+              Click or drag PDF file here
             </p>
             <p className="text-sm text-gray-500">
-              or click to select a file (max 20MB)
+              Maximum file size: 20MB
             </p>
+            <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-600">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Only PDF format supported
+            </div>
           </div>
         )}
       </div>
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-600">{error}</p>
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+          <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="font-medium text-red-800">Error</p>
+            <p className="text-red-600 text-sm">{error}</p>
+          </div>
         </div>
       )}
 
@@ -199,30 +218,57 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       {result && (
         <div className="space-y-6">
           {/* File Info */}
-          <div className="p-4 bg-gray-50 rounded-lg">
-            <h3 className="text-lg font-semibold mb-2">{result.filename}</h3>
-            <p className="text-sm text-gray-600">{result.pageCount} pages</p>
+          <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-red-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="font-medium text-gray-900">{result.filename}</p>
+                  <p className="text-sm text-gray-500">{result.pageCount} pages</p>
+                </div>
+              </div>
+              <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Uploaded</span>
+            </div>
           </div>
 
           {/* AI Summary */}
-          <div className="p-6 bg-blue-50 rounded-lg">
+          <div className="p-6 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-blue-900">AI Summary</h3>
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <h3 className="font-semibold text-blue-900">AI Summary</h3>
+              </div>
               {isSummarizing && (
-                <div className="flex items-center text-sm text-blue-600">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500 mr-2"></div>
-                  Generating...
+                <div className="flex items-center gap-2 text-sm text-blue-600">
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                  <span>Generating...</span>
                 </div>
               )}
             </div>
             
             {summary ? (
-              <div className="prose prose-blue max-w-none">
+              <div className="prose prose-blue max-w-none bg-white rounded-lg p-4 border border-blue-100">
                 <ReactMarkdown>{summary}</ReactMarkdown>
               </div>
             ) : (
-              <div className="text-gray-500 text-center py-8">
-                {isSummarizing ? "Analyzing document..." : "Summary will appear here"}
+              <div className="text-center py-8">
+                {isSummarizing ? (
+                  <div className="flex flex-col items-center">
+                    <div className="w-10 h-10 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
+                    <p className="text-blue-700 font-medium">Analyzing document...</p>
+                    <p className="text-blue-500 text-sm mt-1">This may take a few seconds</p>
+                  </div>
+                ) : (
+                  <p className="text-gray-500">Summary will appear here</p>
+                )}
               </div>
             )}
           </div>

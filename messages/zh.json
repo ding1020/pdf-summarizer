@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF智能摘要",
+    "getStarted": "免费开始",
+    "startFree": "免费试用 - 每天5次摘要",
+    "viewPricing": "查看价格",
+    "signIn": "登录",
+    "signUp": "注册",
+    "loading": "加载中...",
+    "error": "错误",
+    "success": "成功",
+    "learnMore": "了解更多",
+    "contact": "联系我们"
+  },
+  "nav": {
+    "features": "功能特点",
+    "pricing": "价格方案",
+    "howItWorks": "使用流程",
+    "dashboard": "控制面板",
+    "logout": "退出登录"
+  },
+  "hero": {
+    "badge": "先进AI技术驱动",
+    "title1": "将PDF文档转化为",
+    "title2": "可操作的摘要",
+    "subtitle": "上传任意PDF，立即获得AI生成的摘要。几秒钟内提取关键信息，无需数小时阅读。",
+    "cta1": "免费试用 - 每天5次摘要",
+    "cta2": "查看价格方案",
+    "uploadPdf": "上传PDF",
+    "aiAnalysis": "AI分析",
+    "getSummary": "获取摘要"
+  },
+  "trust": {
+    "secure": "安全私密",
+    "noCreditCard": "无需信用卡",
+    "fast": "秒级生成摘要"
+  },
+  "features": {
+    "title": "为什么选择PDF摘要？",
+    "subtitle": "我们的人工智能平台让文档分析比以往更快、更简单。",
+    "fast": {
+      "title": "极速处理",
+      "desc": "几秒钟内获得全面的摘要。我们的优化AI即时处理文档，为您节省数小时的阅读时间。"
+    },
+    "secure": {
+      "title": "安全私密",
+      "desc": "您的文档经过加密处理，安全可靠。我们绝不与第三方分享您的数据。您的隐私是我们的首要任务。"
+    },
+    "free": {
+      "title": "免费开始",
+      "desc": "每天免费获得5次摘要。无需信用卡。仅在需要时升级。简单、透明的定价。"
+    }
+  },
+  "howItWorks": {
+    "title": "如何使用",
+    "subtitle": "三个简单步骤，从PDF中获取关键信息",
+    "step1Title": "创建账户",
+    "step1Desc": "仅需邮箱，几秒完成注册。无需信用卡。",
+    "step2Title": "上传PDF",
+    "step2Desc": "拖放PDF文件或点击浏览。支持最大20MB的文件。",
+    "step3Title": "获取摘要",
+    "step3Desc": "几秒钟内收到全面的AI生成摘要。"
+  },
+  "cta": {
+    "title": "准备好节省时间了吗？",
+    "subtitle": "加入成千上万使用PDF摘要的专业人士，更快地提取关键信息。",
+    "button": "免费开始使用"
+  },
+  "pricing": {
+    "title": "简单透明的定价",
+    "subtitle": "选择适合您需求的方案，随时升级。",
+    "mostPopular": "最受欢迎",
+    "free": {
+      "name": "免费版",
+      "price": "¥0",
+      "period": "永久免费",
+      "description": "非常适合入门体验",
+      "features": [
+        "每天5次PDF摘要",
+        "基础AI摘要功能",
+        "文档历史（7天）",
+        "邮件支持"
+      ],
+      "limitations": [
+        "不支持长文档",
+        "不支持导出功能"
+      ],
+      "button": "当前方案"
+    },
+    "pro": {
+      "name": "专业版",
+      "price": "¥59",
+      "period": "/月",
+      "description": "适合高级用户和专业团队",
+      "features": [
+        "无限PDF摘要",
+        "高级AI，质量更优",
+        "无限文档历史",
+        "导出为Word/PDF",
+        "优先客户支持",
+        "支持更长文档（最高200页）"
+      ],
+      "button": "升级到专业版"
+    },
+    "faq": {
+      "title": "常见问题",
+      "cancel": "可以随时取消吗？",
+      "cancelAnswer": "是的，您可以随时取消订阅。在计费周期结束前，您仍可继续使用服务。",
+      "payment": "支持哪些支付方式？",
+      "paymentAnswer": "我们通过安全的支付合作伙伴Stripe接受所有主流信用卡。",
+      "trial": "有免费试用吗？",
+      "trialAnswer": "我们的免费版让您无需任何承诺即可试用。需要时再升级到专业版。"
+    }
+  },
+  "dashboard": {
+    "welcome": "欢迎回来",
+    "subtitle": "上传PDF文档，立即获得AI驱动的摘要。",
+    "uploadTitle": "上传您的PDF",
+    "uploadSubtitle": "支持格式：PDF（最大20MB）",
+    "historyTitle": "您的摘要",
+    "historySubtitle": "查看和管理您之前的PDF摘要",
+    "dailyLimit": "免费版：每天5次摘要",
+    "tips": {
+      "results": "最佳效果",
+      "resultsDesc": "使用文字清晰的PDF。扫描文档可能精度较低。",
+      "secure": "安全处理",
+      "secureDesc": "您的文档经过加密处理，处理后自动删除。"
+    }
+  },
+  "upload": {
+    "dragDrop": "点击或拖放PDF文件到此处",
+    "maxSize": "最大文件大小：20MB",
+    "onlyPdf": "仅支持PDF格式",
+    "processing": "正在处理PDF...",
+    "extracting": "正在提取文本内容",
+    "dropHere": "将PDF拖放到这里！",
+    "pages": "页",
+    "uploaded": "已上传",
+    "aiSummary": "AI摘要",
+    "generating": "生成中...",
+    "analyzing": "正在分析文档...",
+    "analyzingDesc": "这可能需要几秒钟",
+    "summaryHere": "摘要将在此处显示"
+  },
+  "footer": {
+    "privacy": "隐私政策",
+    "terms": "服务条款",
+    "copyright": "PDF Summary. 保留所有权利。"
+  },
+  "seo": {
+    "homeTitle": "PDF智能摘要 - 秒级提取关键信息",
+    "homeDesc": "上传PDF，立即获得AI生成的摘要。节省时间，几秒钟内提取文档关键信息。",
+    "pricingTitle": "价格方案 - PDF智能摘要",
+    "pricingDesc": "简单透明的定价。免费版每天5次摘要，升级到专业版享受无限次服务。"
+  }
+}

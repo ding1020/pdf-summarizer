@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF 요약 AI",
+    "getStarted": "무료 시작",
+    "startFree": "무료 - 하루 5회 요약",
+    "viewPricing": "가격 보기",
+    "signIn": "로그인",
+    "signUp": "회원가입",
+    "loading": "로딩 중...",
+    "error": "오류",
+    "success": "성공",
+    "learnMore": "자세히 보기",
+    "contact": "문의하기"
+  },
+  "nav": {
+    "features": "기능",
+    "pricing": "가격",
+    "howItWorks": "사용법",
+    "dashboard": "대시보드",
+    "logout": "로그아웃"
+  },
+  "hero": {
+    "badge": "최첨단 AI 기술 지원",
+    "title1": "PDF 문서를",
+    "title2": "실행 가능한 요약으로",
+    "subtitle": "PDF를 업로드하고 즉각적인 AI 생성 요약을 받으세요. 수 시간을 투자하는 대신 몇 초 만에 핵심 인사이트를 추출하세요.",
+    "cta1": "무료 - 하루 5회 요약",
+    "cta2": "가격 보기",
+    "uploadPdf": "PDF 업로드",
+    "aiAnalysis": "AI 분석",
+    "getSummary": "요약 받기"
+  },
+  "trust": {
+    "secure": "안전하고 비공개",
+    "noCreditCard": "신용카드 필요 없음",
+    "fast": "초 단위 요약 생성"
+  },
+  "features": {
+    "title": "PDF Summary를 선택하는 이유?",
+    "subtitle": "AI 기반 플랫폼으로 문서 분석을比以前보다 빠르고 쉽게.",
+    "fast": {
+      "title": "초고속",
+      "desc": "몇 초 만에 포괄적인 요약을 받으세요. 최적화된 AI가 문서를 즉시 처리하여 수 시간의 읽기 시간을 절약합니다."
+    },
+    "secure": {
+      "title": "안전하고 비공개",
+      "desc": "문서는 암호화되어 안전하게 처리됩니다. 당사는 귀하의 데이터를 제3자와 공유하지 않습니다. 귀하의 개인정보 보호가 우리의 최우선입니다."
+    },
+    "free": {
+      "title": "무료로 시작",
+      "desc": "매일 5회의 무료 요약을 받으세요. 신용카드 필요 없음. 필요할 때만 업그레이드하세요.シンプルで 투명한 가격 정책."
+    }
+  },
+  "howItWorks": {
+    "title": "사용 방법",
+    "subtitle": "세 가지 간단한 단계로 PDF에서 인사이트를 얻으세요",
+    "step1Title": "계정 생성",
+    "step1Desc": "이메일만으로 몇 초 만에 가입하세요. 신용카드 필요 없음.",
+    "step2Title": "PDF 업로드",
+    "step2Desc": "PDF 파일을 드래그 앤 드롭하거나 클릭하여 선택. 최대 20MB 지원.",
+    "step3Title": "요약 받기",
+    "step3Desc": "몇 초 만에 포괄적인 AI 생성 요약을 받으세요."
+  },
+  "cta": {
+    "title": "시간을 절약할 준비가 되셨나요?",
+    "subtitle": "PDF Summary를 사용하여 더 빠르게 인사이트를 추출하는 수천 명의 전문가에 합류하세요.",
+    "button": "무료로 시작"
+  },
+  "pricing": {
+    "title": "간单하고 투명한 가격 정책",
+    "subtitle": "필요에 맞는 플랜을 선택하세요. 언제든지 업그레이드 가능.",
+    "mostPopular": "가장 인기",
+    "free": {
+      "name": "무료",
+      "price": "₩0",
+      "period": "영구 무료",
+      "description": "시작에 완벽",
+      "features": [
+        "하루 5회 PDF 요약",
+        "기본 AI 요약",
+        "문서 기록 (7일)",
+        "이메일 지원"
+      ],
+      "limitations": [
+        "긴 문서 불가",
+        "내보내기 기능 없음"
+      ],
+      "button": "현재 플랜"
+    },
+    "pro": {
+      "name": "프로",
+      "price": "₩12,000",
+      "period": "/월",
+      "description": "파워 유저를 위해",
+      "features": [
+        "무제한 PDF 요약",
+        "고품질 고급 AI",
+        "무제한 문서 기록",
+        "Word/PDF 내보내기",
+        "우선 지원",
+        "긴 문서 지원 (최대 200페이지)"
+      ],
+      "button": "프로로 업그레이드"
+    },
+    "faq": {
+      "title": "자주 묻는 질문",
+      "cancel": "언제든지 취소할 수 있나요?",
+      "cancelAnswer": "네, 구독은 언제든지 취소할 수 있습니다. 결제 기간 종료까지 계속 액세스할 수 있습니다.",
+      "payment": "어떤 결제 방법을 지원하나요?",
+      "paymentAnswer": "안전한 결제 파트너 Stripe를 통해 모든 주요 신용카드를 지원합니다.",
+      "trial": "무료 체험이 있나요?",
+      "trialAnswer": "무료 플랜으로 약정 없이 서비스를 사용해 보세요. 준비가 되시면 프로로 업그레이드하세요."
+    }
+  },
+  "dashboard": {
+    "welcome": "다시 오신 것을 환영합니다",
+    "subtitle": "PDF 문서를 업로드하고 즉각적인 AI 기반 요약을 받으세요.",
+    "uploadTitle": "PDF 업로드",
+    "uploadSubtitle": "지원 형식: PDF (최대 20MB)",
+    "historyTitle": "내 요약",
+    "historySubtitle": "이전 PDF 요약 보기 및 관리",
+    "dailyLimit": "무료: 하루 5회 요약",
+    "tips": {
+      "results": "최적의 결과",
+      "resultsDesc": "텍스트가 선명한 PDF를 사용하세요. 스캔된 문서는 정확도가 낮을 수 있습니다.",
+      "secure": "안전한 처리",
+      "secureDesc": "문서는 암호화되어 처리 후 자동으로 삭제됩니다."
+    }
+  },
+  "upload": {
+    "dragDrop": "PDF 파일을 여기에 클릭 또는 드래그",
+    "maxSize": "최대 파일 크기: 20MB",
+    "onlyPdf": "PDF 형식만 지원",
+    "processing": "PDF 처리 중...",
+    "extracting": "텍스트 콘텐츠 추출 중",
+    "dropHere": "PDF를 여기에 드롭!",
+    "pages": "페이지",
+    "uploaded": "업로드됨",
+    "aiSummary": "AI 요약",
+    "generating": "생성 중...",
+    "analyzing": "문서 분석 중...",
+    "analyzingDesc": "몇 초가 걸릴 수 있습니다",
+    "summaryHere": "요약이 여기에 표시됩니다"
+  },
+  "footer": {
+    "privacy": "개인정보처리방침",
+    "terms": "이용약관",
+    "copyright": "PDF Summary. 모든 권리 보유."
+  },
+  "seo": {
+    "homeTitle": "PDF 요약 AI - 몇 초 만에 인사이트 얻기",
+    "homeDesc": "PDF를 업로드하고 즉각적인 AI 생성 요약을 받으세요. 시간을 절약하고 몇 초 만에 문서에서 핵심 정보를 추출하세요.",
+    "pricingTitle": "가격 - PDF 요약 AI",
+    "pricingDesc": "간단하고 투명한 가격 정책. 하루 5회 무료 요약으로 시작, 무제한 액세스를 위해 업그레이드하세요."
+  }
+}

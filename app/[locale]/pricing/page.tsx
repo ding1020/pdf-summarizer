@@ -1,52 +1,39 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 
-const plans = [
-  {
-    name: "Free",
-    price: "$0",
-    period: "forever",
-    description: "Perfect for getting started",
-    features: [
-      "5 PDF summaries per day",
-      "Basic AI summaries",
-      "Document history (7 days)",
-      "Email support",
-    ],
-    limitations: [
-      "No long documents",
-      "No export features",
-    ],
-    buttonText: "Current Plan",
-    buttonVariant: "outline",
-    highlighted: false,
-  },
-  {
-    name: "Pro",
-    price: "$9",
-    period: "/month",
-    description: "For power users and professionals",
-    features: [
-      "Unlimited PDF summaries",
-      "Advanced AI with better quality",
-      "Unlimited document history",
-      "Export to Word/PDF",
-      "Priority support",
-      "Longer documents (up to 200 pages)",
-    ],
-    buttonText: "Upgrade to Pro",
-    buttonVariant: "solid",
-    highlighted: true,
-  },
-];
-
 export default function PricingPage() {
-  const { isLoaded, isSignedIn, user } = useUser();
+  const t = useTranslations("pricing");
+  const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
+
+  const plans = [
+    {
+      name: t("free.name"),
+      price: t("free.price"),
+      period: t("free.period"),
+      description: t("free.description"),
+      features: t.raw("free.features") as string[],
+      limitations: t.raw("limitations") as string[] | undefined,
+      buttonText: t("free.button"),
+      buttonVariant: "outline",
+      highlighted: false,
+    },
+    {
+      name: t("pro.name"),
+      price: t("pro.price"),
+      period: t("pro.period"),
+      description: t("pro.description"),
+      features: t.raw("pro.features") as string[],
+      buttonText: t("pro.button"),
+      buttonVariant: "solid",
+      highlighted: true,
+    },
+  ];
 
   const handleUpgrade = async (planName: string) => {
     if (!isSignedIn) {
@@ -54,28 +41,28 @@ export default function PricingPage() {
       return;
     }
 
-    setLoading(planName);
+    if (planName.toLowerCase() === "pro") {
+      setLoading(planName);
+      try {
+        const response = await fetch("/api/checkout", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan: "pro" }),
+        });
 
-    // TODO: Integrate Stripe checkout
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: planName.toLowerCase() }),
-      });
+        const data = await response.json();
 
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Stripe integration coming soon! Please contact support.");
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert("Stripe integration coming soon! Please contact support.");
+        }
+      } catch (error) {
+        console.error("Upgrade error:", error);
+        alert("Something went wrong. Please try again.");
+      } finally {
+        setLoading(null);
       }
-    } catch (error) {
-      console.error("Upgrade error:", error);
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoading(null);
     }
   };
 
@@ -93,10 +80,10 @@ export default function PricingPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Simple, Transparent Pricing
+            {t("title")}
           </h1>
           <p className="text-xl text-gray-600">
-            Choose the plan that fits your needs. Upgrade anytime.
+            {t("subtitle")}
           </p>
         </div>
 
@@ -112,7 +99,7 @@ export default function PricingPage() {
             >
               {plan.highlighted && (
                 <div className="bg-blue-500 text-white text-center py-2 text-sm font-medium">
-                  Most Popular
+                  {t("mostPopular")}
                 </div>
               )}
               
@@ -198,27 +185,27 @@ export default function PricingPage() {
 
         {/* FAQ */}
         <div className="mt-16 max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">Frequently Asked Questions</h2>
+          <h2 className="text-2xl font-bold text-center mb-8">{t("faq.title")}</h2>
           
           <div className="space-y-6">
             <div>
-              <h3 className="font-semibold text-gray-900">Can I cancel anytime?</h3>
+              <h3 className="font-semibold text-gray-900">{t("faq.cancel")}</h3>
               <p className="text-gray-600 mt-1">
-                Yes, you can cancel your subscription at any time. You&apos;ll continue to have access until the end of your billing period.
+                {t("faq.cancelAnswer")}
               </p>
             </div>
             
             <div>
-              <h3 className="font-semibold text-gray-900">What payment methods do you accept?</h3>
+              <h3 className="font-semibold text-gray-900">{t("faq.payment")}</h3>
               <p className="text-gray-600 mt-1">
-                We accept all major credit cards through our secure payment partner, Stripe.
+                {t("faq.paymentAnswer")}
               </p>
             </div>
             
             <div>
-              <h3 className="font-semibold text-gray-900">Is there a free trial?</h3>
+              <h3 className="font-semibold text-gray-900">{t("faq.trial")}</h3>
               <p className="text-gray-600 mt-1">
-                Our Free plan lets you try the service with no commitment. Upgrade to Pro when you&apos;re ready.
+                {t("faq.trialAnswer")}
               </p>
             </div>
           </div>

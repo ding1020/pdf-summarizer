@@ -1,0 +1,156 @@
+{
+  "common": {
+    "brand": "PDF Zusammenfassung KI",
+    "getStarted": "Kostenlos Starten",
+    "startFree": "Kostenlos - 5 Zusammenfassungen/Tag",
+    "viewPricing": "Preise Ansehen",
+    "signIn": "Anmelden",
+    "signUp": "Registrieren",
+    "loading": "Laden...",
+    "error": "Fehler",
+    "success": "Erfolg",
+    "learnMore": "Mehr Erfahren",
+    "contact": "Kontakt"
+  },
+  "nav": {
+    "features": "Funktionen",
+    "pricing": "Preise",
+    "howItWorks": "So Funktioniert's",
+    "dashboard": "Dashboard",
+    "logout": "Abmelden"
+  },
+  "hero": {
+    "badge": "Angetrieben von fortschrittlicher KI",
+    "title1": "Verwandeln Sie PDF-Dokumente in",
+    "title2": "Verwertbare Zusammenfassungen",
+    "subtitle": "Laden Sie ein beliebiges PDF hoch und erhalten Sie sofort von KI generierte Zusammenfassungen. Extrahieren Sie wichtige Erkenntnisse in Sekunden, nicht in Stunden.",
+    "cta1": "Kostenlos Starten - 5 Zusammenfassungen/Tag",
+    "cta2": "Preise Ansehen",
+    "uploadPdf": "PDF Hochladen",
+    "aiAnalysis": "KI-Analyse",
+    "getSummary": "Zusammenfassung Erhalten"
+  },
+  "trust": {
+    "secure": "Sicher & Privat",
+    "noCreditCard": "Keine Kreditkarte Erforderlich",
+    "fast": "Zusammenfassungen in Sekunden"
+  },
+  "features": {
+    "title": "Warum PDF Summary Wählen?",
+    "subtitle": "Unsere KI-gestützte Plattform macht die Dokumentenanalyse schneller und einfacher als je zuvor.",
+    "fast": {
+      "title": "Blitzschnell",
+      "desc": "Erhalten Sie in Sekunden umfassende Zusammenfassungen. Unsere optimierte KI verarbeitet Dokumente sofort und spart Ihnen stundenlange Lesezeit."
+    },
+    "secure": {
+      "title": "Sicher & Privat",
+      "desc": "Ihre Dokumente werden verschlüsselt und sicher verarbeitet. Wir geben Ihre Daten niemals an Dritte weiter. Ihre Privatsphäre hat Priorität."
+    },
+    "free": {
+      "title": "Kostenlos Beginnen",
+      "desc": "Erhalten Sie jeden Tag 5 kostenlose Zusammenfassungen. Keine Kreditkarte erforderlich. Upgrade nur wenn nötig. Einfache, transparente Preisgestaltung."
+    }
+  },
+  "howItWorks": {
+    "title": "So Funktioniert's",
+    "subtitle": "Drei einfache Schritte um Erkenntnisse aus Ihren PDFs zu gewinnen",
+    "step1Title": "Konto Erstellen",
+    "step1Desc": "Registrieren Sie sich in Sekunden mit nur Ihrer E-Mail. Keine Kreditkarte erforderlich.",
+    "step2Title": "PDF Hochladen",
+    "step2Desc": "Ziehen Sie Ihre PDF-Datei hierher oder klicken Sie zum Durchsuchen. Unterstützt Dateien bis zu 20MB.",
+    "step3Title": "Zusammenfassung Erhalten",
+    "step3Desc": "Erhalten Sie in Sekunden eine umfassende KI-generierte Zusammenfassung."
+  },
+  "cta": {
+    "title": "Bereit Zeit zu sparen?",
+    "subtitle": "Schließen Sie sich Tausenden von Fachleuten an, die PDF Summary nutzen, um schneller Erkenntnisse zu extrahieren.",
+    "button": "Kostenlos Starten"
+  },
+  "pricing": {
+    "title": "Einfache, Transparente Preisgestaltung",
+    "subtitle": "Wählen Sie den Plan, der Ihren Bedürfnissen entspricht. Jederzeit upgraden.",
+    "mostPopular": "Am Beliebtesten",
+    "free": {
+      "name": "Kostenlos",
+      "price": "€0",
+      "period": "für immer",
+      "description": "Perfekt zum Starten",
+      "features": [
+        "5 PDF-Zusammenfassungen pro Tag",
+        "Basis KI-Zusammenfassungen",
+        "Dokumentenverlauf (7 Tage)",
+        "E-Mail-Support"
+      ],
+      "limitations": [
+        "Keine langen Dokumente",
+        "Keine Exportfunktionen"
+      ],
+      "button": "Aktueller Plan"
+    },
+    "pro": {
+      "name": "Pro",
+      "price": "€9",
+      "period": "/Monat",
+      "description": "Für Power-User",
+      "features": [
+        "Unbegrenzte PDF-Zusammenfassungen",
+        "Fortgeschrittene KI mit besserer Qualität",
+        "Unbegrenzter Dokumentenverlauf",
+        "Export nach Word/PDF",
+        "Prioritätssupport",
+        "Längere Dokumente (bis zu 200 Seiten)"
+      ],
+      "button": "Auf Pro Upgraden"
+    },
+    "faq": {
+      "title": "Häufig Gestellte Fragen",
+      "cancel": "Kann ich jederzeit kündigen?",
+      "cancelAnswer": "Ja, Sie können Ihr Abonnement jederzeit kündigen. Sie haben bis zum Ende Ihres Abrechnungszeitraums weiterhin Zugang.",
+      "payment": "Welche Zahlungsmethoden akzeptieren Sie?",
+      "paymentAnswer": "Wir akzeptieren alle gängigen Kreditkarten über unseren sicheren Zahlungspartner Stripe.",
+      "trial": "Gibt es eine kostenlose Testversion?",
+      "trialAnswer": "Unser kostenloser Plan ermöglicht es Ihnen, den Service ohne Verpflichtung zu testen. Upgraden Sie auf Pro, wenn Sie bereit sind."
+    }
+  },
+  "dashboard": {
+    "welcome": "Willkommen zurück",
+    "subtitle": "Laden Sie PDF-Dokumente hoch und erhalten Sie sofort KI-gestützte Zusammenfassungen.",
+    "uploadTitle": "PDF Hochladen",
+    "uploadSubtitle": "Unterstütztes Format: PDF (max 20MB)",
+    "historyTitle": "Ihre Zusammenfassungen",
+    "historySubtitle": "Anzeigen und Verwalten Ihrer vorherigen PDF-Zusammenfassungen",
+    "dailyLimit": "Kostenlos: 5 Zusammenfassungen/Tag",
+    "tips": {
+      "results": "Beste Ergebnisse",
+      "resultsDesc": "Verwenden Sie PDFs mit klarem Text. Gescannte Dokumente können eine geringere Genauigkeit haben.",
+      "secure": "Sichere Verarbeitung",
+      "secureDesc": "Ihre Dokumente werden verschlüsselt und nach der Verarbeitung automatisch gelöscht."
+    }
+  },
+  "upload": {
+    "dragDrop": "Klicken oder ziehen Sie die PDF-Datei hierher",
+    "maxSize": "Maximale Dateigröße: 20MB",
+    "onlyPdf": "Nur PDF-Format unterstützt",
+    "processing": "PDF wird verarbeitet...",
+    "extracting": "Textinhalt wird extrahiert",
+    "dropHere": "PDF hier ablegen!",
+    "pages": "Seiten",
+    "uploaded": "Hochgeladen",
+    "aiSummary": "KI-Zusammenfassung",
+    "generating": "Generierung...",
+    "analyzing": "Dokument wird analysiert...",
+    "analyzingDesc": "Dies kann einige Sekunden dauern",
+    "summaryHere": "Zusammenfassung erscheint hier"
+  },
+  "footer": {
+    "privacy": "Datenschutz",
+    "terms": "AGB",
+    "copyright": "PDF Summary. Alle Rechte vorbehalten."
+  },
+  "seo": {
+    "homeTitle": "PDF Zusammenfassung KI - Erkenntnisse in Sekunden",
+    "homeDesc": "Laden Sie Ihr PDF hoch und erhalten Sie sofort KI-generierte Zusammenfassungen. Sparen Sie Zeit und extrahieren Sie wichtige Informationen aus jedem Dokument.",
+    "pricingTitle": "Preise - PDF Zusammenfassung KI",
+    "pricingDesc": "Einfache, transparente Preisgestaltung. Starten Sie kostenlos mit 5 Zusammenfassungen pro Tag, oder upgraden Sie auf Pro für unbegrenzten Zugang."
+  }
+}
