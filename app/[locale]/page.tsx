@@ -1,12 +1,10 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useLocale } from "next-intl";
+import { Link } from "@/navigation";
 
 export default function HomePage() {
   const t = useTranslations();
-  const locale = useLocale();
 
   return (
     <div className="min-h-screen bg-white">
@@ -292,9 +290,10 @@ export default function HomePage() {
 
             {/* Links */}
             <div className="flex items-center gap-6 text-gray-400 text-sm">
-              <Link href="/pricing" className="hover:text-white transition">{t("footer.privacy")}</Link>
-              <Link href="/privacy" className="hover:text-white transition">{t("footer.privacy")}</Link>
-              <Link href="/terms" className="hover:text-white transition">{t("footer.terms")}</Link>
+              <Link href="/pricing" className="hover:text-white transition">Pricing</Link>
+              <Link href="/privacy" className="hover:text-white transition">Privacy</Link>
+              <Link href="/terms" className="hover:text-white transition">Terms</Link>
+              <Link href="/refund" className="hover:text-white transition">Refund</Link>
             </div>
 
             {/* Copyright */}

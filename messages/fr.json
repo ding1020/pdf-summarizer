@@ -107,7 +107,7 @@
       "cancel": "Puis-je annuler à tout moment ?",
       "cancelAnswer": "Oui, vous pouvez annuler votre abonnement à tout moment. Vous continuerez à avoir accès jusqu'à la fin de votre période de facturation.",
       "payment": "Quels modes de paiement acceptez-vous ?",
-      "paymentAnswer": "Nous acceptons toutes les principales cartes de crédit via notre partenaire de paiement sécurisé, Stripe.",
+      "paymentAnswer": "Nous acceptons toutes les principales cartes de crédit via notre partenaire de paiement sécurisé, Paddle.",
       "trial": "Y a-t-il un essai gratuit ?",
       "trialAnswer": "Notre plan Gratuit vous permet d'essayer le service sans engagement. Passez à Pro quand vous êtes prêt."
     }
@@ -120,6 +120,9 @@
     "historyTitle": "Vos Résumés",
     "historySubtitle": "Voir et gérer vos résumés de PDF précédents",
     "dailyLimit": "Gratuit: 5 résumés/jour",
+    "signInRequired": "Connexion Requise",
+    "signInDesc": "Veuillez vous connecter pour accéder à votre tableau de bord et commencer à résumer des PDFs.",
+    "subscription": "Abonnement",
     "tips": {
       "results": "Meilleurs Résultats",
       "resultsDesc": "Utilisez des PDFs avec du texte clair. Les documents scannés peuvent avoir une précision inférieure.",

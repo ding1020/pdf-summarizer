@@ -107,7 +107,7 @@
       "cancel": "可以随时取消吗？",
       "cancelAnswer": "是的，您可以随时取消订阅。在计费周期结束前，您仍可继续使用服务。",
       "payment": "支持哪些支付方式？",
-      "paymentAnswer": "我们通过安全的支付合作伙伴Stripe接受所有主流信用卡。",
+      "paymentAnswer": "我们通过安全的支付合作伙伴Paddle接受所有主流信用卡。",
       "trial": "有免费试用吗？",
       "trialAnswer": "我们的免费版让您无需任何承诺即可试用。需要时再升级到专业版。"
     }
@@ -120,6 +120,9 @@
     "historyTitle": "您的摘要",
     "historySubtitle": "查看和管理您之前的PDF摘要",
     "dailyLimit": "免费版：每天5次摘要",
+    "signInRequired": "需要登录",
+    "signInDesc": "请登录以访问控制面板并开始摘要PDF文档。",
+    "subscription": "订阅",
     "tips": {
       "results": "最佳效果",
       "resultsDesc": "使用文字清晰的PDF。扫描文档可能精度较低。",
