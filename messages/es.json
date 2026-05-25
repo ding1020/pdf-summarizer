@@ -107,7 +107,7 @@
       "cancel": "¿Puedo cancelar en cualquier momento?",
       "cancelAnswer": "Sí, puedes cancelar tu suscripción en cualquier momento. Seguirás teniendo acceso hasta el final de tu período de facturación.",
       "payment": "¿Qué métodos de pago aceptan?",
-      "paymentAnswer": "Aceptamos todas las principales tarjetas de crédito a través de nuestro socio de pago seguro, Stripe.",
+      "paymentAnswer": "Aceptamos todas las principales tarjetas de crédito a través de nuestro socio de pago seguro, Paddle.",
       "trial": "¿Hay una prueba gratuita?",
       "trialAnswer": "Nuestro plan Gratis te permite probar el servicio sin compromiso. Actualiza a Pro cuando estés listo."
     }
@@ -120,6 +120,9 @@
     "historyTitle": "Tus Resúmenes",
     "historySubtitle": "Ver y gestionar tus resúmenes de PDF anteriores",
     "dailyLimit": "Gratis: 5 resúmenes/día",
+    "signInRequired": "Inicio de Sesión Requerido",
+    "signInDesc": "Por favor inicia sesión para acceder a tu panel y comenzar a resumir PDFs.",
+    "subscription": "Suscripción",
     "tips": {
       "results": "Mejores Resultados",
       "resultsDesc": "Usa PDFs con texto claro. Los documentos escaneados pueden tener menor precisión.",

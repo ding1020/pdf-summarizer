@@ -107,7 +107,7 @@
       "cancel": "Kann ich jederzeit kündigen?",
       "cancelAnswer": "Ja, Sie können Ihr Abonnement jederzeit kündigen. Sie haben bis zum Ende Ihres Abrechnungszeitraums weiterhin Zugang.",
       "payment": "Welche Zahlungsmethoden akzeptieren Sie?",
-      "paymentAnswer": "Wir akzeptieren alle gängigen Kreditkarten über unseren sicheren Zahlungspartner Stripe.",
+      "paymentAnswer": "Wir akzeptieren alle gängigen Kreditkarten über unseren sicheren Zahlungspartner Paddle.",
       "trial": "Gibt es eine kostenlose Testversion?",
       "trialAnswer": "Unser kostenloser Plan ermöglicht es Ihnen, den Service ohne Verpflichtung zu testen. Upgraden Sie auf Pro, wenn Sie bereit sind."
     }
@@ -120,6 +120,9 @@
     "historyTitle": "Ihre Zusammenfassungen",
     "historySubtitle": "Anzeigen und Verwalten Ihrer vorherigen PDF-Zusammenfassungen",
     "dailyLimit": "Kostenlos: 5 Zusammenfassungen/Tag",
+    "signInRequired": "Anmeldung Erforderlich",
+    "signInDesc": "Bitte melden Sie sich an, um auf Ihr Dashboard zuzugreifen und mit der Zusammenfassung von PDFs zu beginnen.",
+    "subscription": "Abonnement",
     "tips": {
       "results": "Beste Ergebnisse",
       "resultsDesc": "Verwenden Sie PDFs mit klarem Text. Gescannte Dokumente können eine geringere Genauigkeit haben.",

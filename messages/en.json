@@ -107,7 +107,7 @@
       "cancel": "Can I cancel anytime?",
       "cancelAnswer": "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.",
       "payment": "What payment methods do you accept?",
-      "paymentAnswer": "We accept all major credit cards through our secure payment partner, Stripe.",
+      "paymentAnswer": "We accept all major credit cards through our secure payment partner, Paddle.",
       "trial": "Is there a free trial?",
       "trialAnswer": "Our Free plan lets you try the service with no commitment. Upgrade to Pro when you're ready."
     }
@@ -120,6 +120,9 @@
     "historyTitle": "Your Summaries",
     "historySubtitle": "View and manage your previous PDF summaries",
     "dailyLimit": "Free: 5 summaries/day",
+    "signInRequired": "Sign In Required",
+    "signInDesc": "Please sign in to access your dashboard and start summarizing PDFs.",
+    "subscription": "Subscription",
     "tips": {
       "results": "Best Results",
       "resultsDesc": "Use PDFs with clear text. Scanned documents may have lower accuracy.",

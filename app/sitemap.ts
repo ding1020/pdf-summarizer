@@ -4,20 +4,41 @@ const locales = ["en", "zh", "ja", "ko", "es", "fr", "de"];
 
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
+// Routes without locale prefix (handled by next-intl middleware)
+const routesWithoutLocale = ["/sign-in", "/sign-up"];
+
+// Routes with locale prefix
+const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund"];
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const routes = ["", "/pricing", "/sign-in", "/sign-up"].flatMap((route) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}${route}`,
+  const sitemapRoutes: MetadataRoute.Sitemap = [];
+
+  // Add routes without locale prefix
+  routesWithoutLocale.forEach((route) => {
+    sitemapRoutes.push({
+      url: `${baseUrl}${route}`,
       lastModified: new Date(),
       changeFrequency: "weekly" as const,
-      priority: route === "" ? 1 : 0.8,
-      alternates: {
-        languages: Object.fromEntries(
-          locales.map((l) => [l, `${baseUrl}/${l}${route}`])
-        ),
-      },
-    }))
-  );
+      priority: 0.6,
+    });
+  });
 
-  return routes;
+  // Add localized routes
+  localizedRoutes.forEach((route) => {
+    locales.forEach((locale) => {
+      sitemapRoutes.push({
+        url: `${baseUrl}/${locale}${route}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority: route === "" ? 1 : 0.8,
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map((l) => [l, `${baseUrl}/${l}${route}`])
+          ),
+        },
+      });
+    });
+  });
+
+  return sitemapRoutes;
 }

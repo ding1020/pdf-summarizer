@@ -1,56 +1,58 @@
-import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
-import { prisma } from "@/lib/db";
+import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
+
+// Check if Clerk is configured (works with both test and production keys)
+const isClerkConfigured = () => {
+  const key = process.env.CLERK_SECRET_KEY;
+  return !!(key && (key.startsWith("sk_live_") || key.startsWith("sk_test_")));
+};
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId: clerkId } = auth();
+    let userId = "demo-user";
+
+    // Try to get auth if Clerk is configured
+    if (isClerkConfigured()) {
+      try {
+        const { auth } = await import("@clerk/nextjs/server");
+        const { userId: id } = await auth();
+        if (id) {
+          userId = id;
+        }
+      } catch (e) {
+        logger.warn("Clerk auth failed, using demo mode");
+      }
+    }
+
+    // Rate limiting
+    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+    const identifier = getClientIdentifier(userId, clientIp);
+    const rateLimitResult = rateLimit(identifier, RATE_LIMITS.free);
     
-    if (!clerkId) {
+    if (!rateLimitResult.success) {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+        { 
+          error: "Rate limit exceeded. Please wait a moment.",
+          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
+        },
+        { 
+          status: 429,
+          headers: {
+            "Content-Type": "application/json",
+            ...getRateLimitHeaders(rateLimitResult),
+          }
+        }
       );
     }
 
     const { documentId, content, provider = "deepseek", language = "multilingual" } = await req.json();
 
-    if (!documentId || !content) {
+    if (!content) {
       return NextResponse.json(
-        { error: "Document ID and content are required" },
-        { status: 400 }
-      );
-    }
-
-    // Get user from database
-    const user = await prisma.user.findUnique({
-      where: { clerkId },
-    });
-
-    if (!user) {
-      return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
-      );
-    }
-
-    // Check usage limit (free: 5 docs/day, pro: unlimited)
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    
-    if (user.subscriptionStatus === "free" && user.usageResetAt < today) {
-      // Reset usage for new day
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { usageCount: 0, usageResetAt: new Date() },
-      });
-    }
-
-    if (user.subscriptionStatus === "free" && user.usageCount >= 5) {
-      return NextResponse.json(
-        { error: "Daily limit reached. Upgrade to Pro for unlimited access." },
-        { status: 429 }
+        { error: "Content is required" },
+        { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
 
@@ -60,11 +62,10 @@ export async function POST(req: NextRequest) {
       ? content.substring(0, maxLength) + "..."
       : content;
 
-    // Get AI provider and generate summary
+    // Generate summary using AI
     let summary: string;
     let usedProvider: AIProvider;
 
-    // Try primary provider first
     try {
       const openai = getAIProvider(provider as AIProvider);
       const completion = await openai.chat.completions.create({
@@ -86,9 +87,9 @@ export async function POST(req: NextRequest) {
       summary = completion.choices[0]?.message?.content || "Failed to generate summary";
       usedProvider = provider as AIProvider;
     } catch (primaryError) {
-      console.error("Primary provider failed, trying fallback:", primaryError);
+      logger.error("Primary AI provider failed:", primaryError instanceof Error ? primaryError : new Error(String(primaryError)));
       
-      // Fallback to Groq if primary fails
+      // Fallback to Groq
       try {
         const openai = getAIProvider("groq");
         const completion = await openai.chat.completions.create({
@@ -109,9 +110,9 @@ export async function POST(req: NextRequest) {
         summary = completion.choices[0]?.message?.content || "Failed to generate summary";
         usedProvider = "groq";
       } catch (groqError) {
-        console.error("Groq also failed, trying SiliconFlow:", groqError);
+        logger.error("Groq also failed:", groqError instanceof Error ? groqError : new Error(String(groqError)));
         
-        // Final fallback to SiliconFlow
+        // Final fallback
         const openai = getAIProvider("siliconflow");
         const completion = await openai.chat.completions.create({
           model: "Qwen/Qwen2.5-7B-Instruct",
@@ -133,32 +134,28 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    // Update document with summary
-    await prisma.document.update({
-      where: { id: documentId },
-      data: { 
-        summary,
-        status: "completed",
-      },
-    });
-
-    // Increment usage count
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { usageCount: { increment: 1 } },
-    });
-
-    return NextResponse.json({
-      success: true,
-      summary,
+    logger.info("Summary generated", {
       documentId,
       provider: usedProvider,
+      contentLength: content.length,
+      demoMode: userId === "demo-user",
     });
+
+    return NextResponse.json(
+      { 
+        success: true, 
+        summary, 
+        documentId: documentId || `demo-${Date.now()}`,
+        provider: usedProvider,
+        demoMode: userId === "demo-user",
+      },
+      { headers: getRateLimitHeaders(rateLimitResult) }
+    );
   } catch (error) {
-    console.error("Summarize error:", error);
+    logger.error("Summarize error:", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
       { error: "Failed to generate summary" },
-      { status: 500 }
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }

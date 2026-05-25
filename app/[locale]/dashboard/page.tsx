@@ -1,19 +1,84 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
-import Link from "next/link";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { Link } from "@/navigation";
 import FileUpload from "@/components/FileUpload";
 import DocumentHistory from "@/components/DocumentHistory";
 
+interface UsageData {
+  used: number;
+  limit: number;
+  remaining: number;
+  isPro: boolean;
+  resetAt: string | null;
+}
+
+interface DemoUser {
+  id: string;
+  email: string;
+  createdAt: string;
+}
+
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
-  const { isLoaded, isSignedIn, user } = useUser();
   const [refreshKey, setRefreshKey] = useState(0);
+  const [usage, setUsage] = useState<UsageData | null>(null);
+  const [loadingUsage, setLoadingUsage] = useState(true);
+  const [demoUser, setDemoUser] = useState<DemoUser | null>(null);
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(true);
+
+  // Check demo mode session
+  useEffect(() => {
+    const stored = localStorage.getItem("demo_user");
+    if (stored) {
+      try {
+        const user = JSON.parse(stored);
+        setDemoUser(user);
+        setIsSignedIn(true);
+      } catch {
+        setIsSignedIn(false);
+      }
+    } else {
+      setIsSignedIn(false);
+    }
+  }, []);
+
+  // Fetch usage stats
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchUsage();
+    } else {
+      setLoadingUsage(false);
+    }
+  }, [isSignedIn, refreshKey]);
+
+  const fetchUsage = async () => {
+    try {
+      const response = await fetch("/api/usage");
+      if (response.ok) {
+        const data = await response.json();
+        setUsage(data);
+      } else {
+        // Demo mode: provide default usage
+        setUsage({ used: 0, limit: 10, remaining: 10, isPro: false, resetAt: null });
+      }
+    } catch (error) {
+      console.error("Failed to fetch usage:", error);
+      setUsage({ used: 0, limit: 10, remaining: 10, isPro: false, resetAt: null });
+    } finally {
+      setLoadingUsage(false);
+    }
+  };
 
   const handleUploadComplete = () => {
     setRefreshKey((k) => k + 1);
+  };
+
+  const handleSignOut = () => {
+    localStorage.removeItem("demo_user");
+    window.location.href = "/";
   };
 
   if (!isLoaded) {
@@ -36,18 +101,20 @@ export default function DashboardPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Sign In Required</h1>
-          <p className="text-gray-600 mb-6">Please sign in to access your dashboard and start summarizing PDFs.</p>
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">{t("signInRequired")}</h1>
+          <p className="text-gray-600 mb-6">{t("signInDesc")}</p>
           <Link
             href="/sign-in"
             className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
           >
-            Sign In
+            {t("common.signIn")}
           </Link>
         </div>
       </div>
     );
   }
+
+  const displayName = demoUser?.email?.split("@")[0] || "User";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -57,22 +124,53 @@ export default function DashboardPage() {
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                {t("welcome")}, {user?.firstName || user?.emailAddresses[0]?.emailAddress?.split("@")[0] || "User"}
+                {t("welcome")}, {displayName}
               </h1>
               <p className="text-gray-600 mt-1">
                 {t("subtitle")}
               </p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
-                <span className="flex items-center gap-2">
+              {/* Usage Badge */}
+              {loadingUsage ? (
+                <div className="bg-gray-100 px-4 py-2 rounded-lg animate-pulse">
+                  <div className="h-4 w-20 bg-gray-200 rounded"></div>
+                </div>
+              ) : usage?.isPro ? (
+                <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  {t("dailyLimit")}
-                </span>
+                  Pro - Unlimited
+                </div>
+              ) : usage ? (
+                <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
+                  <span className="flex items-center gap-2">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                    {usage.used}/{usage.limit} summaries today
+                    {usage.remaining === 0 && (
+                      <Link href="/pricing" className="ml-2 text-xs bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700">
+                        Upgrade
+                      </Link>
+                    )}
+                  </span>
+                </div>
+              ) : null}
+              
+              {/* Demo Mode User Badge */}
+              <div className="flex items-center gap-2">
+                <div className="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-sm font-medium">
+                  Demo Mode
+                </div>
+                <button
+                  onClick={handleSignOut}
+                  className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                >
+                  Sign Out
+                </button>
               </div>
-              <UserButton afterSignOutUrl="/" />
             </div>
           </div>
         </div>
@@ -80,6 +178,35 @@ export default function DashboardPage() {
 
       {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
+        {/* Usage Progress Bar */}
+        {!loadingUsage && usage && !usage.isPro && usage.limit > 0 && (
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-gray-700">Daily Usage</span>
+              <span className="text-sm text-gray-500">
+                {usage.used} of {usage.limit} used
+              </span>
+            </div>
+            <div className="w-full bg-gray-200 rounded-full h-2">
+              <div
+                className={`h-2 rounded-full transition-all ${
+                  usage.remaining === 0 
+                    ? "bg-red-500" 
+                    : usage.used >= usage.limit * 0.8 
+                      ? "bg-yellow-500" 
+                      : "bg-blue-600"
+                }`}
+                style={{ width: `${Math.min((usage.used / usage.limit) * 100, 100)}%` }}
+              ></div>
+            </div>
+            {usage.remaining === 0 && (
+              <p className="text-xs text-red-600 mt-2">
+                You&apos;ve reached your daily limit. Upgrade to Pro for unlimited summaries.
+              </p>
+            )}
+          </div>
+        )}
+
         {/* Upload Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mb-8">
           <div className="flex items-center gap-3 mb-6">

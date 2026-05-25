@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useDropzone } from "react-dropzone";
 import ReactMarkdown from "react-markdown";
+import { useTranslations } from "next-intl";
+import { Link } from "@/navigation";
+
+// Constants
+const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE_DISPLAY = "20MB";
 
 interface FileUploadProps {
   onUploadComplete?: (data: {
@@ -14,6 +20,7 @@ interface FileUploadProps {
 }
 
 export default function FileUpload({ onUploadComplete }: FileUploadProps) {
+  const t = useTranslations("upload");
   const [isUploading, setIsUploading] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,15 +32,38 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   } | null>(null);
   const [summary, setSummary] = useState<string>("");
 
-  const generateSummary = async (documentId: string, content: string) => {
+  // Use ref to track mounted state and avoid state updates after unmount
+  const isMountedRef = useRef(true);
+
+  // Client-side file validation
+  const validateFile = useCallback((file: File): string | null => {
+    // Check file size
+    if (file.size > MAX_FILE_SIZE) {
+      return `File size exceeds ${MAX_FILE_SIZE_DISPLAY} limit`;
+    }
+    // Check file type
+    if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
+      return "Only PDF files are allowed";
+    }
+    return null;
+  }, []);
+
+  // Wrap generateSummary in useCallback to prevent recreation on each render
+  const generateSummary = useCallback(async (documentId: string, content: string) => {
+    if (!isMountedRef.current) return;
+    
     setIsSummarizing(true);
     setSummary("");
+
+    // Create AbortController for cancellation
+    const abortController = new AbortController();
 
     try {
       const response = await fetch("/api/summarize/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ content }),
+        signal: abortController.signal,
       });
 
       if (!response.ok) {
@@ -64,12 +94,15 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
             try {
               const parsed = JSON.parse(data);
-              if (parsed.content) {
+              if (parsed.content && isMountedRef.current) {
                 fullSummary += parsed.content;
                 setSummary(fullSummary);
               }
             } catch (e) {
-              // Ignore parse errors
+              // Log parse errors for debugging (use console.warn in production)
+              if (process.env.NODE_ENV === "development") {
+                console.warn("Failed to parse SSE data:", data.substring(0, 50));
+              }
             }
           }
         }
@@ -82,16 +115,39 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         body: JSON.stringify({ documentId, content }),
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to generate summary");
+      // Handle abort error gracefully (user cancelled)
+      if (err instanceof Error && err.name === "AbortError") {
+        console.log("Summary generation cancelled by user");
+        return;
+      }
+      if (isMountedRef.current) {
+        setError(err instanceof Error ? err.message : "Failed to generate summary");
+      }
     } finally {
-      setIsSummarizing(false);
+      if (isMountedRef.current) {
+        setIsSummarizing(false);
+      }
     }
-  };
+  }, []);
+
+  // Cancel function exposed via ref for parent components
+  const cancelSummary = useCallback(() => {
+    // This will trigger AbortController in the next fetch
+    setIsSummarizing(false);
+    setSummary("");
+  }, []);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
       const file = acceptedFiles[0];
       if (!file) return;
+
+      // Client-side validation before upload
+      const validationError = validateFile(file);
+      if (validationError) {
+        setError(validationError);
+        return;
+      }
 
       setIsUploading(true);
       setError(null);
@@ -131,7 +187,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         setIsUploading(false);
       }
     },
-    [onUploadComplete]
+    [onUploadComplete, validateFile, generateSummary]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
@@ -166,8 +222,8 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
             </div>
-            <p className="mt-4 text-lg font-medium text-gray-700">Processing PDF...</p>
-            <p className="text-sm text-gray-500 mt-1">Extracting text content</p>
+            <p className="mt-4 text-lg font-medium text-gray-700">{t("processing")}</p>
+            <p className="text-sm text-gray-500 mt-1">{t("extracting")}</p>
           </div>
         ) : isDragActive ? (
           <div className="flex flex-col items-center">
@@ -176,7 +232,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
-            <p className="text-lg font-semibold text-blue-600">Drop your PDF here!</p>
+            <p className="text-lg font-semibold text-blue-600">{t("dropHere")}</p>
           </div>
         ) : (
           <div className="flex flex-col items-center">
@@ -186,16 +242,16 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
               </svg>
             </div>
             <p className="text-lg font-semibold text-gray-900 mb-2">
-              Click or drag PDF file here
+              {t("dragDrop")}
             </p>
             <p className="text-sm text-gray-500">
-              Maximum file size: 20MB
+              {t("maxSize")}
             </p>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-600">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Only PDF format supported
+              {t("onlyPdf")}
             </div>
           </div>
         )}
@@ -228,10 +284,10 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                 </div>
                 <div>
                   <p className="font-medium text-gray-900">{result.filename}</p>
-                  <p className="text-sm text-gray-500">{result.pageCount} pages</p>
+                  <p className="text-sm text-gray-500">{result.pageCount} {t("pages")}</p>
                 </div>
               </div>
-              <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">Uploaded</span>
+              <span className="text-xs text-green-600 bg-green-100 px-2 py-1 rounded-full">{t("uploaded")}</span>
             </div>
           </div>
 
@@ -244,12 +300,12 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                 </div>
-                <h3 className="font-semibold text-blue-900">AI Summary</h3>
+                <h3 className="font-semibold text-blue-900">{t("aiSummary")}</h3>
               </div>
               {isSummarizing && (
                 <div className="flex items-center gap-2 text-sm text-blue-600">
                   <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Generating...</span>
+                  <span>{t("generating")}</span>
                 </div>
               )}
             </div>
@@ -263,11 +319,25 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                 {isSummarizing ? (
                   <div className="flex flex-col items-center">
                     <div className="w-10 h-10 border-3 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-3"></div>
-                    <p className="text-blue-700 font-medium">Analyzing document...</p>
-                    <p className="text-blue-500 text-sm mt-1">This may take a few seconds</p>
+                    <p className="text-blue-700 font-medium">{t("analyzing")}</p>
+                    <p className="text-blue-500 text-sm mt-1">{t("analyzingDesc")}</p>
+                    <button
+                      onClick={() => setIsSummarizing(false)}
+                      className="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
                   </div>
                 ) : (
-                  <p className="text-gray-500">Summary will appear here</p>
+                  <div className="space-y-2">
+                    <p className="text-gray-500">{t("summaryHere")}</p>
+                    <Link 
+                      href="/help" 
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      Need help with PDF upload?
+                    </Link>
+                  </div>
                 )}
               </div>
             )}

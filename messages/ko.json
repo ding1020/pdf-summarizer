@@ -107,7 +107,7 @@
       "cancel": "언제든지 취소할 수 있나요?",
       "cancelAnswer": "네, 구독은 언제든지 취소할 수 있습니다. 결제 기간 종료까지 계속 액세스할 수 있습니다.",
       "payment": "어떤 결제 방법을 지원하나요?",
-      "paymentAnswer": "안전한 결제 파트너 Stripe를 통해 모든 주요 신용카드를 지원합니다.",
+      "paymentAnswer": "안전한 결제 파트너 Paddle를 통해 모든 주요 신용카드를 지원합니다.",
       "trial": "무료 체험이 있나요?",
       "trialAnswer": "무료 플랜으로 약정 없이 서비스를 사용해 보세요. 준비가 되시면 프로로 업그레이드하세요."
     }
@@ -120,6 +120,9 @@
     "historyTitle": "내 요약",
     "historySubtitle": "이전 PDF 요약 보기 및 관리",
     "dailyLimit": "무료: 하루 5회 요약",
+    "signInRequired": "로그인 필요",
+    "signInDesc": "대시보드에 액세스하고 PDF 요약을 시작하려면 로그인하세요.",
+    "subscription": "구독",
     "tips": {
       "results": "최적의 결과",
       "resultsDesc": "텍스트가 선명한 PDF를 사용하세요. 스캔된 문서는 정확도가 낮을 수 있습니다.",
