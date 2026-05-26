@@ -1,41 +1,14 @@
 "use client";
 
+import { useUser, useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
-import { useState, useEffect } from "react";
 
 export default function Navigation() {
   const t = useTranslations();
   const pathname = usePathname();
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    
-    // Check if user is signed in via Clerk cookie OR demo mode localStorage
-    const checkAuth = async () => {
-      try {
-        // Check demo mode first
-        const demoUser = localStorage.getItem("demo_user");
-        if (demoUser) {
-          setIsSignedIn(true);
-          return;
-        }
-        
-        // Check Clerk session cookie
-        const cookies = document.cookie.split(';');
-        const clerkCookie = cookies.find(c => c.trim().startsWith('__session'));
-        if (clerkCookie) {
-          setIsSignedIn(true);
-        }
-      } catch (e) {
-        // Auth check failed
-      }
-    };
-    
-    checkAuth();
-  }, []);
+  const { isSignedIn, isLoaded } = useUser();
+  const { signOut } = useClerk();
 
   const isActive = (path: string) => pathname.includes(path);
 
@@ -89,9 +62,9 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Auth Buttons - Simple links, no Clerk dependency */}
+          {/* Auth Buttons */}
           <div className="flex items-center gap-4">
-            {mounted && isSignedIn ? (
+            {isLoaded && isSignedIn ? (
               <>
                 <Link
                   href="/dashboard"
@@ -106,15 +79,7 @@ export default function Navigation() {
                   {t("dashboard.subscription") || "Subscription"}
                 </Link>
                 <button
-                  onClick={() => {
-                    // Clear Clerk session if available
-                    try {
-                      window.Clerk?.signOut();
-                    } catch (e) {}
-                    // Fallback: clear cookies and reload
-                    document.cookie = "__session=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
-                    window.location.href = "/";
-                  }}
+                  onClick={() => signOut(() => { window.location.href = "/"; })}
                   className="px-3 py-1.5 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
                 >
                   Sign Out

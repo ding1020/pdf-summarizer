@@ -1,22 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
   try {
-    // Demo mode: use demo user
-    let clerkId: string | null = null;
-    try {
-      const { auth } = await import("@clerk/nextjs/server");
-      const { userId } = auth();
-      if (userId) clerkId = userId;
-    } catch (e) {
-      // Demo mode
+    // Require authentication
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // Rate limiting
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
-    const identifier = getClientIdentifier(clerkId || "demo", clientIp);
+    const identifier = getClientIdentifier(clerkId, clientIp);
     const rateLimitResult = rateLimit(identifier, RATE_LIMITS.free);
     
     if (!rateLimitResult.success) {
@@ -36,38 +37,42 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get user from database (demo mode uses fixed demo user)
-    const targetClerkId = clerkId || "demo";
+    // Get user from database
     const user = await prisma.user.findUnique({
-      where: { clerkId: targetClerkId },
+      where: { clerkId },
     });
 
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
     // Get all documents for the user
-    const documents = user
-      ? await prisma.document.findMany({
-          where: { userId: user.id },
-          orderBy: { createdAt: "desc" },
-          select: {
-            id: true,
-            filename: true,
-            fileSize: true,
-            pageCount: true,
-            status: true,
-            summary: true,
-            createdAt: true,
-          },
-        })
-      : [];
+    const documents = await prisma.document.findMany({
+      where: { userId: user.id },
+      orderBy: { createdAt: "desc" },
+      select: {
+        id: true,
+        filename: true,
+        fileSize: true,
+        pageCount: true,
+        status: true,
+        summary: true,
+        createdAt: true,
+      },
+    });
 
     return NextResponse.json(
-      { success: true, documents, demoMode: !clerkId },
+      { success: true, documents },
       { headers: { ...getRateLimitHeaders(rateLimitResult) } }
     );
   } catch (error) {
-    console.error("Get documents error:", error);
+    logger.error("Get documents error:", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
-      { success: true, documents: [], demoMode: true },
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      { error: "Failed to fetch documents" },
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 }

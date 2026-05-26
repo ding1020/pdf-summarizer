@@ -1,29 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
 import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
-// Check if Clerk is configured (works with both test and production keys)
-const isClerkConfigured = () => {
-  const key = process.env.CLERK_SECRET_KEY;
-  return !!(key && (key.startsWith("sk_live_") || key.startsWith("sk_test_")));
-};
-
 export async function POST(req: NextRequest) {
   try {
-    let userId = "demo-user";
-
-    // Try to get auth if Clerk is configured
-    if (isClerkConfigured()) {
-      try {
-        const { auth } = await import("@clerk/nextjs/server");
-        const { userId: id } = await auth();
-        if (id) {
-          userId = id;
-        }
-      } catch (e) {
-        logger.warn("Clerk auth failed, using demo mode");
-      }
+    // Require authentication
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401, headers: { "Content-Type": "application/json" } }
+      );
     }
 
     // Rate limiting
@@ -138,16 +127,14 @@ export async function POST(req: NextRequest) {
       documentId,
       provider: usedProvider,
       contentLength: content.length,
-      demoMode: userId === "demo-user",
     });
 
     return NextResponse.json(
       { 
         success: true, 
         summary, 
-        documentId: documentId || `demo-${Date.now()}`,
+        documentId: documentId || `${Date.now()}`,
         provider: usedProvider,
-        demoMode: userId === "demo-user",
       },
       { headers: getRateLimitHeaders(rateLimitResult) }
     );
