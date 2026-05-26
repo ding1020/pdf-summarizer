@@ -10,7 +10,7 @@ export default function SignUpPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <SignUp
         signInUrl={`/${locale}/sign-in`}
-        forceRedirectUrl={`/${locale}/dashboard`}
+        afterSignUpUrl={`/${locale}/dashboard`}
         appearance={{
           elements: {
             formButtonPrimary:
