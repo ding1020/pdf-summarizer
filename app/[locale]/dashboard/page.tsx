@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 import FileUpload from "@/components/FileUpload";
@@ -14,38 +16,15 @@ interface UsageData {
   resetAt: string | null;
 }
 
-interface DemoUser {
-  id: string;
-  email: string;
-  createdAt: string;
-}
-
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
+  const { signOut } = useClerk();
   const [refreshKey, setRefreshKey] = useState(0);
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(true);
-  const [demoUser, setDemoUser] = useState<DemoUser | null>(null);
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(true);
 
-  // Check demo mode session
-  useEffect(() => {
-    const stored = localStorage.getItem("demo_user");
-    if (stored) {
-      try {
-        const user = JSON.parse(stored);
-        setDemoUser(user);
-        setIsSignedIn(true);
-      } catch {
-        setIsSignedIn(false);
-      }
-    } else {
-      setIsSignedIn(false);
-    }
-  }, []);
-
-  // Fetch usage stats
+  // Fetch usage stats when signed in
   useEffect(() => {
     if (isSignedIn) {
       fetchUsage();
@@ -60,13 +39,13 @@ export default function DashboardPage() {
       if (response.ok) {
         const data = await response.json();
         setUsage(data);
-      } else {
-        // Demo mode: provide default usage
-        setUsage({ used: 0, limit: 10, remaining: 10, isPro: false, resetAt: null });
+      } else if (response.status === 401) {
+        // Session expired, redirect to sign-in
+        signOut(() => { window.location.href = "/sign-in"; });
+        return;
       }
     } catch (error) {
       console.error("Failed to fetch usage:", error);
-      setUsage({ used: 0, limit: 10, remaining: 10, isPro: false, resetAt: null });
     } finally {
       setLoadingUsage(false);
     }
@@ -77,11 +56,11 @@ export default function DashboardPage() {
   };
 
   const handleSignOut = () => {
-    localStorage.removeItem("demo_user");
-    window.location.href = "/";
+    signOut(() => { window.location.href = "/"; });
   };
 
-  if (!isLoaded) {
+  // Loading state from Clerk
+  if (!isUserLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
@@ -114,7 +93,7 @@ export default function DashboardPage() {
     );
   }
 
-  const displayName = demoUser?.email?.split("@")[0] || "User";
+  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || "User";
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -159,18 +138,12 @@ export default function DashboardPage() {
                 </div>
               ) : null}
               
-              {/* Demo Mode User Badge */}
-              <div className="flex items-center gap-2">
-                <div className="bg-green-100 text-green-700 px-3 py-1.5 rounded-lg text-sm font-medium">
-                  Demo Mode
-                </div>
-                <button
-                  onClick={handleSignOut}
-                  className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  Sign Out
-                </button>
-              </div>
+              <button
+                onClick={handleSignOut}
+                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                Sign Out
+              </button>
             </div>
           </div>
         </div>

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   req: NextRequest,
@@ -8,56 +10,51 @@ export async function GET(
   try {
     const { id } = await params;
     
-    // Demo mode: auth optional
-    let clerkId: string | null = null;
-    try {
-      const { auth } = await import("@clerk/nextjs/server");
-      const { userId } = auth();
-      if (userId) clerkId = userId;
-    } catch (e) {
-      // Demo mode
+    // Require authentication
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // Get user from database
-    let user;
-    if (clerkId) {
-      user = await prisma.user.findUnique({
-        where: { clerkId },
-      });
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    if (user) {
-      // Get document
-      const document = await prisma.document.findFirst({
-        where: {
-          id: id,
-          userId: user.id,
-        },
-      });
+    // Get document
+    const document = await prisma.document.findFirst({
+      where: {
+        id: id,
+        userId: user.id,
+      },
+    });
 
-      if (!document) {
-        return NextResponse.json(
-          { error: "Document not found" },
-          { status: 404 }
-        );
-      }
-
-      return NextResponse.json({
-        success: true,
-        document,
-      });
+    if (!document) {
+      return NextResponse.json(
+        { error: "Document not found" },
+        { status: 404 }
+      );
     }
 
-    // Demo mode: return not found for non-existent documents
-    return NextResponse.json(
-      { error: "Document not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({
+      success: true,
+      document,
+    });
   } catch (error) {
-    console.error("Get document error:", error);
+    logger.error("Get document error:", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
-      { error: "Document not found" },
-      { status: 404 }
+      { error: "Failed to fetch document" },
+      { status: 500 }
     );
   }
 }
@@ -69,39 +66,40 @@ export async function DELETE(
   try {
     const { id } = await params;
     
-    // Demo mode: auth optional
-    let clerkId: string | null = null;
-    try {
-      const { auth } = await import("@clerk/nextjs/server");
-      const { userId } = auth();
-      if (userId) clerkId = userId;
-    } catch (e) {
-      // Demo mode
+    // Require authentication
+    const { userId: clerkId } = await auth();
+    if (!clerkId) {
+      return NextResponse.json(
+        { error: "Authentication required" },
+        { status: 401 }
+      );
     }
 
     // Get user from database
-    let user;
-    if (clerkId) {
-      user = await prisma.user.findUnique({
-        where: { clerkId },
-      });
+    const user = await prisma.user.findUnique({
+      where: { clerkId },
+    });
+
+    if (!user) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
     }
 
-    if (user) {
-      await prisma.document.deleteMany({
-        where: {
-          id: id,
-          userId: user.id,
-        },
-      });
-    }
+    await prisma.document.deleteMany({
+      where: {
+        id: id,
+        userId: user.id,
+      },
+    });
 
     return NextResponse.json({
       success: true,
       message: "Document deleted",
     });
   } catch (error) {
-    console.error("Delete document error:", error);
+    logger.error("Delete document error:", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
       { error: "Failed to delete document" },
       { status: 500 }
