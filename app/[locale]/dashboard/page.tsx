@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useUser } from "@clerk/nextjs";
 import { useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
@@ -25,15 +25,7 @@ export default function DashboardPage() {
   const [loadingUsage, setLoadingUsage] = useState(true);
 
   // Fetch usage stats when signed in
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchUsage();
-    } else {
-      setLoadingUsage(false);
-    }
-  }, [isSignedIn, refreshKey]);
-
-  const fetchUsage = async () => {
+  const fetchUsage = useCallback(async () => {
     try {
       const response = await fetch("/api/usage");
       if (response.ok) {
@@ -49,7 +41,15 @@ export default function DashboardPage() {
     } finally {
       setLoadingUsage(false);
     }
-  };
+  }, [signOut]);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchUsage();
+    } else {
+      setLoadingUsage(false);
+    }
+  }, [isSignedIn, refreshKey, fetchUsage]);
 
   const handleUploadComplete = () => {
     setRefreshKey((k) => k + 1);

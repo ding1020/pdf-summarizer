@@ -4,7 +4,8 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname);
+// Use forward slashes for cross-platform glob compatibility
+const rootDir = path.resolve(__dirname).replace(/\\/g, '/');
 
 export default defineConfig({
   plugins: [react()],
@@ -12,10 +13,16 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     root: rootDir,
-    setupFiles: [path.join(rootDir, 'tests/setup.ts')],
+    setupFiles: ['./tests/setup.ts'],
     include: [
-      path.join(rootDir, 'tests/**/*.test.ts'),
-      path.join(rootDir, 'tests/**/*.test.tsx'),
+      'tests/**/*.test.ts',
+      'tests/**/*.test.tsx',
+    ],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/openclaw/**',
+      '**/fapiao-app/**',
     ],
     coverage: {
       reporter: ['text', 'json', 'html'],

@@ -1,28 +1,30 @@
 import '@testing-library/jest-dom';
+import { vi } from 'vitest';
 
 // Mock environment variables
 process.env.NODE_ENV = 'test';
 
 // Mock next/navigation
-jest.mock('next/navigation', () => ({
+vi.mock('next/navigation', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    replace: jest.fn(),
-    prefetch: jest.fn(),
+    push: vi.fn(),
+    replace: vi.fn(),
+    prefetch: vi.fn(),
   }),
   usePathname: () => '/',
   useSearchParams: () => new URLSearchParams(),
 }));
 
 // Mock @clerk/nextjs
-jest.mock('@clerk/nextjs', () => ({
-  auth: jest.fn(() => Promise.resolve({ userId: 'test-user-id' })),
-  currentUser: jest.fn(() => Promise.resolve({
+vi.mock('@clerk/nextjs', () => ({
+  auth: vi.fn(() => Promise.resolve({ userId: 'test-user-id' })),
+  currentUser: vi.fn(() => Promise.resolve({
     id: 'test-user-id',
     emailAddresses: [{ emailAddress: 'test@example.com' }],
   })),
   ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
   useUser: () => ({
+    isLoaded: true,
     isSignedIn: true,
     user: {
       id: 'test-user-id',
@@ -30,6 +32,7 @@ jest.mock('@clerk/nextjs', () => ({
     },
   }),
   useClerk: () => ({
+    signOut: vi.fn(),
     user: {
       id: 'test-user-id',
       emailAddresses: [{ emailAddress: 'test@example.com' }],
@@ -38,28 +41,28 @@ jest.mock('@clerk/nextjs', () => ({
 }));
 
 // Mock prisma
-jest.mock('@/lib/db', () => ({
+vi.mock('@/lib/db', () => ({
   prisma: {
     user: {
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
     },
     document: {
-      findMany: jest.fn(),
-      findUnique: jest.fn(),
-      create: jest.fn(),
-      update: jest.fn(),
-      delete: jest.fn(),
+      findMany: vi.fn(),
+      findUnique: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
     },
   },
 }));
 
 // Mock logger
-jest.mock('@/lib/logger', () => ({
+vi.mock('@/lib/logger', () => ({
   logger: {
-    info: jest.fn(),
-    error: jest.fn(),
-    warn: jest.fn(),
+    info: vi.fn(),
+    error: vi.fn(),
+    warn: vi.fn(),
   },
 }));

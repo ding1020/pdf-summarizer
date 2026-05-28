@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
 import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -128,6 +129,22 @@ export async function POST(req: NextRequest) {
       provider: usedProvider,
       contentLength: content.length,
     });
+
+    // Save summary to database if documentId is provided
+    if (documentId) {
+      try {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: {
+            summary,
+            status: "completed",
+          },
+        });
+        logger.info("Summary saved to database", { documentId });
+      } catch (dbError) {
+        logger.warn("Failed to save summary to database", { documentId, error: dbError instanceof Error ? dbError.message : String(dbError) });
+      }
+    }
 
     return NextResponse.json(
       { 

@@ -150,6 +150,25 @@
     "terms": "服务条款",
     "copyright": "PDF Summary. 保留所有权利。"
   },
+  "feedback": {
+    "title": "留下您的反馈",
+    "categoryLabel": "关于什么？",
+    "messageLabel": "您的留言",
+    "messagePlaceholder": "告诉我们您的想法——Bug 报告、功能建议或一般反馈...",
+    "minChars": "至少 10 个字符",
+    "submit": "提交反馈",
+    "submitting": "提交中...",
+    "successTitle": "感谢反馈！",
+    "successMessage": "我们已经收到您的反馈，必要时会与您联系。",
+    "submitAnother": "再写一条",
+    "errorMessage": "出了点问题，请重试。",
+    "categories": {
+      "general": "综合",
+      "bug": "Bug",
+      "feature": "功能建议",
+      "billing": "账单"
+    }
+  },
   "seo": {
     "homeTitle": "PDF智能摘要 - 秒级提取关键信息",
     "homeDesc": "上传PDF，立即获得AI生成的摘要。节省时间，几秒钟内提取文档关键信息。",

@@ -1,10 +1,11 @@
 import { auth } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
-    const { userId: clerkId } = auth();
+    const { userId: clerkId } = await auth();
     
     if (!clerkId) {
       return NextResponse.json(
@@ -43,7 +44,7 @@ export async function GET() {
       billingCycle: user.billingCycle,
     });
   } catch (error) {
-    console.error("Failed to get subscription status:", error);
+    logger.error("Failed to get subscription status", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
       { error: "Failed to get subscription status" },
       { status: 500 }

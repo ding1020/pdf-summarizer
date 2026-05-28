@@ -150,6 +150,25 @@
     "terms": "Terms",
     "copyright": "PDF Summary. All rights reserved."
   },
+  "feedback": {
+    "title": "Send us your feedback",
+    "categoryLabel": "What's this about?",
+    "messageLabel": "Your message",
+    "messagePlaceholder": "Tell us what's on your mind — bug reports, feature requests, or general feedback...",
+    "minChars": "At least 10 characters",
+    "submit": "Submit Feedback",
+    "submitting": "Submitting...",
+    "successTitle": "Thank you!",
+    "successMessage": "We've received your feedback and will get back to you if needed.",
+    "submitAnother": "Submit another",
+    "errorMessage": "Something went wrong. Please try again.",
+    "categories": {
+      "general": "General",
+      "bug": "Bug",
+      "feature": "Feature",
+      "billing": "Billing"
+    }
+  },
   "seo": {
     "homeTitle": "PDF Summarizer AI - Get Insights in Seconds",
     "homeDesc": "Upload your PDF and get AI-powered summaries instantly. Save time and extract key insights from any document.",

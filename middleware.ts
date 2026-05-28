@@ -10,10 +10,12 @@ export default authMiddleware({
     "/sign-in",
     "/sign-up",
     "/pricing",
+    "/help",
     "/(en|zh|ja|ko|es|fr|de)",
     "/(en|zh|ja|ko|es|fr|de)/sign-in",
     "/(en|zh|ja|ko|es|fr|de)/sign-up",
     "/(en|zh|ja|ko|es|fr|de)/pricing",
+    "/(en|zh|ja|ko|es|fr|de)/help",
   ],
   afterAuth(_auth, req) {
     // API routes: Clerk sets auth cookies, skip i18n

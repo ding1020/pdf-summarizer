@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 // Verify Paddle webhook signature using HMAC-SHA256
 async function verifyPaddleWebhook(
@@ -62,11 +61,29 @@ async function verifyPaddleWebhook(
   }
 }
 
-// Find user by email
-async function findUserByEmail(email: string) {
-  return prisma.user.findUnique({
-    where: { email },
-  });
+// Find user by clerkId from custom_data, fallback to email
+async function findUserByEvent(event: { custom_data?: { clerkId?: string; dbUserId?: string } | null; customer?: { email?: string } | null }) {
+  // Priority 1: Look up by clerkId from checkout custom_data
+  const clerkId = event.custom_data?.clerkId;
+  if (clerkId) {
+    const user = await prisma.user.findUnique({ where: { clerkId } });
+    if (user) return user;
+  }
+
+  // Priority 2: Look up by dbUserId from checkout custom_data
+  const dbUserId = event.custom_data?.dbUserId;
+  if (dbUserId) {
+    const user = await prisma.user.findUnique({ where: { id: dbUserId } });
+    if (user) return user;
+  }
+
+  // Priority 3: Look up by customer email (Paddle customer email)
+  const email = event.customer?.email;
+  if (email) {
+    return prisma.user.findUnique({ where: { email } });
+  }
+
+  return null;
 }
 
 export async function POST(req: NextRequest) {
@@ -77,32 +94,33 @@ export async function POST(req: NextRequest) {
 
     // Always verify webhook signature (production or test mode)
     if (!webhookSecret) {
-      console.error("Paddle webhook secret not configured");
+      logger.error("Paddle webhook secret not configured");
       return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
     }
 
     const isValid = await verifyPaddleWebhook(payload, signature, webhookSecret);
     if (!isValid) {
-      console.error("Invalid Paddle webhook signature");
+      logger.error("Invalid Paddle webhook signature");
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     // Additional check: if we're in development/test without a real secret, log warning
     if (process.env.NODE_ENV !== "production" && webhookSecret.startsWith("test_")) {
-      console.warn("Paddle webhook running in test mode with test secret");
+      logger.warn("Paddle webhook running in test mode with test secret");
     }
 
     const event = JSON.parse(payload);
-    console.log("Paddle webhook event:", event.event_type, event.data?.id);
-
     const eventType = event.event_type || event.alert_name;
     const data = event.data || event;
-    const customerEmail = data.customer?.email || data.custom_data?.email;
+    logger.info("Paddle webhook event", { eventType, eventId: data?.id });
+
+    // Find user by clerkId from custom_data, fallback to email
+    const user = await findUserByEvent(data);
 
     switch (eventType) {
       case "subscription.created":
       case "subscription.activated": {
-        console.log("New subscription created:", data.id);
+        logger.info("New subscription created", { subscriptionId: data.id });
         
         const planId = data.items?.[0]?.product_id;
         const status = data.status;
@@ -114,27 +132,26 @@ export async function POST(req: NextRequest) {
           subscriptionEndDate = new Date(currentBillingPeriod.ends_at);
         }
         
-        if (customerEmail) {
-          const user = await findUserByEmail(customerEmail);
-          if (user) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                subscriptionStatus: status === "active" ? "pro" : "free",
-                paddleSubscriptionId: data.id,
-                paddlePlanId: planId,
-                billingCycle: data.billing_cycle,
-                subscriptionEndDate,
-              },
-            });
-            console.log("User subscription updated:", user.id);
-          }
+        if (user) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              subscriptionStatus: status === "active" ? "pro" : "free",
+              paddleSubscriptionId: data.id,
+              paddlePlanId: planId,
+              billingCycle: data.billing_cycle,
+              subscriptionEndDate,
+            },
+          });
+          logger.info("User subscription updated", { userId: user.id });
+        } else {
+          logger.warn("No user found for subscription event", { subscriptionId: data.id });
         }
         break;
       }
 
       case "subscription.updated": {
-        console.log("Subscription updated:", data.id);
+        logger.info("Subscription updated", { subscriptionId: data.id });
         
         const status = data.status;
         const currentBillingPeriod = data.current_billing_period;
@@ -144,18 +161,18 @@ export async function POST(req: NextRequest) {
           subscriptionEndDate = new Date(currentBillingPeriod.ends_at);
         }
         
-        if (customerEmail) {
-          const user = await findUserByEmail(customerEmail);
-          if (user) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                subscriptionStatus: status === "active" ? "pro" : "free",
-                billingCycle: data.billing_cycle,
-                subscriptionEndDate,
-              },
-            });
-          }
+        if (user) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              subscriptionStatus: status === "active" ? "pro" : "free",
+              billingCycle: data.billing_cycle,
+              subscriptionEndDate,
+            },
+          });
+          logger.info("User subscription updated", { userId: user.id });
+        } else {
+          logger.warn("No user found for subscription update", { subscriptionId: data.id });
         }
         break;
       }
@@ -163,24 +180,24 @@ export async function POST(req: NextRequest) {
       case "subscription.canceled":
       case "subscription.past_due":
       case "subscription.paused": {
-        console.log("Subscription cancelled/paused:", data.id);
+        logger.info("Subscription cancelled/paused", { subscriptionId: data.id, eventType });
         
-        if (customerEmail) {
-          const user = await findUserByEmail(customerEmail);
-          if (user) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                subscriptionStatus: "free",
-              },
-            });
-          }
+        if (user) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              subscriptionStatus: "free",
+            },
+          });
+          logger.info("User subscription set to free", { userId: user.id });
+        } else {
+          logger.warn("No user found for subscription cancel", { subscriptionId: data.id });
         }
         break;
       }
 
       case "subscription.resumed": {
-        console.log("Subscription resumed:", data.id);
+        logger.info("Subscription resumed", { subscriptionId: data.id });
         
         const currentBillingPeriod = data.current_billing_period;
         let subscriptionEndDate: Date | null = null;
@@ -188,40 +205,40 @@ export async function POST(req: NextRequest) {
           subscriptionEndDate = new Date(currentBillingPeriod.ends_at);
         }
         
-        if (customerEmail) {
-          const user = await findUserByEmail(customerEmail);
-          if (user) {
-            await prisma.user.update({
-              where: { id: user.id },
-              data: {
-                subscriptionStatus: "pro",
-                subscriptionEndDate,
-              },
-            });
-          }
+        if (user) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: {
+              subscriptionStatus: "pro",
+              subscriptionEndDate,
+            },
+          });
+          logger.info("User subscription restored to pro", { userId: user.id });
+        } else {
+          logger.warn("No user found for subscription resume", { subscriptionId: data.id });
         }
         break;
       }
 
       case "transaction.completed":
       case "transaction.paid": {
-        console.log("Transaction completed:", data.id);
+        logger.info("Transaction completed", { transactionId: data.id });
         break;
       }
 
       case "transaction.failed":
       case "transaction.past_due": {
-        console.log("Transaction failed:", data.id);
+        logger.warn("Transaction failed", { transactionId: data.id, eventType });
         break;
       }
 
       default:
-        console.log("Unhandled Paddle event:", eventType);
+        logger.info("Unhandled Paddle event", { eventType });
     }
 
     return NextResponse.json({ received: true });
   } catch (error) {
-    console.error("Paddle webhook error:", error);
+    logger.error("Paddle webhook error", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
       { error: "Webhook processing failed" },
       { status: 500 }
