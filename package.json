@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && prisma db push && next build",
+    "build": "prisma generate && next build",
     "build:local": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
@@ -24,8 +24,12 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^4.29.12",
+    "@datadog/browser-rum": "^5.0.0",
     "@prisma/client": "^5.22.0",
     "@paddle/paddle-node-sdk": "^2.0.0",
+    "@sentry/nextjs": "^8.0.0",
+    "ioredis": "^5.4.0",
+    "logrocket": "^5.0.0",
     "lucide-react": "^1.9.0",
     "next": "^15.2.4",
     "next-intl": "^4.9.1",
