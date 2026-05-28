@@ -68,6 +68,22 @@ export const documentQuerySchema = paginationSchema.extend({
 
 export type DocumentQueryInput = z.infer<typeof documentQuerySchema>;
 
+// Feedback submission schema
+export const feedbackSchema = z.object({
+  category: z
+    .enum(['general', 'bug', 'feature', 'billing'], {
+      message: 'Category must be one of: general, bug, feature, billing',
+    })
+    .optional()
+    .default('general'),
+  message: z
+    .string()
+    .min(10, { message: 'Message must be at least 10 characters' })
+    .max(2000, { message: 'Message must be under 2000 characters' }),
+});
+
+export type FeedbackInput = z.infer<typeof feedbackSchema>;
+
 // Health check response schema
 export const healthCheckResponseSchema = z.object({
   status: z.enum(['healthy', 'degraded', 'unhealthy']),

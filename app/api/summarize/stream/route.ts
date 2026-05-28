@@ -22,7 +22,7 @@ async function tryStreamWithProvider(
   const stream = await openai.chat.completions.create({
     model,
     messages: [
-      { role: "system", content: getSystemPrompt(language) },
+      { role: "system", content: getSystemPrompt(language as "zh" | "en" | "multilingual" | "technical" | "business") },
       { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
     ],
     temperature: 0.7,
@@ -115,8 +115,9 @@ export async function POST(req: NextRequest) {
       try {
         return await tryStreamWithProvider(p, model, truncatedContent, language, rateLimitResult);
       } catch (err) {
-        logger.warn(`Stream provider ${p} failed, trying next`, 
-          err instanceof Error ? err.message : String(err));
+        logger.warn(`Stream provider ${p} failed, trying next`, { 
+          error: err instanceof Error ? err.message : String(err) 
+        });
       }
     }
 

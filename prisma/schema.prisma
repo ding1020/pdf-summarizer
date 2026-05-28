@@ -43,3 +43,19 @@ model Document {
 
   @@index([userId])
 }
+
+model Feedback {
+  id        String   @id @default(uuid())
+  userId    String?
+  userName  String?
+  userEmail String?
+  category  String   @default("general") // general, bug, feature, billing
+  message   String
+  status    String   @default("open") // open, in_progress, resolved, closed
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}

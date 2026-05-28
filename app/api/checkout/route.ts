@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 // Paddle SDK 动态导入
 async function getPaddleClient() {
@@ -18,7 +19,7 @@ async function getPaddleClient() {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId: clerkId } = auth();
+    const { userId: clerkId } = await auth();
 
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -53,7 +54,7 @@ export async function POST(req: NextRequest) {
       : process.env.PADDLE_PRICE_ID;
 
     if (!priceId) {
-      console.error("[Checkout] Missing price ID for billing cycle:", billingCycle);
+      logger.error("[Checkout] Missing price ID for billing cycle:", undefined, { billingCycle });
       return NextResponse.json({
         error: "Payment configuration error",
         code: "configuration_error",
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
 
     // Paddle 配置检查
     if (!process.env.PADDLE_SECRET_KEY || !process.env.PADDLE_PRICE_ID) {
-      console.error("[Checkout] Missing Paddle configuration:", {
+      logger.error("[Checkout] Missing Paddle configuration", undefined, {
         hasSecretKey: !!process.env.PADDLE_SECRET_KEY,
         hasPriceId: !!process.env.PADDLE_PRICE_ID,
       });
@@ -111,14 +112,14 @@ export async function POST(req: NextRequest) {
       successUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard?payment=success`,
     });
 
-    console.log(`[Checkout] Created checkout session for user ${clerkId}:`, checkoutSession.id);
+    logger.info("[Checkout] Created checkout session", { clerkId, sessionId: checkoutSession.id });
 
     return NextResponse.json({
       url: checkoutSession.url,
     });
 
   } catch (error) {
-    console.error("[Checkout] Error:", error);
+    logger.error("[Checkout] Error", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       error: "Failed to create checkout session",
       message: error instanceof Error ? error.message : "Unknown error",

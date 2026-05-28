@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
+import { logger } from "@/lib/logger";
 
 export async function POST() {
   try {
-    const { userId } = auth();
+    const { userId } = await auth();
     
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -12,7 +13,7 @@ export async function POST() {
 
     // Paddle 配置检查
     if (!process.env.PADDLE_SECRET_KEY) {
-      console.error("[Customer Portal] Missing Paddle configuration");
+      logger.error("[Customer Portal] Missing Paddle configuration");
       return NextResponse.json({
         error: "Payment system not configured",
       }, { status: 503 });
@@ -65,14 +66,14 @@ export async function POST() {
       returnUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard/subscription`,
     });
 
-    console.log(`[Customer Portal] Created portal session for user ${userId}`);
+    logger.info("[Customer Portal] Created portal session", { userId });
 
     return NextResponse.json({
       url: portalSession.url,
     });
 
   } catch (error) {
-    console.error("[Customer Portal] Error:", error);
+    logger.error("[Customer Portal] Error", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({
       error: "Failed to create portal session",
       message: error instanceof Error ? error.message : "Unknown error",
