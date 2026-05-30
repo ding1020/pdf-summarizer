@@ -39,3 +39,10 @@ next-env.d.ts
 # prisma
 src/generated/prisma/
 prisma/migrations/
+
+# debug test scripts (local only)
+test-*.js
+test-*.mjs
+test-report.txt
+test-output.txt
+$null
