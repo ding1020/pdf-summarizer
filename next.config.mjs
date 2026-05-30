@@ -7,6 +7,7 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
   serverExternalPackages: ["pdf-parse"],
+  outputFileTracingRoot: process.cwd(),
   images: {
     remotePatterns: [
       {
