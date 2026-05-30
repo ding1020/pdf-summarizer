@@ -1,27 +1,24 @@
 "use client";
 
-import { SignUp } from "@clerk/nextjs";
-import { useParams } from "next/navigation";
+import dynamic from "next/dynamic";
+
+// Dynamic import with ssr:false to prevent Clerk SSR incompatibility with Next.js 15
+const SignUpPageContent = dynamic(
+  () => import("./SignUpContent"),
+  { ssr: false, loading: () => <SignUpFallback /> }
+);
 
 export default function SignUpPage() {
-  const { locale } = useParams() as { locale: string };
+  return <SignUpPageContent />;
+}
 
+function SignUpFallback() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
-      <SignUp
-        signInUrl={`/${locale}/sign-in`}
-        afterSignUpUrl={`/${locale}/dashboard`}
-        appearance={{
-          elements: {
-            formButtonPrimary:
-              "bg-blue-600 hover:bg-blue-700 text-sm normal-case",
-            card: "shadow-lg rounded-2xl",
-            headerTitle: "text-xl font-bold",
-            socialButtonsBlockButton:
-              "border-gray-300 hover:bg-gray-50",
-          },
-        }}
-      />
+      <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
+        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+        <p className="text-gray-600">Loading sign-up...</p>
+      </div>
     </div>
   );
 }
