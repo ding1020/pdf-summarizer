@@ -24,7 +24,7 @@
     "schema": "prisma/schema.prisma"
   },
   "dependencies": {
-    "@clerk/nextjs": "^4.29.12",
+    "@clerk/nextjs": "^7.4.2",
     "@datadog/browser-rum": "^5.0.0",
     "@paddle/paddle-node-sdk": "^2.0.0",
     "@prisma/client": "^5.22.0",

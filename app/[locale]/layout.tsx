@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import { ClerkProvider } from "@clerk/nextjs";
+import ClientClerkProvider from "@/components/ClientClerkProvider";
 import Navigation from "@/components/Navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -55,7 +55,7 @@ export default async function LocaleLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className={inter.className}>
-        <ClerkProvider>
+        <ClientClerkProvider>
           <ErrorBoundary>
             <NextIntlClientProvider messages={messages}>
               <div className="min-h-screen bg-white">
@@ -70,7 +70,7 @@ export default async function LocaleLayout({
               </div>
             </NextIntlClientProvider>
           </ErrorBoundary>
-        </ClerkProvider>
+        </ClientClerkProvider>
       </body>
     </html>
   );

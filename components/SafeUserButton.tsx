@@ -141,7 +141,7 @@ function SafeUserButton() {
   }
 
   try {
-    return <UserButton afterSignOutUrl="/" />;
+    return <UserButton />;
   } catch (e) {
     return (
       <Link
