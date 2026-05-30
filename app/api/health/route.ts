@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 
-export async function GET(): Promise<NextResponse> {
-  return NextResponse.json({
-    status: "healthy",
-    timestamp: new Date().toISOString(),
-    version: "1.0.0",
-    uptime: process.uptime(),
+// Minimal health check - no dependencies
+export const dynamic = "force-dynamic";
+
+export async function GET() {
+  return new NextResponse("OK", {
+    status: 200,
+    headers: { "Content-Type": "text/plain" },
   });
 }
