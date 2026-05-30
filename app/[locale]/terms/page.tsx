@@ -1,11 +1,13 @@
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Terms of Service - PDF Summary",
-  description: "Terms of Service for PDF Summary AI-powered PDF summarization tool",
-};
-
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Terms of Service - PDF Summary",
+    description: "Terms of Service for PDF Summary AI-powered PDF summarization tool",
+  };
+}
 
 export default function TermsPage() {
   return (

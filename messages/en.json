@@ -169,6 +169,81 @@
       "billing": "Billing"
     }
   },
+  "error": {
+    "title": "Something went wrong",
+    "description": "An unexpected error occurred. Please try again.",
+    "tryAgain": "Try Again",
+    "goHome": "Go Home"
+  },
+  "help": {
+    "title": "Help Center",
+    "subtitle": "Find answers to common questions and get support",
+    "quickActions": "Quick Actions",
+    "emailSupport": "Email Support",
+    "emailSupportDesc": "Get help via email",
+    "upgradePro": "Upgrade to Pro",
+    "upgradeProDesc": "Unlock unlimited access",
+    "faqTitle": "Frequently Asked Questions",
+    "faq1q": "What file formats are supported?",
+    "faq1a": "We currently support PDF files only. Make sure your PDF contains selectable text - scanned documents may not work properly.",
+    "faq2q": "What's the maximum file size?",
+    "faq2a": "Free users can upload PDFs up to 20MB. Pro users have access to larger file support (up to 50MB) and longer documents (up to 200 pages).",
+    "faq3q": "How does the daily limit work?",
+    "faq3a": "Free users get 5 PDF summaries per day. This limit resets at midnight (UTC). Pro users have unlimited access.",
+    "faq4q": "Can I cancel my subscription anytime?",
+    "faq4a": "Yes, you can cancel your subscription at any time through your billing portal. You'll continue to have access until the end of your billing period.",
+    "faq5q": "Is my data secure?",
+    "faq5a": "Absolutely. All your documents are encrypted and processed securely. We never share your data with third parties. Uploaded files are automatically deleted after processing.",
+    "faq6q": "What happens if my PDF upload fails?",
+    "faq6a": "If your upload fails, please check: 1) The file is in PDF format, 2) The file size is under 20MB, 3) Your internet connection is stable. If problems persist, contact support.",
+    "faq7q": "Why is my summary incomplete?",
+    "faq7a": "For very long documents, we process up to 15,000 characters. For complete summaries of lengthy PDFs, please upgrade to Pro.",
+    "faq8q": "Can I export my summaries?",
+    "faq8a": "Pro users can export summaries in multiple formats including PDF and Word. Free users can copy the summary text directly.",
+    "footerLinks": {
+      "privacy": "Privacy Policy",
+      "terms": "Terms of Service",
+      "refund": "Refund Policy"
+    }
+  },
+  "legal": {
+    "cookies": {
+      "title": "Cookie Policy",
+      "updated": "Last updated",
+      "whatAre": "What Are Cookies?",
+      "whatAreDesc": "Cookies are small text files that are placed on your computer or mobile device when you visit our website. They help us provide you with a better experience and allow certain features to work properly.",
+      "howWeUse": "How We Use Cookies",
+      "essential": "Essential Cookies",
+      "essentialDesc": "Required for the website to function properly. These include authentication cookies, security cookies, and cookies needed to remember your preferences.",
+      "analytics": "Analytics Cookies",
+      "analyticsDesc": "Help us understand how visitors interact with our website by collecting anonymous information. This helps us improve our service.",
+      "auth": "Authentication Cookies",
+      "authDesc": "Used by Clerk (our authentication provider) to maintain your login session and securely authenticate you.",
+      "thirdParty": "Third-Party Cookies",
+      "thirdPartyDesc": "We use services from third parties that may also set cookies:",
+      "clerk": "Authentication and session management",
+      "paddle": "Payment processing",
+      "vercel": "Website hosting and analytics",
+      "managing": "Managing Cookies",
+      "managingDesc": "Most web browsers allow you to control cookies through their settings. However, disabling cookies may affect the functionality of our website.",
+      "updates": "Updates to This Policy",
+      "updatesDesc": "We may update this Cookie Policy from time to time. Any changes will be posted on this page.",
+      "contact": "Contact Us",
+      "contactDesc": "If you have questions about our use of cookies, please contact us at"
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "updated": "Last updated"
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "updated": "Last updated"
+    },
+    "refund": {
+      "title": "Refund Policy",
+      "updated": "Last updated"
+    }
+  },
   "seo": {
     "homeTitle": "PDF Summarizer AI - Get Insights in Seconds",
     "homeDesc": "Upload your PDF and get AI-powered summaries instantly. Save time and extract key insights from any document.",
