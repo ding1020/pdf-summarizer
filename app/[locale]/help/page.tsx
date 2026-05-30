@@ -9,38 +9,14 @@ export default function HelpPage() {
   const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
 
   const faqs = [
-    {
-      question: "What file formats are supported?",
-      answer: "We currently support PDF files only. Make sure your PDF contains selectable text - scanned documents may not work properly.",
-    },
-    {
-      question: "What's the maximum file size?",
-      answer: "Free users can upload PDFs up to 20MB. Pro users have access to larger file support (up to 50MB) and longer documents (up to 200 pages).",
-    },
-    {
-      question: "How does the daily limit work?",
-      answer: "Free users get 5 PDF summaries per day. This limit resets at midnight (UTC). Pro users have unlimited access.",
-    },
-    {
-      question: "Can I cancel my subscription anytime?",
-      answer: "Yes, you can cancel your subscription at any time through your billing portal. You'll continue to have access until the end of your billing period.",
-    },
-    {
-      question: "Is my data secure?",
-      answer: "Absolutely. All your documents are encrypted and processed securely. We never share your data with third parties. Uploaded files are automatically deleted after processing.",
-    },
-    {
-      question: "What happens if my PDF upload fails?",
-      answer: "If your upload fails, please check: 1) The file is in PDF format, 2) The file size is under 20MB, 3) Your internet connection is stable. If problems persist, contact support.",
-    },
-    {
-      question: "Why is my summary incomplete?",
-      answer: "For very long documents, we process up to 15,000 characters. For complete summaries of lengthy PDFs, please upgrade to Pro.",
-    },
-    {
-      question: "Can I export my summaries?",
-      answer: "Pro users can export summaries in multiple formats including PDF and Word. Free users can copy the summary text directly.",
-    },
+    { q: t("faq1q"), a: t("faq1a") },
+    { q: t("faq2q"), a: t("faq2a") },
+    { q: t("faq3q"), a: t("faq3a") },
+    { q: t("faq4q"), a: t("faq4a") },
+    { q: t("faq5q"), a: t("faq5a") },
+    { q: t("faq6q"), a: t("faq6a") },
+    { q: t("faq7q"), a: t("faq7a") },
+    { q: t("faq8q"), a: t("faq8a") },
   ];
 
   return (
@@ -53,13 +29,13 @@ export default function HelpPage() {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Help Center</h1>
-          <p className="text-gray-600">Find answers to common questions and get support</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">{t("title")}</h1>
+          <p className="text-gray-600">{t("subtitle")}</p>
         </div>
 
         {/* Quick Actions */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">{t("quickActions")}</h2>
           <div className="grid sm:grid-cols-2 gap-4">
             <a 
               href={`mailto:${supportEmail}`}
@@ -71,8 +47,8 @@ export default function HelpPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-900">Email Support</p>
-                <p className="text-sm text-gray-500">Get help via email</p>
+                <p className="font-medium text-gray-900">{t("emailSupport")}</p>
+                <p className="text-sm text-gray-500">{t("emailSupportDesc")}</p>
               </div>
             </a>
             <Link
@@ -85,8 +61,8 @@ export default function HelpPage() {
                 </svg>
               </div>
               <div>
-                <p className="font-medium text-gray-900">Upgrade to Pro</p>
-                <p className="text-sm text-gray-500">Unlock unlimited access</p>
+                <p className="font-medium text-gray-900">{t("upgradePro")}</p>
+                <p className="text-sm text-gray-500">{t("upgradeProDesc")}</p>
               </div>
             </Link>
           </div>
@@ -94,12 +70,12 @@ export default function HelpPage() {
 
         {/* FAQs */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
-          <h2 className="text-lg font-semibold text-gray-900 mb-6">Frequently Asked Questions</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-6">{t("faqTitle")}</h2>
           <div className="space-y-6">
             {faqs.map((faq, index) => (
               <div key={index} className="border-b border-gray-100 last:border-0 pb-6 last:pb-0">
-                <h3 className="font-medium text-gray-900 mb-2">{faq.question}</h3>
-                <p className="text-gray-600 text-sm leading-relaxed">{faq.answer}</p>
+                <h3 className="font-medium text-gray-900 mb-2">{faq.q}</h3>
+                <p className="text-gray-600 text-sm leading-relaxed">{faq.a}</p>
               </div>
             ))}
           </div>
@@ -112,11 +88,11 @@ export default function HelpPage() {
 
         {/* Related Links */}
         <div className="mt-8 flex flex-wrap justify-center gap-4 text-sm">
-          <Link href="/privacy" className="text-blue-600 hover:underline">Privacy Policy</Link>
+          <Link href="/privacy" className="text-blue-600 hover:underline">{t("footerLinks.privacy")}</Link>
           <span className="text-gray-400">|</span>
-          <Link href="/terms" className="text-blue-600 hover:underline">Terms of Service</Link>
+          <Link href="/terms" className="text-blue-600 hover:underline">{t("footerLinks.terms")}</Link>
           <span className="text-gray-400">|</span>
-          <Link href="/refund" className="text-blue-600 hover:underline">Refund Policy</Link>
+          <Link href="/refund" className="text-blue-600 hover:underline">{t("footerLinks.refund")}</Link>
         </div>
       </div>
     </div>

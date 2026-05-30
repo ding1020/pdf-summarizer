@@ -169,6 +169,81 @@
       "billing": "账单"
     }
   },
+  "error": {
+    "title": "出了点问题",
+    "description": "发生了意外错误，请重试。",
+    "tryAgain": "重试",
+    "goHome": "返回首页"
+  },
+  "help": {
+    "title": "帮助中心",
+    "subtitle": "查找常见问题解答并获取支持",
+    "quickActions": "快速操作",
+    "emailSupport": "邮件支持",
+    "emailSupportDesc": "通过邮件获取帮助",
+    "upgradePro": "升级到专业版",
+    "upgradeProDesc": "解锁无限次使用",
+    "faqTitle": "常见问题",
+    "faq1q": "支持哪些文件格式？",
+    "faq1a": "目前仅支持 PDF 文件。请确保您的 PDF 包含可选中的文本——扫描文档可能无法正常工作。",
+    "faq2q": "文件大小有限制吗？",
+    "faq2a": "免费用户可上传最大 20MB 的 PDF。专业版用户支持更大文件（最高 50MB）和更长文档（最高 200 页）。",
+    "faq3q": "每日限制如何运作？",
+    "faq3a": "免费用户每天可获得 5 次 PDF 摘要。限制在 UTC 午夜重置。专业版用户无限制使用。",
+    "faq4q": "可以随时取消订阅吗？",
+    "faq4a": "是的，您可以随时通过账单门户取消订阅。在计费周期结束前，您仍可继续使用服务。",
+    "faq5q": "我的数据安全吗？",
+    "faq5a": "绝对安全。您的所有文档均经过加密并安全处理。我们绝不与第三方共享您的数据。上传的文件在处理后自动删除。",
+    "faq6q": "PDF 上传失败怎么办？",
+    "faq6a": "如果上传失败，请检查：1) 文件为 PDF 格式，2) 文件小于 20MB，3) 网络连接稳定。如问题持续，请联系支持。",
+    "faq7q": "为什么我的摘要不完整？",
+    "faq7a": "对于较长的文档，我们最多处理 15,000 个字符。如需完整摘要，请升级到专业版。",
+    "faq8q": "可以导出摘要吗？",
+    "faq8a": "专业版用户可以将摘要导出为 PDF 和 Word 等多种格式。免费用户可以复制摘要文本。",
+    "footerLinks": {
+      "privacy": "隐私政策",
+      "terms": "服务条款",
+      "refund": "退款政策"
+    }
+  },
+  "legal": {
+    "cookies": {
+      "title": "Cookie 政策",
+      "updated": "最后更新",
+      "whatAre": "什么是 Cookie？",
+      "whatAreDesc": "Cookie 是您访问我们网站时放置在您计算机或移动设备上的小型文本文件。它们帮助我们为您提供更好的体验并使某些功能正常运行。",
+      "howWeUse": "我们如何使用 Cookie",
+      "essential": "必要 Cookie",
+      "essentialDesc": "网站正常运行所必需的。包括身份验证 Cookie、安全 Cookie 和记住您偏好所需的 Cookie。",
+      "analytics": "分析 Cookie",
+      "analyticsDesc": "通过收集匿名信息，帮助我们了解访问者如何与我们的网站互动，从而改进服务。",
+      "auth": "身份验证 Cookie",
+      "authDesc": "由 Clerk（我们的身份验证提供商）用于维护您的登录会话并安全地验证您的身份。",
+      "thirdParty": "第三方 Cookie",
+      "thirdPartyDesc": "我们使用的第三方服务也可能设置 Cookie：",
+      "clerk": "身份验证和会话管理",
+      "paddle": "支付处理",
+      "vercel": "网站托管和分析",
+      "managing": "管理 Cookie",
+      "managingDesc": "大多数网络浏览器允许您通过设置控制 Cookie。但禁用 Cookie 可能会影响我们网站的功能。",
+      "updates": "政策更新",
+      "updatesDesc": "我们可能不时更新此 Cookie 政策。任何更改将发布在此页面上。",
+      "contact": "联系我们",
+      "contactDesc": "如果您对我们使用 Cookie 有任何疑问，请联系"
+    },
+    "privacy": {
+      "title": "隐私政策",
+      "updated": "最后更新"
+    },
+    "terms": {
+      "title": "服务条款",
+      "updated": "最后更新"
+    },
+    "refund": {
+      "title": "退款政策",
+      "updated": "最后更新"
+    }
+  },
   "seo": {
     "homeTitle": "PDF智能摘要 - 秒级提取关键信息",
     "homeDesc": "上传PDF，立即获得AI生成的摘要。节省时间，几秒钟内提取文档关键信息。",

@@ -1,13 +1,15 @@
 import { Metadata } from "next";
 
-export const metadata: Metadata = {
-  title: "Privacy Policy - PDF Summary",
-  description: "Privacy Policy for PDF Summary AI-powered PDF summarization tool",
-};
-
 const PRIVACY_EMAIL = process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "privacy@pdfsum.com";
 
-export default function PrivacyPage() {
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Privacy Policy - PDF Summary",
+    description: "Privacy Policy for PDF Summary AI-powered PDF summarization tool",
+  };
+}
+
+export default async function PrivacyPage() {
   return (
     <div className="min-h-screen bg-gray-50 py-16">
       <div className="max-w-3xl mx-auto px-4">
