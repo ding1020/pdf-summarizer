@@ -2,6 +2,7 @@ import { authMiddleware } from "@clerk/nextjs";
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./navigation";
 import { NextResponse } from "next/server";
+import type { NextFetchEvent, NextRequest } from "next/server";
 
 const intlMiddleware = createIntlMiddleware(routing);
 
@@ -28,21 +29,20 @@ const clerkMiddleware = authMiddleware({
   },
 });
 
-export default function middleware(args: Parameters<typeof clerkMiddleware>[0]) {
+export default function middleware(req: NextRequest, event: NextFetchEvent) {
   try {
-    return clerkMiddleware(args);
+    return clerkMiddleware(req, event);
   } catch (error) {
     // Clerk init failed (wrong keys / network) → fall back to i18n only
     console.error("Middleware: Clerk auth failed, falling back to i18n-only", error);
-    const { request } = args;
 
     // For API routes, pass through without auth
-    if (request.nextUrl.pathname.startsWith("/api/")) {
+    if (req.nextUrl.pathname.startsWith("/api/")) {
       return NextResponse.next();
     }
 
     // For web routes, still apply locale routing
-    return intlMiddleware(request);
+    return intlMiddleware(req);
   }
 }
 
