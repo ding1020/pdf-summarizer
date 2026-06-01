@@ -9,6 +9,6 @@ export default function robots(): MetadataRoute.Robots {
         disallow: ["/api/", "/dashboard/"],
       },
     ],
-    sitemap: "https://pdfsum.com/sitemap.xml",
+    sitemap: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com"}/sitemap.xml`,
   };
 }

@@ -46,7 +46,7 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const messages = await getMessages();
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -55,9 +55,9 @@ export default async function LocaleLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
       </head>
       <body className={inter.className}>
-        <ClientClerkProvider>
-          <ErrorBoundary>
-            <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider messages={messages}>
+          <ClientClerkProvider>
+            <ErrorBoundary>
               <div className="min-h-screen bg-white">
                 {/* Top Bar with Language Switcher */}
                 <div className="bg-gray-50 border-b">
@@ -68,9 +68,9 @@ export default async function LocaleLayout({
                 <Navigation />
                 {children}
               </div>
-            </NextIntlClientProvider>
-          </ErrorBoundary>
-        </ClientClerkProvider>
+            </ErrorBoundary>
+          </ClientClerkProvider>
+        </NextIntlClientProvider>
       </body>
     </html>
   );
