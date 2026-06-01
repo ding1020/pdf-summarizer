@@ -10,11 +10,13 @@
     "error": "错误",
     "success": "成功",
     "learnMore": "了解更多",
-    "contact": "联系我们"
+    "contact": "联系我们",
+    "selectLanguage": "选择语言"
   },
   "nav": {
     "features": "功能特点",
     "pricing": "价格方案",
+    "help": "帮助中心",
     "howItWorks": "使用流程",
     "dashboard": "控制面板",
     "logout": "退出登录"
@@ -110,7 +112,53 @@
       "paymentAnswer": "我们通过安全的支付合作伙伴Paddle接受所有主流信用卡。",
       "trial": "有免费试用吗？",
       "trialAnswer": "我们的免费版让您无需任何承诺即可试用。需要时再升级到专业版。"
-    }
+    },
+    "badges": {
+      "secure": "安全支付",
+      "poweredBy": "由Paddle提供支持",
+      "cancel": "随时取消",
+      "support": "全天候支持"
+    },
+    "billing": {
+      "monthly": "按月",
+      "yearly": "按年",
+      "savePercent": "省27%"
+    },
+    "pro": {
+      "name": "专业版",
+      "price": "¥59",
+      "yearlyPrice": "¥579",
+      "period": "/月",
+      "yearlyPeriod": "/年（省27%）",
+      "description": "适合高级用户和专业团队",
+      "features": [
+        "无限PDF摘要",
+        "高级AI，质量更优",
+        "无限文档历史",
+        "导出为Word/PDF",
+        "优先客户支持",
+        "支持更长文档（最高200页）"
+      ],
+      "button": "升级到专业版",
+      "pricePerMonth": "相当于每月约¥48"
+    },
+    "bestValue": "最超值",
+    "errors": {
+      "paymentFailed": "支付失败。请检查您的银行卡信息后重试。",
+      "cardDeclined": "银行卡被拒。请尝试其他支付方式。",
+      "insufficientFunds": "余额不足。请尝试其他银行卡。",
+      "configError": "支付系统暂时不可用，请稍后再试。",
+      "generic": "出了点问题，请重试。",
+      "notConfigured": "支付系统正在配置中。请联系客服获取升级帮助。"
+    },
+    "processing": "处理中...",
+    "securePayment": "通过Paddle安全支付",
+    "socialProof": {
+      "line1": "已获得超过10,000名专业人士的信赖",
+      "line2": "加入成千上万的研究人员、学生和商业专业人士的行列"
+    },
+    "questions": "有问题？",
+    "contactUs": "联系我们"
   },
   "dashboard": {
     "welcome": "欢迎回来",
@@ -123,6 +171,13 @@
     "signInRequired": "需要登录",
     "signInDesc": "请登录以访问控制面板并开始摘要PDF文档。",
     "subscription": "订阅",
+    "proUnlimited": "专业版 - 无限使用",
+    "summariesToday": "今天已使用 {used}/{limit} 次摘要",
+    "upgrade": "升级",
+    "signOut": "退出登录",
+    "dailyUsage": "今日使用量",
+    "xOfYUsed": "已使用 {used}/{limit} 次",
+    "dailyLimitReached": "您已达到今日使用上限。升级到专业版即可无限使用。",
     "tips": {
       "results": "最佳效果",
       "resultsDesc": "使用文字清晰的PDF。扫描文档可能精度较低。",
@@ -146,8 +201,11 @@
     "summaryHere": "摘要将在此处显示"
   },
   "footer": {
+    "brand": "PDF智能摘要",
+    "pricing": "价格方案",
     "privacy": "隐私政策",
     "terms": "服务条款",
+    "refund": "退款政策",
     "copyright": "PDF Summary. 保留所有权利。"
   },
   "feedback": {

@@ -14,6 +14,7 @@ interface Toast {
 
 export default function PricingPage() {
   const t = useTranslations("pricing");
+  const ct = useTranslations();
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
@@ -50,9 +51,9 @@ export default function PricingPage() {
   const proPlan = {
     name: t("pro.name"),
     monthlyPrice: t("pro.price"),
-    yearlyPrice: "$79",
-    period: selectedBilling === "yearly" ? "/year" : "/month",
-    yearlyPeriod: "/year (Save 27%)",
+    yearlyPrice: t("pro.yearlyPrice"),
+    period: selectedBilling === "yearly" ? t("pro.period") : t("pro.period"),
+    yearlyPeriod: t("pro.yearlyPeriod"),
     description: t("pro.description"),
     features: t.raw("pro.features") as string[],
     buttonText: t("pro.button"),
@@ -85,18 +86,18 @@ export default function PricingPage() {
         } else if (data.error) {
           // Handle specific error codes
           const errorMessages: Record<string, string> = {
-            payment_failed: "Payment failed. Please check your card details and try again.",
-            card_declined: "Your card was declined. Please try a different payment method.",
-            insufficient_funds: "Insufficient funds. Please try a different card.",
-            configuration_error: "Payment system is temporarily unavailable. Please try again later.",
+            payment_failed: t("errors.paymentFailed"),
+            card_declined: t("errors.cardDeclined"),
+            insufficient_funds: t("errors.insufficientFunds"),
+            configuration_error: t("errors.configError"),
           };
           showToast(errorMessages[data.code] || data.error, "error");
         } else {
-          showToast("Payment system is being configured. Please contact support for upgrade assistance.", "info");
+          showToast(t("errors.notConfigured"), "info");
         }
       } catch (error) {
         console.error("Upgrade error:", error);
-        showToast("Something went wrong. Please try again.", "error");
+        showToast(t("errors.generic"), "error");
       } finally {
         setLoading(null);
       }
@@ -130,25 +131,25 @@ export default function PricingPage() {
             <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            <span className="text-sm font-medium">Secure Payment</span>
+            <span className="text-sm font-medium">{t("badges.secure")}</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
             </svg>
-            <span className="text-sm font-medium">Powered by Paddle</span>
+            <span className="text-sm font-medium">{t("badges.poweredBy")}</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span className="text-sm font-medium">Cancel Anytime</span>
+            <span className="text-sm font-medium">{t("badges.cancel")}</span>
           </div>
           <div className="flex items-center gap-2 text-gray-600">
             <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <span className="text-sm font-medium">24/7 Support</span>
+            <span className="text-sm font-medium">{t("badges.support")}</span>
           </div>
         </div>
 
@@ -163,7 +164,7 @@ export default function PricingPage() {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Monthly
+              {t("billing.monthly")}
             </button>
             <button
               onClick={() => setSelectedBilling("yearly")}
@@ -173,9 +174,9 @@ export default function PricingPage() {
                   : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Yearly
+              {t("billing.yearly")}
               <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                Save 27%
+                {t("billing.savePercent")}
               </span>
             </button>
           </div>
@@ -255,7 +256,7 @@ export default function PricingPage() {
             {selectedBilling === "yearly" && (
               <div className="absolute top-4 right-4">
                 <span className="px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-full">
-                  Best Value
+                  {t("bestValue")}
                 </span>
               </div>
             )}
@@ -278,7 +279,7 @@ export default function PricingPage() {
               </div>
               {selectedBilling === "yearly" && (
                 <p className="text-sm text-gray-500 mt-1">
-                  Equivalent to ${Math.round(79 / 12)}/month
+                  {t("pro.pricePerMonth")}
                 </p>
               )}
 
@@ -314,7 +315,7 @@ export default function PricingPage() {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    Processing...
+                    {t("processing")}
                   </span>
                 ) : (
                   proPlan.buttonText
@@ -322,7 +323,7 @@ export default function PricingPage() {
               </button>
 
               <p className="text-center text-xs text-gray-500 mt-4">
-                Secure payment via Paddle
+                {t("securePayment")}
               </p>
             </div>
           </div>
@@ -337,8 +338,8 @@ export default function PricingPage() {
               </svg>
             ))}
           </div>
-          <p className="text-gray-600 mb-2">Trusted by <span className="font-semibold text-gray-900">10,000+</span> professionals</p>
-          <p className="text-sm text-gray-500">Join thousands of researchers, students, and business professionals</p>
+          <p className="text-gray-600 mb-2">{t("socialProof.line1")}</p>
+          <p className="text-sm text-gray-500">{t("socialProof.line2")}</p>
         </div>
 
         {/* FAQ */}
@@ -372,7 +373,7 @@ export default function PricingPage() {
         {/* Contact */}
         <div className="mt-12 text-center text-gray-500">
           <p>
-            Questions? <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pdfsum.com'}`} className="text-blue-600 hover:underline">Contact us</a>
+            {t("questions")} <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pdfsum.com'}`} className="text-blue-600 hover:underline">{t("contactUs")}</a>
           </p>
         </div>
 

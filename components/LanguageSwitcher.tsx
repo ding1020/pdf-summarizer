@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "@/navigation";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Globe } from "lucide-react";
 
 const languages = [
@@ -18,6 +18,7 @@ export default function LanguageSwitcher() {
   const locale = useLocale();
   const router = useRouter();
   const pathname = usePathname();
+  const t = useTranslations();
 
   const handleChange = (newLocale: string) => {
     const segments = pathname.split("/");
@@ -29,7 +30,7 @@ export default function LanguageSwitcher() {
     <div className="relative group">
       <button
         className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors"
-        aria-label="Select language"
+        aria-label={t("common.selectLanguage")}
       >
         <Globe className="w-4 h-4" />
         <span className="hidden sm:inline">{languages.find(l => l.code === locale)?.name}</span>
