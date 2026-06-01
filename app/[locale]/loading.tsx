@@ -1,4 +1,9 @@
+"use client";
+
+import { useTranslations } from "next-intl";
+
 export default function Loading() {
+  const t = useTranslations();
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="text-center">
@@ -6,7 +11,7 @@ export default function Loading() {
           <div className="absolute inset-0 rounded-full border-4 border-blue-200"></div>
           <div className="absolute inset-0 rounded-full border-4 border-blue-600 border-t-transparent animate-spin"></div>
         </div>
-        <p className="text-gray-500 text-sm">Loading...</p>
+        <p className="text-gray-500 text-sm">{t("common.loading")}</p>
       </div>
     </div>
   );

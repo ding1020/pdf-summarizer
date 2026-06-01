@@ -18,6 +18,7 @@ interface UsageData {
 
 export default function DashboardPage() {
   const t = useTranslations("dashboard");
+  const ct = useTranslations();
   const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
   const { signOut } = useClerk();
   const [refreshKey, setRefreshKey] = useState(0);
@@ -86,14 +87,14 @@ export default function DashboardPage() {
             href="/sign-in"
             className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
           >
-            {t("common.signIn")}
+            {ct("common.signIn")}
           </Link>
         </div>
       </div>
     );
   }
 
-  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || "User";
+  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || ct("common.brand");
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -120,7 +121,7 @@ export default function DashboardPage() {
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  Pro - Unlimited
+                  {t("proUnlimited")}
                 </div>
               ) : usage ? (
                 <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
@@ -128,10 +129,10 @@ export default function DashboardPage() {
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                     </svg>
-                    {usage.used}/{usage.limit} summaries today
+                    {t("summariesToday", { used: usage.used, limit: usage.limit })}
                     {usage.remaining === 0 && (
                       <Link href="/pricing" className="ml-2 text-xs bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700">
-                        Upgrade
+                        {t("upgrade")}
                       </Link>
                     )}
                   </span>
@@ -142,7 +143,7 @@ export default function DashboardPage() {
                 onClick={handleSignOut}
                 className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
-                Sign Out
+                {t("signOut")}
               </button>
             </div>
           </div>
@@ -155,9 +156,9 @@ export default function DashboardPage() {
         {!loadingUsage && usage && !usage.isPro && usage.limit > 0 && (
           <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">Daily Usage</span>
+              <span className="text-sm font-medium text-gray-700">{t("dailyUsage")}</span>
               <span className="text-sm text-gray-500">
-                {usage.used} of {usage.limit} used
+                {t("xOfYUsed", { used: usage.used, limit: usage.limit })}
               </span>
             </div>
             <div className="w-full bg-gray-200 rounded-full h-2">
@@ -174,7 +175,7 @@ export default function DashboardPage() {
             </div>
             {usage.remaining === 0 && (
               <p className="text-xs text-red-600 mt-2">
-                You&apos;ve reached your daily limit. Upgrade to Pro for unlimited summaries.
+                {t("dailyLimitReached")}
               </p>
             )}
           </div>

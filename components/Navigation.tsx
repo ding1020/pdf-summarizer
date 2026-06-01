@@ -47,7 +47,7 @@ export default function Navigation() {
                 isActive("/help") ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
               }`}
             >
-              Help
+              {t("nav.help")}
             </Link>
             <Link
               href="/#how-it-works"
