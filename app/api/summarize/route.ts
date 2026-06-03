@@ -1,25 +1,20 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
-import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimit, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
-    // Require authentication
-    const { userId } = await auth();
-    if (!userId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Rate limiting
+    // ==================== Rate Limiting ====================
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+    const { userId } = await auth();
+    const isGuest = !userId;
     const identifier = getClientIdentifier(userId, clientIp);
-    const rateLimitResult = rateLimit(identifier, RATE_LIMITS.free);
+    const guestRateLimit = { windowMs: 60 * 1000, maxRequests: 3 };
+    const usageRateConfig = isGuest ? guestRateLimit : { windowMs: 60 * 1000, maxRequests: 20 };
+    const rateLimitResult = rateLimit(identifier, usageRateConfig);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -46,13 +41,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Truncate content if too long
     const maxLength = 15000;
     const truncatedContent = content.length > maxLength 
       ? content.substring(0, maxLength) + "..."
       : content;
 
-    // Generate summary using AI
     let summary: string;
     let usedProvider: AIProvider;
 
@@ -62,14 +55,8 @@ export async function POST(req: NextRequest) {
         model: openai.baseURL?.includes("groq") ? "llama-3.3-70b-versatile" : 
                openai.baseURL?.includes("siliconflow") ? "Qwen/Qwen2.5-7B-Instruct" : "deepseek-chat",
         messages: [
-          {
-            role: "system",
-            content: getSystemPrompt(language),
-          },
-          {
-            role: "user",
-            content: `Please summarize the following document:\n\n${truncatedContent}`,
-          },
+          { role: "system", content: getSystemPrompt(language) },
+          { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
         ],
         temperature: 0.7,
         max_tokens: 2000,
@@ -79,20 +66,13 @@ export async function POST(req: NextRequest) {
     } catch (primaryError) {
       logger.error("Primary AI provider failed:", primaryError instanceof Error ? primaryError : new Error(String(primaryError)));
       
-      // Fallback to Groq
       try {
         const openai = getAIProvider("groq");
         const completion = await openai.chat.completions.create({
           model: "llama-3.3-70b-versatile",
           messages: [
-            {
-              role: "system",
-              content: getSystemPrompt(language),
-            },
-            {
-              role: "user",
-              content: `Please summarize the following document:\n\n${truncatedContent}`,
-            },
+            { role: "system", content: getSystemPrompt(language) },
+            { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
           ],
           temperature: 0.7,
           max_tokens: 2000,
@@ -102,19 +82,12 @@ export async function POST(req: NextRequest) {
       } catch (groqError) {
         logger.error("Groq also failed:", groqError instanceof Error ? groqError : new Error(String(groqError)));
         
-        // Final fallback
         const openai = getAIProvider("siliconflow");
         const completion = await openai.chat.completions.create({
           model: "Qwen/Qwen2.5-7B-Instruct",
           messages: [
-            {
-              role: "system",
-              content: getSystemPrompt(language),
-            },
-            {
-              role: "user",
-              content: `Please summarize the following document:\n\n${truncatedContent}`,
-            },
+            { role: "system", content: getSystemPrompt(language) },
+            { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
           ],
           temperature: 0.7,
           max_tokens: 2000,
@@ -128,17 +101,15 @@ export async function POST(req: NextRequest) {
       documentId,
       provider: usedProvider,
       contentLength: content.length,
+      isGuest,
     });
 
-    // Save summary to database if documentId is provided
-    if (documentId) {
+    // Save to DB only if signed-in and documentId is valid
+    if (!isGuest && documentId) {
       try {
         await prisma.document.update({
           where: { id: documentId },
-          data: {
-            summary,
-            status: "completed",
-          },
+          data: { summary, status: "completed" },
         });
         logger.info("Summary saved to database", { documentId });
       } catch (dbError) {

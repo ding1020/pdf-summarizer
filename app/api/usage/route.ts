@@ -3,21 +3,25 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
-// Free tier limits
 const FREE_DAILY_LIMIT = 5;
 
 export async function GET() {
   try {
-    // Require authentication
     const { userId: clerkId } = await auth();
+    
+    // Guest: return default free tier stats
     if (!clerkId) {
-      return NextResponse.json(
-        { error: "Authentication required" },
-        { status: 401 }
-      );
+      return NextResponse.json({
+        used: 0,
+        limit: FREE_DAILY_LIMIT,
+        remaining: FREE_DAILY_LIMIT,
+        isPro: false,
+        resetAt: null,
+        isGuest: true,
+      });
     }
 
-    // Get user
+    // Signed-in: fetch actual usage from DB
     const user = await prisma.user.findUnique({
       where: { clerkId },
       select: { subscriptionStatus: true },
@@ -51,6 +55,7 @@ export async function GET() {
       remaining,
       isPro,
       resetAt: isPro ? null : new Date(startOfDay.getTime() + 24 * 60 * 60 * 1000).toISOString(),
+      isGuest: false,
     });
   } catch (error) {
     logger.error("Failed to get usage stats:", error instanceof Error ? error : new Error(String(error)));

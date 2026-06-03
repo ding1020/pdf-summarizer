@@ -43,7 +43,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     }
     // Check file type
     if (file.type !== "application/pdf" && !file.name.endsWith(".pdf")) {
-      return "Only PDF files are allowed";
+      return t("onlyPdfError");
     }
     return null;
   }, []);
@@ -68,14 +68,14 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || "Failed to generate summary");
+        throw new Error(error.error || t("summarizeFailed"));
       }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
       if (!reader) {
-        throw new Error("Failed to read stream");
+        throw new Error(t("streamFailed"));
       }
 
       let fullSummary = "";
@@ -121,7 +121,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         return;
       }
       if (isMountedRef.current) {
-        setError(err instanceof Error ? err.message : "Failed to generate summary");
+        setError(err instanceof Error ? err.message : t("summarizeFailed"));
       }
     } finally {
       if (isMountedRef.current) {
@@ -166,7 +166,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || "Upload failed");
+          throw new Error(data.error || t("uploadFailed"));
         }
 
         const uploadResult = {
@@ -264,7 +264,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
-            <p className="font-medium text-red-800">Error</p>
+            <p className="font-medium text-red-800">{t("errorTitle")}</p>
             <p className="text-red-600 text-sm">{error}</p>
           </div>
         </div>

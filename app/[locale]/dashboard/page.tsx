@@ -1,185 +1,60 @@
-"use client";
-
-import { useState, useEffect, useCallback } from "react";
-import { useUser } from "@clerk/nextjs";
-import { useClerk } from "@clerk/nextjs";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
-import FileUpload from "@/components/FileUpload";
-import DocumentHistory from "@/components/DocumentHistory";
+import FileUploadWrapper from "./FileUploadWrapper";
+import AuthDependentUI from "./AuthUI";
 
-interface UsageData {
-  used: number;
-  limit: number;
-  remaining: number;
-  isPro: boolean;
-  resetAt: string | null;
-}
-
-export default function DashboardPage() {
-  const t = useTranslations("dashboard");
-  const ct = useTranslations();
-  const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
-  const { signOut } = useClerk();
-  const [refreshKey, setRefreshKey] = useState(0);
-  const [usage, setUsage] = useState<UsageData | null>(null);
-  const [loadingUsage, setLoadingUsage] = useState(true);
-
-  // Fetch usage stats when signed in
-  const fetchUsage = useCallback(async () => {
-    try {
-      const response = await fetch("/api/usage");
-      if (response.ok) {
-        const data = await response.json();
-        setUsage(data);
-      } else if (response.status === 401) {
-        // Session expired, redirect to sign-in
-        signOut(() => { window.location.href = "/sign-in"; });
-        return;
-      }
-    } catch (error) {
-      console.error("Failed to fetch usage:", error);
-    } finally {
-      setLoadingUsage(false);
-    }
-  }, [signOut]);
-
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchUsage();
-    } else {
-      setLoadingUsage(false);
-    }
-  }, [isSignedIn, refreshKey, fetchUsage]);
-
-  const handleUploadComplete = () => {
-    setRefreshKey((k) => k + 1);
-  };
-
-  const handleSignOut = () => {
-    signOut(() => { window.location.href = "/"; });
-  };
-
-  // Loading state from Clerk
-  if (!isUserLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">{t("welcome")}</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!isSignedIn) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center max-w-md mx-auto px-4">
-          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">{t("signInRequired")}</h1>
-          <p className="text-gray-600 mb-6">{t("signInDesc")}</p>
-          <Link
-            href="/sign-in"
-            className="inline-block px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition"
-          >
-            {ct("common.signIn")}
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || ct("common.brand");
+// Server Component: always renders. Client components handle auth state internally.
+export default async function DashboardPage() {
+  const t = await getTranslations("dashboard");
+  const ct = await getTranslations();
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Dashboard Header */}
+      {/* Guest Header (shown when not signed in) */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-                {t("welcome")}, {displayName}
+                {ct("guest.welcomeTitle")}
               </h1>
-              <p className="text-gray-600 mt-1">
-                {t("subtitle")}
-              </p>
+              <p className="text-gray-600 mt-1">{ct("guest.welcomeDesc")}</p>
             </div>
-            <div className="flex items-center gap-4">
-              {/* Usage Badge */}
-              {loadingUsage ? (
-                <div className="bg-gray-100 px-4 py-2 rounded-lg animate-pulse">
-                  <div className="h-4 w-20 bg-gray-200 rounded"></div>
-                </div>
-              ) : usage?.isPro ? (
-                <div className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                  </svg>
-                  {t("proUnlimited")}
-                </div>
-              ) : usage ? (
-                <div className="bg-blue-50 text-blue-700 px-4 py-2 rounded-lg text-sm font-medium">
-                  <span className="flex items-center gap-2">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                    {t("summariesToday", { used: usage.used, limit: usage.limit })}
-                    {usage.remaining === 0 && (
-                      <Link href="/pricing" className="ml-2 text-xs bg-blue-600 text-white px-2 py-0.5 rounded hover:bg-blue-700">
-                        {t("upgrade")}
-                      </Link>
-                    )}
-                  </span>
-                </div>
-              ) : null}
-              
-              <button
-                onClick={handleSignOut}
-                className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
-              >
-                {t("signOut")}
-              </button>
-            </div>
+            {/* Auth-dependent UI: shows user info or sign-up buttons */}
+            <AuthDependentUI refreshKey={0} />
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
       <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Usage Progress Bar */}
-        {!loadingUsage && usage && !usage.isPro && usage.limit > 0 && (
-          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium text-gray-700">{t("dailyUsage")}</span>
-              <span className="text-sm text-gray-500">
-                {t("xOfYUsed", { used: usage.used, limit: usage.limit })}
-              </span>
+        {/* Guest Banner */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+              <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
-              <div
-                className={`h-2 rounded-full transition-all ${
-                  usage.remaining === 0 
-                    ? "bg-red-500" 
-                    : usage.used >= usage.limit * 0.8 
-                      ? "bg-yellow-500" 
-                      : "bg-blue-600"
-                }`}
-                style={{ width: `${Math.min((usage.used / usage.limit) * 100, 100)}%` }}
-              ></div>
+            <div>
+              <p className="font-medium text-blue-900 text-sm">{ct("guest.tryForFree")}</p>
+              <p className="text-blue-600 text-xs mt-0.5">{ct("guest.signUpToSave")}</p>
             </div>
-            {usage.remaining === 0 && (
-              <p className="text-xs text-red-600 mt-2">
-                {t("dailyLimitReached")}
-              </p>
-            )}
           </div>
-        )}
+          <div className="flex gap-2 flex-shrink-0">
+            <Link
+              href="/sign-up"
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition whitespace-nowrap"
+            >
+              {ct("common.signUp")}
+            </Link>
+            <Link
+              href="/sign-in"
+              className="px-4 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition whitespace-nowrap"
+            >
+              {ct("common.signIn")}
+            </Link>
+          </div>
+        </div>
 
         {/* Upload Section */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mb-8">
@@ -194,7 +69,7 @@ export default function DashboardPage() {
               <p className="text-sm text-gray-500">{t("uploadSubtitle")}</p>
             </div>
           </div>
-          <FileUpload onUploadComplete={handleUploadComplete} />
+          <FileUploadWrapper />
         </div>
 
         {/* Quick Tips */}
@@ -227,20 +102,26 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* History Section */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        {/* Guest CTA */}
+        <div className="text-center py-8 bg-white rounded-2xl shadow-sm border border-gray-200">
+          <div className="max-w-md mx-auto px-4">
+            <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
-            <div>
-              <h2 className="text-xl font-bold text-gray-900">{t("historyTitle")}</h2>
-              <p className="text-sm text-gray-500">{t("historySubtitle")}</p>
-            </div>
+            <h2 className="text-xl font-bold text-gray-900 mb-2">{ct("guest.createAccountTitle")}</h2>
+            <p className="text-gray-600 mb-6">{ct("guest.createAccountDesc")}</p>
+            <Link
+              href="/sign-up"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-blue-800 transition shadow-lg"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              {ct("common.getStarted")}
+            </Link>
           </div>
-          <DocumentHistory key={refreshKey} />
         </div>
       </div>
     </div>

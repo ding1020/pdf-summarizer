@@ -44,7 +44,7 @@ export default function HomePage() {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-16">
               <Link
-                href="/sign-up"
+                href="/dashboard"
                 className="inline-flex items-center justify-center gap-2 px-8 py-4 bg-white text-blue-700 text-lg font-semibold rounded-xl hover:bg-blue-50 transition shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5"
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -262,7 +262,7 @@ export default function HomePage() {
               {t("cta.subtitle")}
             </p>
             <Link
-              href="/sign-up"
+              href="/dashboard"
               className="inline-flex items-center gap-2 px-10 py-4 bg-white text-blue-700 text-lg font-semibold rounded-xl hover:bg-blue-50 transition shadow-xl"
             >
               {t("cta.button")}
