@@ -14,7 +14,6 @@ interface Toast {
 
 export default function PricingPage() {
   const t = useTranslations("pricing");
-  const ct = useTranslations();
   const { isLoaded, isSignedIn } = useUser();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);

@@ -16,7 +16,6 @@ async function tryStreamWithProvider(
   model: string,
   truncatedContent: string,
   language: string,
-  rateLimitResult: ReturnType<typeof rateLimit>
 ): Promise<Response> {
   const openai = getAIProvider(provider);
   const stream = await openai.chat.completions.create({
@@ -53,31 +52,40 @@ async function tryStreamWithProvider(
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       "Connection": "keep-alive",
-      ...getRateLimitHeaders(rateLimitResult),
     },
   });
 }
 
 export async function POST(req: NextRequest) {
+  // ==================== Auth (safe wrapper) ====================
+  let userId: string | null = null;
   try {
-    // Require authentication
-    const { userId } = await auth();
-    if (!userId) {
-      return new Response(
-        JSON.stringify({ error: "Authentication required" }),
-        { status: 401, headers: { "Content-Type": "application/json" } }
-      );
-    }
+    const authResult = await auth();
+    userId = authResult.userId || null;
+  } catch (authError) {
+    logger.warn("Auth check failed in summarize stream", {
+      error: authError instanceof Error ? authError.message : String(authError),
+    });
+    userId = null;
+  }
 
-    // Apply rate limiting
-    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+  // ==================== Rate Limiting ====================
+  try {
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || req.headers.get("x-real-ip")
+      || "anonymous";
     const identifier = getClientIdentifier(userId, clientIp);
-    const rateLimitResult = rateLimit(identifier, RATE_LIMITS.free);
+    
+    const guestRateLimit = { windowMs: 60 * 1000, maxRequests: 3 };
+    const rateLimitConfig = userId ? RATE_LIMITS.free : guestRateLimit;
+    const rateLimitResult = rateLimit(identifier, rateLimitConfig);
     
     if (!rateLimitResult.success) {
       return new Response(
         JSON.stringify({ 
-          error: "Too many requests. Please try again later.",
+          error: userId 
+            ? "Too many requests. Please try again later."
+            : "Free trial limit reached. Sign up for more.",
           retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000)
         }),
         {
@@ -89,48 +97,70 @@ export async function POST(req: NextRequest) {
         }
       );
     }
+  } catch (rateLimitError) {
+    logger.warn("Rate limiting failed in summarize stream", {
+      error: rateLimitError instanceof Error ? rateLimitError.message : String(rateLimitError),
+    });
+  }
 
-    const { content, provider = "deepseek", language = "multilingual" } = await req.json();
-
-    if (!content) {
-      return new Response(
-        JSON.stringify({ error: "Content is required" }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-    }
-
-    // Truncate content if too long
-    const maxLength = 15000;
-    const truncatedContent = content.length > maxLength 
-      ? content.substring(0, maxLength) + "..."
-      : content;
-
-    // Try providers in fallback order, starting with requested provider
-    const startIndex = FALLBACK_CHAIN.findIndex(p => p.provider === provider);
-    const orderedProviders = startIndex >= 0 
-      ? [...FALLBACK_CHAIN.slice(startIndex), ...FALLBACK_CHAIN.slice(0, startIndex)]
-      : FALLBACK_CHAIN;
-
-    for (const { provider: p, model } of orderedProviders) {
-      try {
-        return await tryStreamWithProvider(p, model, truncatedContent, language, rateLimitResult);
-      } catch (err) {
-        logger.warn(`Stream provider ${p} failed, trying next`, { 
-          error: err instanceof Error ? err.message : String(err) 
-        });
-      }
-    }
-
-    // All providers failed
+  // ==================== Parse Request Body ====================
+  let body: { content?: string; provider?: string; language?: string };
+  try {
+    body = await req.json();
+  } catch (parseError) {
     return new Response(
-      JSON.stringify({ error: "AI service unavailable. Please try again later." }),
-      { status: 503, headers: { "Content-Type": "application/json" } }
-    );
-  } catch (error) {
-    logger.error("Stream error:", error instanceof Error ? error : new Error(String(error)));
-    return new Response(
-      JSON.stringify({ error: "Failed to generate summary" }),
-      { status: 500, headers: { "Content-Type": "application/json" } }
+      JSON.stringify({ error: "Invalid request body. Please provide document content." }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
     );
   }
+
+  const { content, provider = "deepseek", language = "multilingual" } = body;
+
+  if (!content || typeof content !== "string") {
+    return new Response(
+      JSON.stringify({ error: "Document content is required and must be a string." }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  if (content.trim().length === 0) {
+    return new Response(
+      JSON.stringify({ error: "Document content is empty." }),
+      { status: 400, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // Truncate content if too long
+  const maxLength = 15000;
+  const truncatedContent = content.length > maxLength 
+    ? content.substring(0, maxLength) + "\n\n[Content truncated...]"
+    : content;
+
+  // Try providers in fallback order
+  const startIndex = FALLBACK_CHAIN.findIndex(p => p.provider === provider);
+  const orderedProviders = startIndex >= 0 
+    ? [...FALLBACK_CHAIN.slice(startIndex), ...FALLBACK_CHAIN.slice(0, startIndex)]
+    : FALLBACK_CHAIN;
+
+  const errors: string[] = [];
+
+  for (const { provider: p, model } of orderedProviders) {
+    try {
+      return await tryStreamWithProvider(p, model, truncatedContent, language);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      errors.push(`${p}: ${errMsg}`);
+      logger.warn(`Stream provider ${p} failed, trying next`, { error: errMsg });
+    }
+  }
+
+  logger.error("All AI providers failed", undefined, { errors });
+
+  return new Response(
+    JSON.stringify({ 
+      error: "AI service is temporarily unavailable. Please try again in a moment.",
+      details: process.env.NODE_ENV === "development" ? errors : undefined,
+    }),
+    { status: 503, headers: { "Content-Type": "application/json" } }
+  );
 }

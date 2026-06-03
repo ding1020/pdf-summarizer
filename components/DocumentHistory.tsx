@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, memo } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import ReactMarkdown from "react-markdown";
 
 interface Document {
@@ -18,6 +19,7 @@ interface DocumentItemProps {
   doc: Document;
   isSelected: boolean;
   isDeleting: boolean;
+  locale: string;
   onSelect: (doc: Document) => void;
   onDelete: (id: string) => void;
 }
@@ -26,6 +28,7 @@ const DocumentItem = memo(function DocumentItem({
   doc,
   isSelected,
   isDeleting,
+  locale,
   onSelect,
   onDelete,
 }: DocumentItemProps) {
@@ -47,7 +50,7 @@ const DocumentItem = memo(function DocumentItem({
             {doc.pageCount} pages • {formatFileSize(doc.fileSize)}
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            {formatDate(doc.createdAt)}
+            {formatDate(doc.createdAt, locale)}
           </p>
         </div>
         <div className="flex items-center gap-2 ml-2">
@@ -91,8 +94,8 @@ function formatFileSize(bytes: number): string {
   return (bytes / (1024 * 1024)).toFixed(1) + " MB";
 }
 
-function formatDate(dateString: string): string {
-  return new Date(dateString).toLocaleDateString("en-US", {
+function formatDate(dateString: string, locale: string): string {
+  return new Date(dateString).toLocaleDateString(locale, {
     year: "numeric",
     month: "short",
     day: "numeric",
@@ -102,6 +105,8 @@ function formatDate(dateString: string): string {
 }
 
 export default function DocumentHistory() {
+  const t = useTranslations("documents");
+  const locale = useLocale();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
@@ -127,7 +132,7 @@ export default function DocumentHistory() {
   }, [fetchDocuments]);
 
   const handleDelete = useCallback(async (id: string) => {
-    if (!confirm("Are you sure you want to delete this document?")) return;
+    if (!confirm(t("confirmDelete"))) return;
 
     setDeleting(id);
     try {
@@ -157,14 +162,14 @@ export default function DocumentHistory() {
   if (documents.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
-        <p>No documents yet. Upload your first PDF above!</p>
+        <p>{t("noDocuments")}</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-4">
-      <h2 className="text-xl font-semibold">Document History</h2>
+      <h2 className="text-xl font-semibold">{t("historyTitle")}</h2>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Document List */}
@@ -175,6 +180,7 @@ export default function DocumentHistory() {
               doc={doc}
               isSelected={selectedDoc?.id === doc.id}
               isDeleting={deleting === doc.id}
+              locale={locale}
               onSelect={setSelectedDoc}
               onDelete={handleDelete}
             />
@@ -193,13 +199,13 @@ export default function DocumentHistory() {
               ) : (
                 <p className="text-gray-500 italic">
                   {selectedDoc.status === "processing"
-                    ? "Generating summary..."
-                    : "No summary available"}
+                    ? t("generatingSummary")
+                    : t("noSummaryAvailable")}
                 </p>
               )}
             </div>
           ) : (
-            <p className="text-gray-500 text-center">Select a document to view summary</p>
+            <p className="text-gray-500 text-center">{t("selectToView")}</p>
           )}
         </div>
       </div>
