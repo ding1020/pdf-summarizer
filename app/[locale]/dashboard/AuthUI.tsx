@@ -29,7 +29,7 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
       setClerkTimedOut(false);
       return;
     }
-    const timer = setTimeout(() => setClerkTimedOut(true), 6000);
+    const timer = setTimeout(() => setClerkTimedOut(true), 3000);
     return () => clearTimeout(timer);
   }, [isUserLoaded]);
 

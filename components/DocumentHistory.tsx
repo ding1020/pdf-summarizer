@@ -149,7 +149,7 @@ export default function DocumentHistory() {
     } finally {
       setDeleting(null);
     }
-  }, []);
+  }, [t]);
 
   if (loading) {
     return (

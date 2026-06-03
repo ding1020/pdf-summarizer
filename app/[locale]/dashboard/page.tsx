@@ -1,7 +1,18 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
 import FileUploadWrapper from "./FileUploadWrapper";
 import AuthDependentUI from "./AuthUI";
+
+// ── Auth UI Skeleton (shown while Clerk loads) ──
+function AuthUISkeleton() {
+  return (
+    <div className="flex items-center gap-3">
+      <div className="h-10 bg-gray-100 animate-pulse rounded-lg w-32" />
+      <div className="h-10 bg-gray-100 animate-pulse rounded-lg w-24" />
+    </div>
+  );
+}
 
 // Server Component: always renders. Client components handle auth state internally.
 export default async function DashboardPage() {
@@ -20,8 +31,10 @@ export default async function DashboardPage() {
               </h1>
               <p className="text-gray-600 mt-1">{ct("guest.welcomeDesc")}</p>
             </div>
-            {/* Auth-dependent UI: shows user info or sign-up buttons */}
-            <AuthDependentUI refreshKey={0} />
+            {/* Auth-dependent UI wrapped in Suspense for graceful loading */}
+            <Suspense fallback={<AuthUISkeleton />}>
+              <AuthDependentUI refreshKey={0} />
+            </Suspense>
           </div>
         </div>
       </div>

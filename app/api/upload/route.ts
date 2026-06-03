@@ -34,12 +34,10 @@ export async function POST(req: NextRequest) {
     const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
       || req.headers.get("x-real-ip")
       || "anonymous";
-    const guestRateLimit = { windowMs: 60 * 1000, maxRequests: 3 };
-    
     const identifier = isGuest
       ? getClientIdentifier(null, clientIp)
       : getClientIdentifier(clerkId, clientIp);
-    const rateLimitConfig = isGuest ? guestRateLimit : RATE_LIMITS.free;
+    const rateLimitConfig = isGuest ? RATE_LIMITS.guest : RATE_LIMITS.free;
     const rateLimitResult = rateLimit(identifier, rateLimitConfig);
     
     if (!rateLimitResult.success) {

@@ -2,7 +2,56 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
+import { useUser, UserButton } from "@clerk/nextjs";
+import { Suspense, memo } from "react";
 
+// ── Auth-aware buttons (isolated to avoid blocking navigation) ──
+const AuthButtons = memo(function AuthButtons() {
+  const t = useTranslations();
+  const { isLoaded, isSignedIn } = useUser();
+
+  if (!isLoaded) {
+    return (
+      <div className="flex items-center gap-4">
+        <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
+        <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
+      </div>
+    );
+  }
+
+  if (!isSignedIn) {
+    return (
+      <div className="flex items-center gap-4">
+        <Link
+          href="/sign-in"
+          className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+        >
+          {t("common.signIn")}
+        </Link>
+        <Link
+          href="/sign-up"
+          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          {t("common.signUp")}
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-4">
+      <Link
+        href="/dashboard"
+        className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        {t("nav.dashboard")}
+      </Link>
+      <UserButton />
+    </div>
+  );
+});
+
+// ── Main Navigation ──
 export default function Navigation() {
   const t = useTranslations();
   const pathname = usePathname();
@@ -59,21 +108,10 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Auth Buttons — always show public links on main pages */}
-          <div className="flex items-center gap-4">
-            <Link
-              href="/sign-in"
-              className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-            >
-              {t("common.signIn")}
-            </Link>
-            <Link
-              href="/sign-up"
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-            >
-              {t("common.signUp")}
-            </Link>
-          </div>
+          {/* Auth Buttons — gracefully degrades if Clerk unavailable */}
+          <Suspense fallback={<div className="h-9 w-40 bg-gray-100 animate-pulse rounded-lg" />}>
+            <AuthButtons />
+          </Suspense>
         </div>
       </div>
     </nav>
