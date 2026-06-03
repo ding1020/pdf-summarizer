@@ -46,7 +46,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       return t("onlyPdfError");
     }
     return null;
-  }, []);
+  }, [t]);
 
   // Wrap generateSummary in useCallback to prevent recreation on each render
   const generateSummary = useCallback(async (documentId: string, content: string) => {
@@ -128,7 +128,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         setIsSummarizing(false);
       }
     }
-  }, []);
+  }, [t]);
 
   // Cancel function exposed via ref for parent components
   const cancelSummary = useCallback(() => {
@@ -187,7 +187,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         setIsUploading(false);
       }
     },
-    [onUploadComplete, validateFile, generateSummary]
+    [onUploadComplete, validateFile, generateSummary, t]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

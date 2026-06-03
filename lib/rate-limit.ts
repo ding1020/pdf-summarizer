@@ -1,8 +1,16 @@
 /**
  * Rate Limiting Utility
- * Simple in-memory rate limiter for API routes
+ * In-memory rate limiter with LRU eviction for serverless environments.
+ *
+ * ⚠️  PRODUCTION NOTE: In-memory store resets on cold starts and is not
+ * shared across Vercel instances. For production workloads, migrate to
+ * @vercel/kv or Upstash Redis:
+ *   import { Ratelimit } from "@upstash/ratelimit";
+ *   import { Redis } from "@upstash/redis";
+ *   const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), limiter: ... });
  */
 
+// ── Types ──
 interface RateLimitEntry {
   count: number;
   resetTime: number;
@@ -13,99 +21,87 @@ export interface RateLimitConfig {
   maxRequests: number;   // Max requests per window
 }
 
-// In-memory store (resets on server restart - suitable for serverless)
+// ── Store with capacity limit (prevents memory leaks) ──
+const MAX_STORE_SIZE = 5000;
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Track cleanup interval ID for cleanup
+// Periodic cleanup for non-serverless environments
 let cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
 
-function getCleanupInterval() {
-  // Return existing interval or create new one
-  if (cleanupIntervalId === null) {
-    // Only start cleanup in non-serverless environments (Node.js runtime)
-    if (typeof globalThis !== 'undefined' && !process.env.VERCEL) {
-      cleanupIntervalId = setInterval(() => {
-        const now = Date.now();
-        for (const [key, entry] of rateLimitStore.entries()) {
-          if (entry.resetTime < now) {
-            rateLimitStore.delete(key);
-          }
+function ensureCleanup() {
+  if (cleanupIntervalId === null && typeof globalThis !== 'undefined' && !process.env.VERCEL) {
+    cleanupIntervalId = setInterval(() => {
+      const now = Date.now();
+      for (const [key, entry] of rateLimitStore.entries()) {
+        if (entry.resetTime < now) {
+          rateLimitStore.delete(key);
         }
-      }, 60000);
-    }
+      }
+    }, 60000);
   }
-  return cleanupIntervalId;
 }
 
-// Initialize cleanup on module load (will be a no-op in serverless)
+// Initialize cleanup on module load
 if (typeof globalThis !== 'undefined') {
-  getCleanupInterval();
+  ensureCleanup();
 }
 
-export function rateLimit(identifier: string, config: RateLimitConfig): { 
-  success: boolean; 
-  remaining: number;
-  resetTime: number;
-} {
+// ── Core rate limiter ──
+export function rateLimit(
+  identifier: string,
+  config: RateLimitConfig,
+): { success: boolean; remaining: number; resetTime: number } {
   const now = Date.now();
-  const key = `ratelimit:${identifier}`;
-  
+  const key = `rl:${identifier}`;
+
   let entry = rateLimitStore.get(key);
-  
-  // Initialize or reset if window expired
+
+  // Reset if window expired
   if (!entry || entry.resetTime < now) {
-    entry = {
-      count: 0,
-      resetTime: now + config.windowMs,
-    };
+    entry = { count: 0, resetTime: now + config.windowMs };
   }
-  
+
   entry.count++;
   rateLimitStore.set(key, entry);
-  
+
+  // LRU eviction — if store grows too large, remove oldest entries
+  if (rateLimitStore.size > MAX_STORE_SIZE) {
+    const keysToDelete = Math.floor(MAX_STORE_SIZE * 0.2); // evict 20%
+    const entries = Array.from(rateLimitStore.entries())
+      .sort((a, b) => a[1].resetTime - b[1].resetTime)
+      .slice(0, keysToDelete);
+
+    for (const [k] of entries) {
+      rateLimitStore.delete(k);
+    }
+  }
+
   const remaining = Math.max(0, config.maxRequests - entry.count);
   const success = entry.count <= config.maxRequests;
-  
-  return {
-    success,
-    remaining,
-    resetTime: entry.resetTime,
-  };
+
+  return { success, remaining, resetTime: entry.resetTime };
 }
 
-// Predefined rate limit configurations
+// ── Predefined rate limit tiers ──
 export const RATE_LIMITS = {
-  // Stricter for free users: 20 requests per minute
-  free: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 20,
-  },
-  // More generous for pro users: 60 requests per minute
-  pro: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 60,
-  },
-  // Very strict for auth endpoints: 10 per minute
-  auth: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 10,
-  },
-  // Checkout: 5 per minute
-  checkout: {
-    windowMs: 60 * 1000, // 1 minute
-    maxRequests: 5,
-  },
+  /** Free registered users: 20 req/min */
+  free: { windowMs: 60_000, maxRequests: 20 } as RateLimitConfig,
+  /** Pro subscribers: 60 req/min */
+  pro: { windowMs: 60_000, maxRequests: 60 } as RateLimitConfig,
+  /** Auth endpoints: 10 req/min */
+  auth: { windowMs: 60_000, maxRequests: 10 } as RateLimitConfig,
+  /** Checkout: 5 req/min */
+  checkout: { windowMs: 60_000, maxRequests: 5 } as RateLimitConfig,
+  /** Guest users: 3 req/min */
+  guest: { windowMs: 60_000, maxRequests: 3 } as RateLimitConfig,
 };
 
-// Helper to get client identifier (IP + userId if available)
+// ── Helpers ──
 export function getClientIdentifier(userId?: string | null, ip?: string): string {
-  if (userId) {
-    return `user:${userId}`;
-  }
+  if (userId) return `user:${userId}`;
   return `ip:${ip || 'anonymous'}`;
 }
 
-// HTTP headers for rate limit response
 export function getRateLimitHeaders(result: { remaining: number; resetTime: number }) {
   return {
     'X-RateLimit-Remaining': result.remaining.toString(),

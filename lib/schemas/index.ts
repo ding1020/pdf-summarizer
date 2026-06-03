@@ -15,10 +15,15 @@ export const uploadSchema = z.object({
 export type UploadInput = z.infer<typeof uploadSchema>;
 
 // Summarize validation schema
+// documentId accepts: UUIDs (registered users) or guest_* format (anonymous users)
 export const summarizeSchema = z.object({
   documentId: z
     .string()
-    .uuid({ message: 'Invalid document ID' }),
+    .min(1, { message: 'Document ID is required' })
+    .refine(
+      (val) => /^[a-f0-9-]{36}$/.test(val) || /^guest_\d+_[a-z0-9]+$/.test(val),
+      { message: 'Invalid document ID format' },
+    ),
   content: z
     .string()
     .min(1, { message: 'Content is required' })

@@ -28,12 +28,13 @@ const providerConfigs: Record<string, AIConfig> = {
 
 export function getAIProvider(provider: AIProvider) {
   const config = providerConfigs[provider];
-  
-  const apiKey = config.provider === "deepseek" 
-    ? process.env.DEEPSEEK_API_KEY
-    : config.provider === "groq"
-    ? process.env.GROQ_API_KEY
-    : process.env.SILICONFLOW_API_KEY;
+
+  const apiKey =
+    config.provider === "deepseek"
+      ? process.env.DEEPSEEK_API_KEY
+      : config.provider === "groq"
+        ? process.env.GROQ_API_KEY
+        : process.env.SILICONFLOW_API_KEY;
 
   if (!apiKey) {
     throw new Error(`API key not configured for ${config.provider}`);
@@ -102,6 +103,60 @@ Requirements:
 5. Use Markdown formatting`,
 };
 
-export function getSystemPrompt(language: "zh" | "en" | "multilingual" | "technical" | "business" = "multilingual") {
+export function getSystemPrompt(
+  language: "zh" | "en" | "multilingual" | "technical" | "business" = "multilingual",
+) {
   return SYSTEM_PROMPTS[language];
+}
+
+// ── Token & Cost Tracking ──
+
+/** Estimated cost per 1M tokens (USD) for each provider */
+const PROVIDER_COST_PER_1M: Record<AIProvider, { input: number; output: number }> = {
+  deepseek: { input: 0.14, output: 0.28 },
+  groq: { input: 0.0, output: 0.0 },       // Groq has free tier
+  siliconflow: { input: 0.0, output: 0.0 }, // SiliconFlow has free tier
+};
+
+export interface TokenUsage {
+  inputTokens: number;
+  outputTokens: number;
+  totalTokens: number;
+  costUSD: number;
+  provider: AIProvider;
+  model: string;
+}
+
+/** Rough token estimation: ~4 chars ≈ 1 token for English/Chinese */
+export function estimateTokens(text: string): number {
+  // Chinese chars ≈ 1.5 tokens each, English ≈ 0.25 tokens per char
+  const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
+  const otherChars = text.length - chineseChars;
+  return Math.ceil(chineseChars * 1.5 + otherChars * 0.25);
+}
+
+export function calculateCost(
+  provider: AIProvider,
+  inputTokens: number,
+  outputTokens: number,
+): number {
+  const rates = PROVIDER_COST_PER_1M[provider];
+  if (!rates) return 0;
+  return (inputTokens * rates.input + outputTokens * rates.output) / 1_000_000;
+}
+
+export function createUsageRecord(
+  provider: AIProvider,
+  model: string,
+  inputTokens: number,
+  outputTokens: number,
+): TokenUsage {
+  return {
+    inputTokens,
+    outputTokens,
+    totalTokens: inputTokens + outputTokens,
+    costUSD: calculateCost(provider, inputTokens, outputTokens),
+    provider,
+    model,
+  };
 }

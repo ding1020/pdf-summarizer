@@ -4,6 +4,24 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "regions": ["iad1"],
+  "functions": {
+    "app/api/upload/route.ts": {
+      "memory": 512,
+      "maxDuration": 30
+    },
+    "app/api/summarize/stream/route.ts": {
+      "memory": 512,
+      "maxDuration": 60
+    },
+    "app/api/summarize/route.ts": {
+      "memory": 512,
+      "maxDuration": 60
+    },
+    "app/api/webhooks/**/*.ts": {
+      "memory": 256,
+      "maxDuration": 15
+    }
+  },
   "headers": [
     {
       "source": "/(.*)",
@@ -23,6 +41,31 @@
         {
           "key": "Referrer-Policy",
           "value": "strict-origin-when-cross-origin"
+        },
+        {
+          "key": "Strict-Transport-Security",
+          "value": "max-age=63072000; includeSubDomains; preload"
+        },
+        {
+          "key": "Permissions-Policy",
+          "value": "camera=(), microphone=(), geolocation=()"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Access-Control-Allow-Origin",
+          "value": "https://www.pdfsum.com"
+        },
+        {
+          "key": "Access-Control-Allow-Methods",
+          "value": "GET, POST, OPTIONS"
+        },
+        {
+          "key": "Access-Control-Allow-Headers",
+          "value": "Content-Type, Authorization"
         }
       ]
     }
