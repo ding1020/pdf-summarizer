@@ -130,6 +130,17 @@
       "secureDesc": "Tus documentos están cifrados y se eliminan automáticamente después del procesamiento."
     }
   },
+  "documents": {
+    "historyTitle": "Historial de Documentos",
+    "confirmDelete": "¿Está seguro de que desea eliminar este documento?",
+    "noDocuments": "Aún no hay documentos. ¡Sube tu primer PDF!",
+    "selectToView": "Selecciona un documento para ver el resumen",
+    "generatingSummary": "Generando resumen...",
+    "noSummaryAvailable": "Resumen no disponible",
+    "fetchError": "Error al cargar documentos. Inténtelo de nuevo.",
+    "deleteError": "Error al eliminar el documento. Inténtelo de nuevo.",
+    "retry": "Reintentar"
+  },
   "upload": {
     "dragDrop": "Haz clic o arrastra el archivo PDF aquí",
     "maxSize": "Tamaño máximo: 20MB",
@@ -143,7 +154,8 @@
     "generating": "Generando...",
     "analyzing": "Analizando documento...",
     "analyzingDesc": "Esto puede tomar unos segundos",
-    "summaryHere": "El resumen aparecerá aquí"
+    "summaryHere": "El resumen aparecerá aquí",
+    "cancel": "Cancelar"
   },
   "footer": {
     "privacy": "Privacidad",
@@ -155,5 +167,12 @@
     "homeDesc": "Sube tu PDF y obtén resúmenes generados por IA al instante. Ahorra tiempo y extrae información clave de cualquier documento.",
     "pricingTitle": "Precios - PDF Resumen AI",
     "pricingDesc": "Precios simples y transparentes. Comienza gratis con 5 resúmenes por día, o actualiza a Pro para acceso ilimitado."
+  },
+  "cookies": {
+    "title": "Este sitio usa cookies",
+    "description": "Usamos cookies para autenticación, análisis y para mejorar tu experiencia.",
+    "learnMore": "Más información",
+    "essentialOnly": "Solo esenciales",
+    "acceptAll": "Aceptar todas"
   }
 }

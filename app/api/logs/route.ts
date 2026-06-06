@@ -82,12 +82,22 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// Timing-safe string comparison
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
+}
+
 // Endpoint to retrieve recent logs (for debugging/admin)
 export async function GET(req: NextRequest) {
-  const authHeader = req.headers.get("authorization");
+  const authHeader = req.headers.get("authorization") || "";
+  const expected = `Bearer ${process.env.LOG_API_KEY || ""}`;
   
-  // Simple authentication - replace with proper auth in production
-  if (authHeader !== `Bearer ${process.env.LOG_API_KEY}`) {
+  if (!timingSafeEqual(authHeader, expected)) {
     return NextResponse.json(
       { error: "Unauthorized" },
       { status: 401 }

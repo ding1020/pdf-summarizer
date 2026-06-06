@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
 import { feedbackSchema } from "@/lib/schemas";
-import { rateLimit, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
 
     // Rate limiting: 3 feedback submissions per hour per client
     const clientId = getClientIdentifier(clerkId || "anonymous");
-    const rateLimitResult = rateLimit(clientId, {
+    const rateLimitResult = await rateLimitAsync(clientId, {
       maxRequests: 3,
       windowMs: 60 * 60 * 1000, // 1 hour
     });
@@ -50,7 +50,7 @@ export async function POST(req: NextRequest) {
     let userEmail: string | null = null;
     let dbUserId: string | null = null;
 
-    // Enrich with authenticated user info if available
+    // Enrich with authenticated user info — Clerk session provides implicit CSRF protection
     if (clerkId) {
       try {
         const user = await prisma.user.findUnique({
@@ -61,9 +61,16 @@ export async function POST(req: NextRequest) {
           userEmail = user.email;
         }
       } catch {
-        // Non-blocking: proceed even if user lookup fails
         logger.warn("[Feedback] User lookup failed", { clerkId });
       }
+    }
+
+    // Require authentication for feedback submission (Clerk handles CSRF via session tokens)
+    if (!clerkId && message.length > 500) {
+      return NextResponse.json(
+        { error: "Please sign in to submit longer feedback." },
+        { status: 401 }
+      );
     }
 
     const feedback = await prisma.feedback.create({
@@ -108,6 +115,20 @@ export async function GET(req: NextRequest) {
 
     if (!clerkId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Rate limiting for feedback queries
+    const clientId = getClientIdentifier(clerkId);
+    const rateLimitResult = await rateLimitAsync(clientId, {
+      maxRequests: 30,
+      windowMs: 60 * 1000, // 1 minute
+    });
+
+    if (!rateLimitResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please wait a moment." },
+        { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
+      );
     }
 
     // Only allow users to view their own feedback

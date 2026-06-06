@@ -187,7 +187,10 @@
     "noDocuments": "No documents yet. Upload your first PDF above!",
     "selectToView": "Select a document to view summary",
     "generatingSummary": "Generating summary...",
-    "noSummaryAvailable": "No summary available"
+    "noSummaryAvailable": "No summary available",
+    "fetchError": "Failed to load documents. Please try again.",
+    "deleteError": "Failed to delete document. Please try again.",
+    "retry": "Retry"
   },
   "upload": {
     "dragDrop": "Click or drag PDF file here",
@@ -207,6 +210,8 @@
     "uploadFailed": "Upload failed",
     "summarizeFailed": "Failed to generate summary",
     "streamFailed": "Failed to read stream",
+    "cancel": "Cancel",
+    "needHelp": "Need help with PDF upload?",
     "errorTitle": "Error"
   },
   "footer": {
@@ -239,6 +244,10 @@
   "error": {
     "title": "Something went wrong",
     "description": "An unexpected error occurred. Please try again.",
+    "boundaryDescription": "We encountered an unexpected error. This has been reported and we'll fix it as soon as possible.",
+    "errorDetails": "Error Details (Development Only)",
+    "contactSupport": "contact support",
+    "ifKeepsHappening": "If this keeps happening, please ",
     "tryAgain": "Try Again",
     "goHome": "Go Home"
   },
@@ -450,5 +459,12 @@
     "homeDesc": "Upload your PDF and get AI-powered summaries instantly. Save time and extract key insights from any document.",
     "pricingTitle": "Pricing - PDF Summary AI",
     "pricingDesc": "Simple, transparent pricing. Start free with 5 summaries per day, or upgrade to Pro for unlimited access."
+  },
+  "cookies": {
+    "title": "This site uses cookies",
+    "description": "We use cookies for authentication, analytics, and to improve your experience.",
+    "learnMore": "Learn more",
+    "essentialOnly": "Essential Only",
+    "acceptAll": "Accept All"
   }
 }

@@ -1,17 +1,24 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 
 const COOKIE_CONSENT_KEY = "pdfsum_cookie_consent";
 
 export default function CookieConsent() {
+  const t = useTranslations("cookies");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    // Respect Do Not Track (DNT) header — auto-accept essential-only
+    const dnt = navigator.doNotTrack === "1" || (window as any).doNotTrack === "1";
     const consented = localStorage.getItem(COOKIE_CONSENT_KEY);
+    if (dnt && !consented) {
+      localStorage.setItem(COOKIE_CONSENT_KEY, "essential");
+      return;
+    }
     if (!consented) {
-      // Small delay so it doesn't flash on first paint
       const timer = setTimeout(() => setVisible(true), 800);
       return () => clearTimeout(timer);
     }
@@ -42,11 +49,11 @@ export default function CookieConsent() {
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">This site uses cookies</p>
+                <p className="text-sm font-medium text-gray-900">{t("title")}</p>
                 <p className="text-xs text-gray-500 mt-0.5 max-w-xl">
-                  We use cookies for authentication, analytics, and to improve your experience.{" "}
+                  {t("description")}{" "}
                   <Link href="/cookies" className="text-blue-600 hover:underline">
-                    Learn more
+                    {t("learnMore")}
                   </Link>
                 </p>
               </div>
@@ -58,13 +65,13 @@ export default function CookieConsent() {
                 onClick={acceptEssential}
                 className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
               >
-                Essential Only
+                {t("essentialOnly")}
               </button>
               <button
                 onClick={acceptAll}
                 className="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Accept All
+                {t("acceptAll")}
               </button>
             </div>
           </div>

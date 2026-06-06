@@ -130,6 +130,17 @@
       "secureDesc": "Vos documents sont chiffrés et automatiquement supprimés après le traitement."
     }
   },
+  "documents": {
+    "historyTitle": "Historique des Documents",
+    "confirmDelete": "Êtes-vous sûr de vouloir supprimer ce document ?",
+    "noDocuments": "Aucun document pour le moment. Téléchargez votre premier PDF !",
+    "selectToView": "Sélectionnez un document pour voir le résumé",
+    "generatingSummary": "Génération du résumé...",
+    "noSummaryAvailable": "Aucun résumé disponible",
+    "fetchError": "Échec du chargement des documents. Veuillez réessayer.",
+    "deleteError": "Échec de la suppression du document. Veuillez réessayer.",
+    "retry": "Réessayer"
+  },
   "upload": {
     "dragDrop": "Cliquez ou glissez le fichier PDF ici",
     "maxSize": "Taille maximale: 20 Mo",
@@ -143,7 +154,8 @@
     "generating": "Génération...",
     "analyzing": "Analyse du document...",
     "analyzingDesc": "Cela peut prendre quelques secondes",
-    "summaryHere": "Le résumé apparaîtra ici"
+    "summaryHere": "Le résumé apparaîtra ici",
+    "cancel": "Annuler"
   },
   "footer": {
     "privacy": "Confidentialité",
@@ -155,5 +167,12 @@
     "homeDesc": "Téléchargez votre PDF et obtenez des résumés générés par IA instantanément. Gagnez du temps et extrayez les informations clés de tout document.",
     "pricingTitle": "Tarifs - PDF Résumé IA",
     "pricingDesc": "Tarification simple et transparente. Commencez gratuitement avec 5 résumés par jour, ou passez à Pro pour un accès illimité."
+  },
+  "cookies": {
+    "title": "Ce site utilise des cookies",
+    "description": "Nous utilisons des cookies pour l'authentification, l'analyse et pour améliorer votre expérience.",
+    "learnMore": "En savoir plus",
+    "essentialOnly": "Essentiels uniquement",
+    "acceptAll": "Tout accepter"
   }
 }

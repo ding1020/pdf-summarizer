@@ -6,6 +6,15 @@ import { Link } from "@/navigation";
 interface Props {
   children: ReactNode;
   fallback?: ReactNode;
+  messages?: {
+    title: string;
+    description: string;
+    tryAgain: string;
+    goHome: string;
+    errorDetails: string;
+    contactSupport: string;
+    ifKeepsHappening: string;
+  };
 }
 
 interface State {
@@ -32,13 +41,13 @@ export default class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    // Log error to console for debugging
-    console.error("ErrorBoundary caught an error:", error, errorInfo);
-    
-    // In production, this would also send to Sentry
-    if (process.env.NODE_ENV === "production") {
-      this.logErrorToService(error, errorInfo);
+    // Log error to console for debugging (dev only)
+    if (process.env.NODE_ENV === "development") {
+      console.error("ErrorBoundary caught an error:", error, errorInfo);
     }
+    
+    // In production, send structured error to logging service
+    this.logErrorToService(error, errorInfo);
     
     this.setState({
       error,
@@ -55,8 +64,10 @@ export default class ErrorBoundary extends Component<Props, State> {
       componentStack: errorInfo.componentStack,
     };
     
-    // Log to console in a structured format that Sentry can pick up
-    console.error("Unhandled error:", JSON.stringify(errorData, null, 2));
+    // Log structured error — Sentry picks this up automatically in production
+    if (process.env.NODE_ENV === "development") {
+      console.error("Unhandled error:", JSON.stringify(errorData, null, 2));
+    }
   }
 
   handleReload = () => {
@@ -75,6 +86,16 @@ export default class ErrorBoundary extends Component<Props, State> {
         return this.props.fallback;
       }
 
+      const msg = this.props.messages || {
+        title: "Something went wrong",
+        description: "We encountered an unexpected error. This has been reported and we'll fix it as soon as possible.",
+        tryAgain: "Try Again",
+        goHome: "Go Home",
+        errorDetails: "Error Details (Development Only)",
+        contactSupport: "contact support",
+        ifKeepsHappening: "If this keeps happening, please ",
+      };
+
       return (
         <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
           <div className="max-w-md w-full bg-white rounded-2xl shadow-lg p-8 text-center">
@@ -85,6 +106,7 @@ export default class ErrorBoundary extends Component<Props, State> {
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
+                aria-hidden="true"
               >
                 <path
                   strokeLinecap="round"
@@ -97,20 +119,19 @@ export default class ErrorBoundary extends Component<Props, State> {
 
             {/* Error Title */}
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
-              Something went wrong
+              {msg.title}
             </h1>
 
             {/* Error Message */}
             <p className="text-gray-600 mb-6">
-              We encountered an unexpected error. This has been reported and we&apos;ll
-              fix it as soon as possible.
+              {msg.description}
             </p>
 
             {/* Technical Details (only in development) */}
             {process.env.NODE_ENV === "development" && this.state.error && (
               <details className="text-left mb-6 p-4 bg-gray-100 rounded-lg text-sm">
                 <summary className="font-medium cursor-pointer text-gray-700 mb-2">
-                  Error Details (Development Only)
+                  {msg.errorDetails}
                 </summary>
                 <pre className="overflow-x-auto text-red-600 whitespace-pre-wrap">
                   {this.state.error.message}
@@ -126,24 +147,24 @@ export default class ErrorBoundary extends Component<Props, State> {
                 onClick={this.handleReload}
                 className="flex-1 px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                Try Again
+                {msg.tryAgain}
               </button>
               <Link
                 href="/"
                 className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-center"
               >
-                Go Home
+                {msg.goHome}
               </Link>
             </div>
 
             {/* Support Link */}
             <p className="text-sm text-gray-500 mt-6">
-              If this keeps happening, please{" "}
+              {msg.ifKeepsHappening}
               <a
                 href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pdfsum.com'}`}
                 className="text-blue-600 hover:underline"
               >
-                contact support
+                {msg.contactSupport}
               </a>
             </p>
           </div>

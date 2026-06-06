@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
-import { getAIProvider, getSystemPrompt, type AIProvider } from "@/lib/ai";
-import { rateLimit, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { getAIProvider, getSystemPrompt, getModelForProvider, type AIProvider } from "@/lib/ai";
+import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
+import { summarizeSchema } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function POST(req: NextRequest) {
     const identifier = getClientIdentifier(userId, clientIp);
     const guestRateLimit = { windowMs: 60 * 1000, maxRequests: 3 };
     const usageRateConfig = isGuest ? guestRateLimit : { windowMs: 60 * 1000, maxRequests: 20 };
-    const rateLimitResult = rateLimit(identifier, usageRateConfig);
+    const rateLimitResult = await rateLimitAsync(identifier, usageRateConfig);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -32,14 +33,18 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { documentId, content, provider = "deepseek", language = "multilingual" } = await req.json();
+    // ==================== Input Validation (Zod) ====================
+    const body = await req.json();
+    const parsed = summarizeSchema.safeParse(body);
 
-    if (!content) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Content is required" },
+        { error: "Invalid request", details: parsed.error.flatten().fieldErrors },
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
+
+    const { documentId, content, provider = "deepseek", language = "multilingual" } = parsed.data;
 
     const maxLength = 15000;
     const truncatedContent = content.length > maxLength 
@@ -51,9 +56,9 @@ export async function POST(req: NextRequest) {
 
     try {
       const openai = getAIProvider(provider as AIProvider);
+      const model = getModelForProvider(provider);
       const completion = await openai.chat.completions.create({
-        model: openai.baseURL?.includes("groq") ? "llama-3.3-70b-versatile" : 
-               openai.baseURL?.includes("siliconflow") ? "Qwen/Qwen2.5-7B-Instruct" : "deepseek-chat",
+        model,
         messages: [
           { role: "system", content: getSystemPrompt(language) },
           { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
@@ -68,8 +73,9 @@ export async function POST(req: NextRequest) {
       
       try {
         const openai = getAIProvider("groq");
+        const model = getModelForProvider("groq");
         const completion = await openai.chat.completions.create({
-          model: "llama-3.3-70b-versatile",
+          model,
           messages: [
             { role: "system", content: getSystemPrompt(language) },
             { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
@@ -83,8 +89,9 @@ export async function POST(req: NextRequest) {
         logger.error("Groq also failed:", groqError instanceof Error ? groqError : new Error(String(groqError)));
         
         const openai = getAIProvider("siliconflow");
+        const model = getModelForProvider("siliconflow");
         const completion = await openai.chat.completions.create({
-          model: "Qwen/Qwen2.5-7B-Instruct",
+          model,
           messages: [
             { role: "system", content: getSystemPrompt(language) },
             { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },

@@ -46,6 +46,14 @@ export function getAIProvider(provider: AIProvider) {
   });
 }
 
+/** 集中式模型名解析 — 单一来源，所有路由统一使用 */
+export function getModelForProvider(provider: AIProvider | string): string {
+  const config = providerConfigs[provider as AIProvider];
+  if (config) return config.model;
+  // Fallback: recognize legacy provider strings
+  return providerConfigs.deepseek.model;
+}
+
 export function getAllProviders(): AIConfig[] {
   return Object.values(providerConfigs);
 }
@@ -104,9 +112,13 @@ Requirements:
 };
 
 export function getSystemPrompt(
-  language: "zh" | "en" | "multilingual" | "technical" | "business" = "multilingual",
-) {
-  return SYSTEM_PROMPTS[language];
+  language: "zh" | "en" | "ja" | "ko" | "es" | "fr" | "de" | "multilingual" | "technical" | "business" = "multilingual",
+): string {
+  // Map locale-language codes to their dedicated prompts, falling back to multilingual
+  if (language in SYSTEM_PROMPTS) {
+    return SYSTEM_PROMPTS[language as keyof typeof SYSTEM_PROMPTS];
+  }
+  return SYSTEM_PROMPTS.multilingual;
 }
 
 // ── Token & Cost Tracking ──

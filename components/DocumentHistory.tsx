@@ -109,6 +109,7 @@ export default function DocumentHistory() {
   const locale = useLocale();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
 
@@ -119,13 +120,16 @@ export default function DocumentHistory() {
 
       if (data.success) {
         setDocuments(data.documents);
+        setError(null);
+      } else {
+        setError(data.error || t("fetchError"));
       }
-    } catch (error) {
-      console.error("Failed to fetch documents:", error);
+    } catch (err) {
+      setError(t("fetchError"));
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     fetchDocuments();
@@ -135,6 +139,7 @@ export default function DocumentHistory() {
     if (!confirm(t("confirmDelete"))) return;
 
     setDeleting(id);
+    setError(null);
     try {
       const response = await fetch(`/api/documents/${id}`, {
         method: "DELETE",
@@ -143,9 +148,12 @@ export default function DocumentHistory() {
       if (response.ok) {
         setDocuments((prev) => prev.filter((doc) => doc.id !== id));
         setSelectedDoc((prev) => (prev?.id === id ? null : prev));
+      } else {
+        const data = await response.json().catch(() => ({ error: t("deleteError") }));
+        setError(data.error || t("deleteError"));
       }
-    } catch (error) {
-      console.error("Failed to delete:", error);
+    } catch {
+      setError(t("deleteError"));
     } finally {
       setDeleting(null);
     }
@@ -155,6 +163,22 @@ export default function DocumentHistory() {
     return (
       <div className="flex justify-center py-8">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="text-center py-8">
+        <div className="p-4 bg-red-50 border border-red-200 rounded-xl mb-4">
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+        <button
+          onClick={() => { setError(null); setLoading(true); fetchDocuments(); }}
+          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition"
+        >
+          {t("retry")}
+        </button>
       </div>
     );
   }

@@ -31,11 +31,20 @@ export const metadata: Metadata = {
     siteName: "PDF Summary AI",
     title: "PDF Summary AI - Get Insights in Seconds",
     description: "Upload any PDF and get AI-powered summaries instantly.",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "PDF Summary AI - AI-Powered Document Summaries",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "PDF Summary AI - Get Insights in Seconds",
     description: "Upload any PDF and get AI-powered summaries instantly.",
+    images: ["/og-image.png"],
   },
   robots: { index: true, follow: true },
 };
@@ -49,6 +58,17 @@ export default async function LocaleLayout({
 }) {
   const { locale } = await params;
   const messages = await getMessages({ locale });
+
+  // Error Boundary i18n messages — passed as props since it's a class component
+  const errorMessages = {
+    title: messages.error?.title || "Something went wrong",
+    description: messages.error?.boundaryDescription || "We encountered an unexpected error. This has been reported and we'll fix it as soon as possible.",
+    tryAgain: messages.error?.tryAgain || "Try Again",
+    goHome: messages.error?.goHome || "Go Home",
+    errorDetails: messages.error?.errorDetails || "Error Details (Development Only)",
+    contactSupport: messages.error?.contactSupport || "contact support",
+    ifKeepsHappening: messages.error?.ifKeepsHappening || "If this keeps happening, please ",
+  };
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -69,11 +89,36 @@ export default async function LocaleLayout({
 
         {/* ── Theme color ── */}
         <meta name="theme-color" content="#2563eb" />
+
+        {/* ── JSON-LD Structured Data (SoftwareApplication) ── */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "WebApplication",
+              name: "PDF Summary AI",
+              url: process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com",
+              description: "Upload any PDF and get AI-powered summaries instantly. Extract key insights in seconds.",
+              applicationCategory: "BusinessApplication",
+              operatingSystem: "Web",
+              offers: {
+                "@type": "Offer",
+                price: "0",
+                priceCurrency: "USD",
+              },
+              author: {
+                "@type": "Organization",
+                name: "PDF Summary AI",
+              },
+            }),
+          }}
+        />
       </head>
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <ClientClerkProvider>
-            <ErrorBoundary>
+            <ErrorBoundary messages={errorMessages}>
               <div className="min-h-screen bg-white">
                 {/* Top Bar with Language Switcher */}
                 <div className="bg-gray-50 border-b">

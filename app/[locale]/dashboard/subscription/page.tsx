@@ -36,8 +36,8 @@ export default function SubscriptionPage() {
         const data = await response.json();
         setSubscription(data);
       }
-    } catch (error) {
-      console.error("Failed to fetch subscription:", error);
+    } catch {
+      // Silently handle — user sees loading state resolve
     } finally {
       setLoadingSubscription(false);
     }
@@ -65,8 +65,7 @@ export default function SubscriptionPage() {
       } else {
         setMessage({ type: "error", text: data.error || t("errorPortal") });
       }
-    } catch (error) {
-      console.error("Manage subscription error:", error);
+    } catch {
       setMessage({ type: "error", text: t("errorGeneric") });
     } finally {
       setLoading(false);
@@ -96,8 +95,7 @@ export default function SubscriptionPage() {
       } else {
         setMessage({ type: "error", text: data.error || t("errorPaymentConfig") });
       }
-    } catch (error) {
-      console.error("Upgrade error:", error);
+    } catch {
       setMessage({ type: "error", text: t("errorGeneric") });
     } finally {
       setLoading(false);

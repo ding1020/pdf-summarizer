@@ -40,8 +40,8 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
         const data = await response.json();
         setUsage(data);
       }
-    } catch (error) {
-      console.error("Failed to fetch usage:", error);
+    } catch {
+      // Silently handle — usage bar will just not render
     } finally {
       setLoadingUsage(false);
     }

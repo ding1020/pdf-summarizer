@@ -51,7 +51,7 @@ export default function PricingPage() {
     name: t("pro.name"),
     monthlyPrice: t("pro.price"),
     yearlyPrice: t("pro.yearlyPrice"),
-    period: selectedBilling === "yearly" ? t("pro.period") : t("pro.period"),
+    period: selectedBilling === "yearly" ? t("pro.yearlyPeriod") : t("pro.period"),
     yearlyPeriod: t("pro.yearlyPeriod"),
     description: t("pro.description"),
     features: t.raw("pro.features") as string[],
@@ -94,8 +94,7 @@ export default function PricingPage() {
         } else {
           showToast(t("errors.notConfigured"), "info");
         }
-      } catch (error) {
-        console.error("Upgrade error:", error);
+      } catch {
         showToast(t("errors.generic"), "error");
       } finally {
         setLoading(null);
@@ -238,12 +237,21 @@ export default function PricingPage() {
                   ))}
                 </ul>
 
-                <button
-                  disabled
-                  className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg opacity-50 cursor-not-allowed"
-                >
-                  {plan.buttonText}
-                </button>
+                {isSignedIn ? (
+                  <button
+                    disabled
+                    className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg opacity-50 cursor-not-allowed"
+                  >
+                    {plan.buttonText}
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => router.push("/sign-up")}
+                    className="mt-8 w-full py-3 px-6 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
+                  >
+                    {t("free.button")}
+                  </button>
+                )}
               </div>
             </div>
           ))}

@@ -1,85 +1,174 @@
 /**
  * Rate Limiting Utility
- * In-memory rate limiter with LRU eviction for serverless environments.
  *
- * ⚠️  PRODUCTION NOTE: In-memory store resets on cold starts and is not
- * shared across Vercel instances. For production workloads, migrate to
- * @vercel/kv or Upstash Redis:
- *   import { Ratelimit } from "@upstash/ratelimit";
- *   import { Redis } from "@upstash/redis";
- *   const ratelimit = new Ratelimit({ redis: Redis.fromEnv(), limiter: ... });
+ * Dual-backend rate limiter:
+ *   - Production: Upstash Redis (shared across all Vercel instances)
+ *   - Dev/Fallback: In-memory Map with LRU eviction
+ *
+ * Environment variables (production):
+ *   UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
+ *   UPSTASH_REDIS_REST_TOKEN=****
+ *
+ * When neither is set, the in-memory store is used automatically.
  */
 
+import { Redis } from "@upstash/redis";
+
 // ── Types ──
-interface RateLimitEntry {
+export interface RateLimitConfig {
+  windowMs: number;
+  maxRequests: number;
+}
+
+export interface RateLimitResult {
+  success: boolean;
+  remaining: number;
+  resetTime: number;
+}
+
+// ── Redis client (lazy singleton) ──
+let _redis: Redis | null = null;
+let _redisInitAttempted = false;
+
+function getRedis(): Redis | null {
+  if (_redisInitAttempted) return _redis;
+  _redisInitAttempted = true;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (!url || !token) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "[rate-limit] UPSTASH_REDIS_* env vars not set — using in-memory store (NOT shared across Vercel instances)"
+      );
+    }
+    return null;
+  }
+
+  try {
+    _redis = new Redis({ url, token });
+    return _redis;
+  } catch (err) {
+    console.error("[rate-limit] Failed to create Redis client:", err);
+    return null;
+  }
+}
+
+// ── Redis-based rate limiting (sliding window via INCR + EXPIRE) ──
+async function redisRateLimit(
+  key: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const redis = getRedis();
+  if (!redis) throw new Error("Redis not available");
+
+  const ttlSeconds = Math.ceil(config.windowMs / 1000);
+  const now = Date.now();
+
+  // Atomic: INCR returns the new count; if first request, set expiry
+  const current = (await redis.incr(key)) as number;
+
+  if (current === 1) {
+    await redis.expire(key, ttlSeconds);
+  }
+
+  const ttl = await redis.ttl(key); // seconds remaining
+  const success = current <= config.maxRequests;
+  const remaining = Math.max(0, config.maxRequests - current);
+  const resetTime = now + (ttl > 0 ? ttl * 1000 : config.windowMs);
+
+  return { success, remaining, resetTime };
+}
+
+// ── In-memory fallback ──
+interface MemoryEntry {
   count: number;
   resetTime: number;
 }
 
-export interface RateLimitConfig {
-  windowMs: number;      // Time window in milliseconds
-  maxRequests: number;   // Max requests per window
-}
-
-// ── Store with capacity limit (prevents memory leaks) ──
 const MAX_STORE_SIZE = 5000;
-const rateLimitStore = new Map<string, RateLimitEntry>();
+const memoryStore = new Map<string, MemoryEntry>();
 
-// Periodic cleanup for non-serverless environments
-let cleanupIntervalId: ReturnType<typeof setInterval> | null = null;
+let cleanupInterval: ReturnType<typeof setInterval> | null = null;
 
-function ensureCleanup() {
-  if (cleanupIntervalId === null && typeof globalThis !== 'undefined' && !process.env.VERCEL) {
-    cleanupIntervalId = setInterval(() => {
+function startCleanup() {
+  if (cleanupInterval !== null) return;
+  if (typeof globalThis !== "undefined" && !process.env.VERCEL) {
+    cleanupInterval = setInterval(() => {
       const now = Date.now();
-      for (const [key, entry] of rateLimitStore.entries()) {
-        if (entry.resetTime < now) {
-          rateLimitStore.delete(key);
-        }
+      for (const [key, entry] of memoryStore.entries()) {
+        if (entry.resetTime < now) memoryStore.delete(key);
       }
-    }, 60000);
+    }, 60_000);
   }
 }
+if (typeof globalThis !== "undefined") startCleanup();
 
-// Initialize cleanup on module load
-if (typeof globalThis !== 'undefined') {
-  ensureCleanup();
-}
-
-// ── Core rate limiter ──
-export function rateLimit(
-  identifier: string,
-  config: RateLimitConfig,
-): { success: boolean; remaining: number; resetTime: number } {
+function memoryRateLimit(key: string, config: RateLimitConfig): RateLimitResult {
   const now = Date.now();
-  const key = `rl:${identifier}`;
+  let entry = memoryStore.get(key);
 
-  let entry = rateLimitStore.get(key);
-
-  // Reset if window expired
   if (!entry || entry.resetTime < now) {
     entry = { count: 0, resetTime: now + config.windowMs };
   }
 
   entry.count++;
-  rateLimitStore.set(key, entry);
+  memoryStore.set(key, entry);
 
-  // LRU eviction — if store grows too large, remove oldest entries
-  if (rateLimitStore.size > MAX_STORE_SIZE) {
-    const keysToDelete = Math.floor(MAX_STORE_SIZE * 0.2); // evict 20%
-    const entries = Array.from(rateLimitStore.entries())
+  // LRU eviction
+  if (memoryStore.size > MAX_STORE_SIZE) {
+    const toDelete = Math.floor(MAX_STORE_SIZE * 0.2);
+    const sorted = Array.from(memoryStore.entries())
       .sort((a, b) => a[1].resetTime - b[1].resetTime)
-      .slice(0, keysToDelete);
-
-    for (const [k] of entries) {
-      rateLimitStore.delete(k);
-    }
+      .slice(0, toDelete);
+    for (const [k] of sorted) memoryStore.delete(k);
   }
 
   const remaining = Math.max(0, config.maxRequests - entry.count);
   const success = entry.count <= config.maxRequests;
 
   return { success, remaining, resetTime: entry.resetTime };
+}
+
+// ── Public API ──
+
+/**
+ * Rate limit a request.
+ * When Redis is configured → atomic, shared across all server instances.
+ * When Redis is not configured → local in-memory (dev/testing only).
+ *
+ * ⚠️  Synchronous: only works with in-memory backend.
+ *     For production (Redis), use rateLimitAsync().
+ */
+export function rateLimit(
+  identifier: string,
+  config: RateLimitConfig
+): RateLimitResult {
+  // Synchronous path always uses memory (Redis requires async)
+  return memoryRateLimit(`rl:${identifier}`, config);
+}
+
+/**
+ * Rate limit a request (async).
+ * Prefer this for production — it uses Redis when available,
+ * falling back to in-memory automatically.
+ */
+export async function rateLimitAsync(
+  identifier: string,
+  config: RateLimitConfig
+): Promise<RateLimitResult> {
+  const redis = getRedis();
+
+  if (redis) {
+    try {
+      return await redisRateLimit(`rl:${identifier}`, config);
+    } catch (err) {
+      console.warn("[rate-limit] Redis error, falling back to memory:", err);
+    }
+  }
+
+  return memoryRateLimit(`rl:${identifier}`, config);
 }
 
 // ── Predefined rate limit tiers ──
@@ -97,14 +186,20 @@ export const RATE_LIMITS = {
 };
 
 // ── Helpers ──
-export function getClientIdentifier(userId?: string | null, ip?: string): string {
+export function getClientIdentifier(
+  userId?: string | null,
+  ip?: string
+): string {
   if (userId) return `user:${userId}`;
-  return `ip:${ip || 'anonymous'}`;
+  return `ip:${ip || "anonymous"}`;
 }
 
-export function getRateLimitHeaders(result: { remaining: number; resetTime: number }) {
+export function getRateLimitHeaders(result: {
+  remaining: number;
+  resetTime: number;
+}) {
   return {
-    'X-RateLimit-Remaining': result.remaining.toString(),
-    'X-RateLimit-Reset': new Date(result.resetTime).toISOString(),
+    "X-RateLimit-Remaining": result.remaining.toString(),
+    "X-RateLimit-Reset": new Date(result.resetTime).toISOString(),
   };
 }

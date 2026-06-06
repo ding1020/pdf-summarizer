@@ -126,22 +126,28 @@ export async function POST(req: NextRequest) {
         const status = data.status;
         const currentBillingPeriod = data.current_billing_period;
         
-        // Calculate subscription end date
         let subscriptionEndDate: Date | null = null;
         if (currentBillingPeriod?.ends_at) {
           subscriptionEndDate = new Date(currentBillingPeriod.ends_at);
         }
         
         if (user) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              subscriptionStatus: status === "active" ? "pro" : "free",
-              paddleSubscriptionId: data.id,
-              paddlePlanId: planId,
-              billingCycle: data.billing_cycle,
-              subscriptionEndDate,
-            },
+          await prisma.$transaction(async (tx) => {
+            const freshUser = await tx.user.findUnique({ where: { id: user!.id } });
+            if (!freshUser) {
+              logger.warn("User disappeared mid-transaction", { userId: user!.id });
+              return;
+            }
+            await tx.user.update({
+              where: { id: freshUser.id },
+              data: {
+                subscriptionStatus: status === "active" ? "pro" : "free",
+                paddleSubscriptionId: data.id,
+                paddlePlanId: planId,
+                billingCycle: data.billing_cycle,
+                subscriptionEndDate,
+              },
+            });
           });
           logger.info("User subscription updated", { userId: user.id });
         } else {
@@ -162,13 +168,15 @@ export async function POST(req: NextRequest) {
         }
         
         if (user) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              subscriptionStatus: status === "active" ? "pro" : "free",
-              billingCycle: data.billing_cycle,
-              subscriptionEndDate,
-            },
+          await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+              where: { id: user!.id },
+              data: {
+                subscriptionStatus: status === "active" ? "pro" : "free",
+                billingCycle: data.billing_cycle,
+                subscriptionEndDate,
+              },
+            });
           });
           logger.info("User subscription updated", { userId: user.id });
         } else {
@@ -183,11 +191,13 @@ export async function POST(req: NextRequest) {
         logger.info("Subscription cancelled/paused", { subscriptionId: data.id, eventType });
         
         if (user) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              subscriptionStatus: "free",
-            },
+          await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+              where: { id: user!.id },
+              data: {
+                subscriptionStatus: "free",
+              },
+            });
           });
           logger.info("User subscription set to free", { userId: user.id });
         } else {
@@ -206,12 +216,14 @@ export async function POST(req: NextRequest) {
         }
         
         if (user) {
-          await prisma.user.update({
-            where: { id: user.id },
-            data: {
-              subscriptionStatus: "pro",
-              subscriptionEndDate,
-            },
+          await prisma.$transaction(async (tx) => {
+            await tx.user.update({
+              where: { id: user!.id },
+              data: {
+                subscriptionStatus: "pro",
+                subscriptionEndDate,
+              },
+            });
           });
           logger.info("User subscription restored to pro", { userId: user.id });
         } else {
