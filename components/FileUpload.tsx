@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
 import ReactMarkdown from "react-markdown";
 import { useTranslations } from "next-intl";
@@ -32,8 +32,13 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   } | null>(null);
   const [summary, setSummary] = useState<string>("");
 
-  // Use ref to track mounted state and avoid state updates after unmount
+  // Track mounted state to prevent state updates after unmount
   const isMountedRef = useRef(true);
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Client-side file validation
   const validateFile = useCallback((file: File): string | null => {
@@ -98,11 +103,8 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                 fullSummary += parsed.content;
                 setSummary(fullSummary);
               }
-            } catch (e) {
-              // Log parse errors for debugging (use console.warn in production)
-              if (process.env.NODE_ENV === "development") {
-                console.warn("Failed to parse SSE data:", data.substring(0, 50));
-              }
+            } catch {
+              // Parse errors are expected on partial chunks; only log in dev
             }
           }
         }
@@ -117,7 +119,6 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     } catch (err) {
       // Handle abort error gracefully (user cancelled)
       if (err instanceof Error && err.name === "AbortError") {
-        console.log("Summary generation cancelled by user");
         return;
       }
       if (isMountedRef.current) {
@@ -204,6 +205,10 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       {/* Upload Area */}
       <div
         {...getRootProps()}
+        role="button"
+        tabIndex={0}
+        aria-label={t("dragDrop")}
+        aria-describedby="upload-hint"
         className={`
           border-2 border-dashed rounded-xl p-8 md:p-12 text-center cursor-pointer
           transition-all duration-200
@@ -214,10 +219,10 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
           ${isUploading || isSummarizing ? "opacity-50 cursor-not-allowed" : ""}
         `}
       >
-        <input {...getInputProps()} />
+        <input {...getInputProps()} aria-label={t("dragDrop")} />
         
         {isUploading ? (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center" role="status" aria-live="polite">
             <div className="relative">
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-200"></div>
               <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-600 border-t-transparent absolute top-0 left-0"></div>
@@ -226,9 +231,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
             <p className="text-sm text-gray-500 mt-1">{t("extracting")}</p>
           </div>
         ) : isDragActive ? (
-          <div className="flex flex-col items-center">
+          <div className="flex flex-col items-center" role="status" aria-live="assertive">
             <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-blue-600" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
               </svg>
             </div>
@@ -237,18 +242,18 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         ) : (
           <div className="flex flex-col items-center">
             <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-              <svg className="w-10 h-10 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-10 h-10 text-gray-500" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
             <p className="text-lg font-semibold text-gray-900 mb-2">
               {t("dragDrop")}
             </p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500" id="upload-hint">
               {t("maxSize")}
             </p>
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gray-100 rounded-lg text-sm text-gray-600">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {t("onlyPdf")}
@@ -324,8 +329,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                     <button
                       onClick={() => setIsSummarizing(false)}
                       className="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                      aria-label={t("cancel")}
                     >
-                      Cancel
+                      {t("cancel")}
                     </button>
                   </div>
                 ) : (
@@ -335,7 +341,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                       href="/help" 
                       className="text-sm text-blue-600 hover:underline"
                     >
-                      Need help with PDF upload?
+                      {t("needHelp")}
                     </Link>
                   </div>
                 )}

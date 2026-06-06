@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 export async function GET(req: NextRequest) {
@@ -18,7 +18,7 @@ export async function GET(req: NextRequest) {
     // Rate limiting
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
     const identifier = getClientIdentifier(clerkId, clientIp);
-    const rateLimitResult = rateLimit(identifier, RATE_LIMITS.free);
+    const rateLimitResult = await rateLimitAsync(identifier, RATE_LIMITS.free);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(

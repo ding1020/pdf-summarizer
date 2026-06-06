@@ -18,13 +18,28 @@ const nextConfig = {
 
   // 🔒 Security headers
   async headers() {
+    const csp = [
+      "default-src 'self'",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.pdfsum.com https://*.clerk.accounts.dev",
+      "style-src 'self' 'unsafe-inline'",
+      "img-src 'self' data: blob: https://img.clerk.com",
+      "font-src 'self' data:",
+      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://clerk.pdfsum.com https://*.clerk.accounts.dev https://api.paddle.com https://sandbox-api.paddle.com",
+      "frame-src https://*.clerk.accounts.dev https://checkout.paddle.com https://sandbox-checkout.paddle.com",
+      "media-src 'none'",
+      "object-src 'none'",
+      "base-uri 'self'",
+      "form-action 'self'",
+    ].join("; ");
+
     return [
       {
         source: "/:path*",
         headers: [
+          { key: "Content-Security-Policy", value: csp },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          { key: "X-XSS-Protection", value: "1; mode=block" },
+          // X-XSS-Protection removed — CSP with 'unsafe-inline' handles XSS; this header is deprecated
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
@@ -42,8 +57,7 @@ const nextConfig = {
     minimumCacheTTL: 86400, // 1 day
   },
 
-  // 📦 Transpile external packages if needed
-  transpilePackages: ["next-intl"],
+  // 📦 Transpile external packages — handled by next-intl plugin via createNextIntlPlugin
 };
 
 // ── Sentry configuration ──

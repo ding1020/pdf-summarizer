@@ -3,19 +3,20 @@ import { auth } from "@clerk/nextjs/server";
 import {
   getAIProvider,
   getSystemPrompt,
+  getModelForProvider,
   estimateTokens,
   createUsageRecord,
   type AIProvider,
   type TokenUsage,
 } from "@/lib/ai";
-import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 // ── AI provider fallback chain: deepseek → groq → siliconflow ──
 const FALLBACK_CHAIN: { provider: AIProvider; model: string }[] = [
-  { provider: "deepseek", model: "deepseek-chat" },
-  { provider: "groq", model: "llama-3.3-70b-versatile" },
-  { provider: "siliconflow", model: "Qwen/Qwen2.5-7B-Instruct" },
+  { provider: "deepseek", model: getModelForProvider("deepseek") },
+  { provider: "groq", model: getModelForProvider("groq") },
+  { provider: "siliconflow", model: getModelForProvider("siliconflow") },
 ];
 
 // ── Request timeout (30s for the whole streaming operation) ──
@@ -88,6 +89,7 @@ async function tryStreamWithProvider(
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       "Connection": "keep-alive",
+      "X-Accel-Buffering": "no", // Disable nginx buffering for SSE
     },
   });
 
@@ -117,7 +119,7 @@ export async function POST(req: NextRequest) {
       "anonymous";
     const identifier = getClientIdentifier(userId, clientIp);
     const rateLimitConfig = userId ? RATE_LIMITS.free : RATE_LIMITS.guest;
-    const rateLimitResult = rateLimit(identifier, rateLimitConfig);
+    const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
 
     if (!rateLimitResult.success) {
       return new Response(
@@ -192,6 +194,8 @@ export async function POST(req: NextRequest) {
         controller.signal,
       );
 
+      clearTimeout(timeoutId); // Clean up timeout on success
+
       totalTokensUsed = usage.totalTokens;
 
       logger.info("AI stream completed", {
@@ -213,7 +217,7 @@ export async function POST(req: NextRequest) {
         headers,
       });
     } catch (err) {
-      clearTimeout(timeoutId);
+      clearTimeout(timeoutId); // Clean up timeout on error
       const errMsg = err instanceof Error ? err.message : String(err);
       errors.push(`${p}: ${errMsg}`);
       logger.warn(`Stream provider ${p} failed, trying next`, { error: errMsg });

@@ -130,6 +130,17 @@
       "secureDesc": "Ihre Dokumente werden verschlüsselt und nach der Verarbeitung automatisch gelöscht."
     }
   },
+  "documents": {
+    "historyTitle": "Dokumentverlauf",
+    "confirmDelete": "Möchten Sie dieses Dokument wirklich löschen?",
+    "noDocuments": "Noch keine Dokumente. Laden Sie Ihr erstes PDF hoch!",
+    "selectToView": "Dokument auswählen, um Zusammenfassung anzuzeigen",
+    "generatingSummary": "Zusammenfassung wird erstellt...",
+    "noSummaryAvailable": "Keine Zusammenfassung verfügbar",
+    "fetchError": "Dokumente konnten nicht geladen werden. Bitte versuchen Sie es erneut.",
+    "deleteError": "Dokument konnte nicht gelöscht werden. Bitte versuchen Sie es erneut.",
+    "retry": "Erneut versuchen"
+  },
   "upload": {
     "dragDrop": "Klicken oder ziehen Sie die PDF-Datei hierher",
     "maxSize": "Maximale Dateigröße: 20MB",
@@ -143,7 +154,8 @@
     "generating": "Generierung...",
     "analyzing": "Dokument wird analysiert...",
     "analyzingDesc": "Dies kann einige Sekunden dauern",
-    "summaryHere": "Zusammenfassung erscheint hier"
+    "summaryHere": "Zusammenfassung erscheint hier",
+    "cancel": "Abbrechen"
   },
   "footer": {
     "privacy": "Datenschutz",
@@ -155,5 +167,12 @@
     "homeDesc": "Laden Sie Ihr PDF hoch und erhalten Sie sofort KI-generierte Zusammenfassungen. Sparen Sie Zeit und extrahieren Sie wichtige Informationen aus jedem Dokument.",
     "pricingTitle": "Preise - PDF Zusammenfassung KI",
     "pricingDesc": "Einfache, transparente Preisgestaltung. Starten Sie kostenlos mit 5 Zusammenfassungen pro Tag, oder upgraden Sie auf Pro für unbegrenzten Zugang."
+  },
+  "cookies": {
+    "title": "Diese Website verwendet Cookies",
+    "description": "Wir verwenden Cookies für Authentifizierung, Analyse und zur Verbesserung Ihrer Erfahrung.",
+    "learnMore": "Mehr erfahren",
+    "essentialOnly": "Nur notwendige",
+    "acceptAll": "Alle akzeptieren"
   }
 }

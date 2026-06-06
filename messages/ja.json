@@ -130,6 +130,17 @@
       "secureDesc": "ドキュメントは暗号化され、処理後に自動的に削除されます。"
     }
   },
+  "documents": {
+    "historyTitle": "ドキュメント履歴",
+    "confirmDelete": "このドキュメントを削除してもよろしいですか？",
+    "noDocuments": "まだドキュメントがありません。最初のPDFをアップロードしてください！",
+    "selectToView": "ドキュメントを選択して概要を表示",
+    "generatingSummary": "概要を生成中...",
+    "noSummaryAvailable": "概要はありません",
+    "fetchError": "ドキュメントの読み込みに失敗しました。再試行してください。",
+    "deleteError": "ドキュメントの削除に失敗しました。再試行してください。",
+    "retry": "再試行"
+  },
   "upload": {
     "dragDrop": "PDFファイルをここにクリックまたはドラッグ",
     "maxSize": "最大ファイルサイズ: 20MB",
@@ -143,7 +154,8 @@
     "generating": "生成中...",
     "analyzing": "ドキュメントを分析中...",
     "analyzingDesc": "数秒かかる場合があります",
-    "summaryHere": "サマリーはここに表示されます"
+    "summaryHere": "サマリーはここに表示されます",
+    "cancel": "キャンセル"
   },
   "footer": {
     "privacy": "プライバシー",
@@ -155,5 +167,12 @@
     "homeDesc": "PDFをアップロードして、AI生成のサマリーを即座に取得。時間を節約し、数秒でドキュメントから重要な情報を抽出。",
     "pricingTitle": "料金 - PDF サマリー AI",
     "pricingDesc": "シンプルで透明な価格設定。1日5回の無料サマリーから、無制限アクセスまで。"
+  },
+  "cookies": {
+    "title": "このサイトはCookieを使用しています",
+    "description": "認証、分析、およびエクスペリエンス向上のためにCookieを使用しています。",
+    "learnMore": "詳細を見る",
+    "essentialOnly": "必要なもののみ",
+    "acceptAll": "すべて許可"
   }
 }

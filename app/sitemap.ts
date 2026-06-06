@@ -8,7 +8,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 const routesWithoutLocale = ["/sign-in", "/sign-up"];
 
 // Routes with locale prefix
-const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund"];
+const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund", "/help", "/cookies"];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapRoutes: MetadataRoute.Sitemap = [];

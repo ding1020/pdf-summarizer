@@ -130,6 +130,17 @@
       "secureDesc": "문서는 암호화되어 처리 후 자동으로 삭제됩니다."
     }
   },
+  "documents": {
+    "historyTitle": "문서 기록",
+    "confirmDelete": "이 문서를 삭제하시겠습니까?",
+    "noDocuments": "아직 문서가 없습니다. 첫 번째 PDF를 업로드하세요!",
+    "selectToView": "문서를 선택하여 요약 보기",
+    "generatingSummary": "요약 생성 중...",
+    "noSummaryAvailable": "요약 없음",
+    "fetchError": "문서를 불러오지 못했습니다. 다시 시도해 주세요.",
+    "deleteError": "문서를 삭제하지 못했습니다. 다시 시도해 주세요.",
+    "retry": "다시 시도"
+  },
   "upload": {
     "dragDrop": "PDF 파일을 여기에 클릭 또는 드래그",
     "maxSize": "최대 파일 크기: 20MB",
@@ -143,7 +154,8 @@
     "generating": "생성 중...",
     "analyzing": "문서 분석 중...",
     "analyzingDesc": "몇 초가 걸릴 수 있습니다",
-    "summaryHere": "요약이 여기에 표시됩니다"
+    "summaryHere": "요약이 여기에 표시됩니다",
+    "cancel": "취소"
   },
   "footer": {
     "privacy": "개인정보처리방침",
@@ -155,5 +167,12 @@
     "homeDesc": "PDF를 업로드하고 즉각적인 AI 생성 요약을 받으세요. 시간을 절약하고 몇 초 만에 문서에서 핵심 정보를 추출하세요.",
     "pricingTitle": "가격 - PDF 요약 AI",
     "pricingDesc": "간단하고 투명한 가격 정책. 하루 5회 무료 요약으로 시작, 무제한 액세스를 위해 업그레이드하세요."
+  },
+  "cookies": {
+    "title": "이 사이트는 쿠키를 사용합니다",
+    "description": "인증, 분석 및 경험 개선을 위해 쿠키를 사용합니다.",
+    "learnMore": "자세히 알아보기",
+    "essentialOnly": "필수만",
+    "acceptAll": "모두 허용"
   }
 }

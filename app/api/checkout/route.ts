@@ -1,20 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
-// Paddle SDK 动态导入
-async function getPaddleClient() {
-  const Paddle = require("@paddle/paddle-node-sdk");  // eslint-disable-next-line
-  
-  // 支持明确的 PADDLE_ENVIRONMENT 设置，或根据 NODE_ENV 自动判断
-  const environment = process.env.PADDLE_ENVIRONMENT || 
-    (process.env.NODE_ENV === "production" ? "production" : "sandbox");
-  
-  return new Paddle(process.env.PADDLE_SECRET_KEY!, {
-    environment,
-  });
+// Paddle SDK ESM 动态导入 (Next.js 15 兼容)
+import type { Paddle as PaddleType } from "@paddle/paddle-node-sdk";
+
+let _paddleClient: PaddleType | null = null;
+
+async function getPaddleClient(): Promise<PaddleType> {
+  if (_paddleClient) return _paddleClient;
+  const { Paddle, Environment } = await import("@paddle/paddle-node-sdk");
+  const environment =
+    (process.env.PADDLE_ENVIRONMENT === "production" || process.env.NODE_ENV === "production")
+      ? Environment.production
+      : Environment.sandbox;
+  _paddleClient = new Paddle(process.env.PADDLE_SECRET_KEY!, { environment });
+  return _paddleClient;
 }
 
 export async function POST(req: NextRequest) {
@@ -27,7 +30,7 @@ export async function POST(req: NextRequest) {
 
     // Rate limiting for checkout (very strict)
     const clientId = getClientIdentifier(clerkId);
-    const rateLimitResult = rateLimit(clientId, RATE_LIMITS.checkout);
+    const rateLimitResult = await rateLimitAsync(clientId, RATE_LIMITS.checkout);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -86,17 +89,19 @@ export async function POST(req: NextRequest) {
     const paddle = await getPaddleClient();
 
     // 创建 Paddle 客户链接结
-    const customer = await paddle.customers.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const customer = await (paddle as any).customers.create({
       email: user.email,
       name: user.email.split("@")[0],
-      metadata: {
+      customData: {
         clerkId,
         dbUserId: String(user.id),
       },
     });
 
     // 创建结账会话
-    const checkoutSession = await paddle.checkouts.create({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const checkoutSession = await (paddle as any).checkouts.create({
       customerId: customer.id,
       items: [
         {

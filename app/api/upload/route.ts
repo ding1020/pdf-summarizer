@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/db";
-import { rateLimit, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 // pdf-parse is a CommonJS module, must be dynamically imported
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
       ? getClientIdentifier(null, clientIp)
       : getClientIdentifier(clerkId, clientIp);
     const rateLimitConfig = isGuest ? RATE_LIMITS.guest : RATE_LIMITS.free;
-    const rateLimitResult = rateLimit(identifier, rateLimitConfig);
+    const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
     
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -114,9 +114,6 @@ export async function POST(req: NextRequest) {
 
     pdfData = await parsePDF(buffer);
 
-    // Handle both old and new pdf-parse API shapes
-    const pageCount = pdfData.numpages ?? pdfData.numPages ?? 0;
-
     if (!pdfData.text || pdfData.text.trim().length === 0) {
       return NextResponse.json(
         { error: "Could not extract text from this PDF. The file may be scanned (image-based) or password-protected." },
@@ -161,6 +158,11 @@ export async function POST(req: NextRequest) {
 
   // ==================== Save / Return ====================
   const pageCount = pdfData.numpages ?? pdfData.numPages ?? 0;
+  // Truncate stored content for compliance (GDPR data minimization)
+  const MAX_STORED_CONTENT_LENGTH = 100_000;
+  const storedContent = pdfData.text.length > MAX_STORED_CONTENT_LENGTH
+    ? pdfData.text.substring(0, MAX_STORED_CONTENT_LENGTH) + "\n\n[Content truncated for storage. Full text processed for summarization.]"
+    : pdfData.text;
 
   try {
     let documentId: string;
@@ -191,7 +193,7 @@ export async function POST(req: NextRequest) {
           filename: file.name,
           fileSize: file.size,
           pageCount,
-          content: pdfData.text,
+          content: storedContent,
           status: "completed",
         },
       });

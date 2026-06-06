@@ -187,7 +187,10 @@
     "noDocuments": "暂无文档。请上传您的第一个PDF！",
     "selectToView": "选择一个文档以查看摘要",
     "generatingSummary": "正在生成摘要...",
-    "noSummaryAvailable": "暂无摘要"
+    "noSummaryAvailable": "暂无摘要",
+    "fetchError": "加载文档失败，请重试。",
+    "deleteError": "删除文档失败，请重试。",
+    "retry": "重试"
   },
   "upload": {
     "dragDrop": "点击或拖放PDF文件到此处",
@@ -207,6 +210,8 @@
     "uploadFailed": "上传失败",
     "summarizeFailed": "摘要生成失败",
     "streamFailed": "读取流失败",
+    "cancel": "取消",
+    "needHelp": "需要帮助上传PDF？",
     "errorTitle": "错误"
   },
   "footer": {
@@ -239,6 +244,10 @@
   "error": {
     "title": "出了点问题",
     "description": "发生了意外错误，请重试。",
+    "boundaryDescription": "我们遇到了意外错误。此问题已被报告，我们将尽快修复。",
+    "errorDetails": "错误详情（仅开发环境）",
+    "contactSupport": "联系客服",
+    "ifKeepsHappening": "如果持续出现此问题，请",
     "tryAgain": "重试",
     "goHome": "返回首页"
   },
@@ -450,5 +459,12 @@
     "homeDesc": "上传PDF，立即获得AI生成的摘要。节省时间，几秒钟内提取文档关键信息。",
     "pricingTitle": "价格方案 - PDF智能摘要",
     "pricingDesc": "简单透明的定价。免费版每天5次摘要，升级到专业版享受无限次服务。"
+  },
+  "cookies": {
+    "title": "本网站使用 Cookie",
+    "description": "我们使用 Cookie 进行身份验证、分析和改进您的体验。",
+    "learnMore": "了解更多",
+    "essentialOnly": "仅必要",
+    "acceptAll": "全部接受"
   }
 }

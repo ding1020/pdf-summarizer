@@ -9,7 +9,6 @@ export async function GET() {
   try {
     const { userId: clerkId } = await auth();
     
-    // Guest: return default free tier stats
     if (!clerkId) {
       return NextResponse.json({
         used: 0,
@@ -21,10 +20,9 @@ export async function GET() {
       });
     }
 
-    // Signed-in: fetch actual usage from DB
     const user = await prisma.user.findUnique({
       where: { clerkId },
-      select: { subscriptionStatus: true },
+      select: { id: true, subscriptionStatus: true },
     });
 
     if (!user) {
@@ -39,9 +37,11 @@ export async function GET() {
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
 
+    // Count actual summarize API calls today (more accurate than document count)
     const todayUsage = await prisma.document.count({
       where: {
-        user: { clerkId },
+        userId: user.id,
+        summary: { not: null },
         createdAt: { gte: startOfDay },
       },
     });
