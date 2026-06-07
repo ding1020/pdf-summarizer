@@ -20,12 +20,12 @@ const nextConfig = {
   async headers() {
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.pdfsum.com https://*.clerk.accounts.dev",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.pdfsum.com https://accounts.pdfsum.com https://*.clerk.accounts.dev https://*.clerk.accounts.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://img.clerk.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://clerk.pdfsum.com https://*.clerk.accounts.dev https://api.paddle.com https://sandbox-api.paddle.com",
-      "frame-src https://*.clerk.accounts.dev https://checkout.paddle.com https://sandbox-checkout.paddle.com",
+      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://clerk.pdfsum.com https://accounts.pdfsum.com https://*.clerk.accounts.dev https://*.clerk.accounts.com https://api.paddle.com",
+      "frame-src https://clerk.pdfsum.com https://accounts.pdfsum.com https://*.clerk.accounts.dev https://*.clerk.accounts.com https://checkout.paddle.com",
       "media-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",
