@@ -18,14 +18,16 @@ const nextConfig = {
 
   // 🔒 Security headers
   async headers() {
+    // Use Clerk default *.clerk.accounts.com until custom domain SSL is issued.
+    // Once SSL is active, switch back to clerk.pdfsum.com / accounts.pdfsum.com
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://clerk.pdfsum.com https://accounts.pdfsum.com https://*.clerk.accounts.dev https://*.clerk.accounts.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://img.clerk.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://clerk.pdfsum.com https://accounts.pdfsum.com https://*.clerk.accounts.dev https://*.clerk.accounts.com https://api.paddle.com",
-      "frame-src https://clerk.pdfsum.com https://accounts.pdfsum.com https://*.clerk.accounts.dev https://*.clerk.accounts.com https://checkout.paddle.com",
+      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://*.clerk.accounts.com https://api.paddle.com",
+      "frame-src https://*.clerk.accounts.com https://checkout.paddle.com",
       "media-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",
