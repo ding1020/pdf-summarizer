@@ -3,33 +3,26 @@
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
 import { useUser, UserButton } from "@clerk/nextjs";
-import { Suspense, memo } from "react";
+import { Suspense, memo, useState, useEffect } from "react";
 
-// ── Auth-aware buttons (isolated to avoid blocking navigation) ──
-const AuthButtons = memo(function AuthButtons() {
-  const t = useTranslations();
+// ── Guest buttons (always safe, no Clerk dependency) ──
+function GuestButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
+    <div className="flex items-center gap-4">
+      <Link href="/sign-in" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+        {t("common.signIn")}
+      </Link>
+      <Link href="/sign-up" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+        {t("common.signUp")}
+      </Link>
+    </div>
+  );
+}
 
-  // Gracefully degrade if Clerk is unavailable (e.g., custom domain SSL pending)
-  let isLoaded = false;
-  let isSignedIn = false;
-
-  try {
-    const user = useUser();
-    isLoaded = user.isLoaded;
-    isSignedIn = user.isSignedIn;
-  } catch {
-    // Clerk not available — show sign-in link (will work once SSL is issued)
-    return (
-      <div className="flex items-center gap-4">
-        <Link href="/sign-in" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-          {t("common.signIn")}
-        </Link>
-        <Link href="/sign-up" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-          {t("common.signUp")}
-        </Link>
-      </div>
-    );
-  }
+// ── Auth-aware content (only mounted on client AFTER ClerkProvider is ready) ──
+function AuthContent({ t }: { t: ReturnType<typeof useTranslations> }) {
+  // Always called unconditionally at top level — React Hooks rules satisfied
+  const { isLoaded, isSignedIn } = useUser();
 
   if (!isLoaded) {
     return (
@@ -41,22 +34,7 @@ const AuthButtons = memo(function AuthButtons() {
   }
 
   if (!isSignedIn) {
-    return (
-      <div className="flex items-center gap-4">
-        <Link
-          href="/sign-in"
-          className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-        >
-          {t("common.signIn")}
-        </Link>
-        <Link
-          href="/sign-up"
-          className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
-        >
-          {t("common.signUp")}
-        </Link>
-      </div>
-    );
+    return <GuestButtons t={t} />;
   }
 
   return (
@@ -70,6 +48,21 @@ const AuthButtons = memo(function AuthButtons() {
       <UserButton />
     </div>
   );
+}
+
+// ── Auth-aware buttons wrapper ──
+// During SSR / before hydration: show guest buttons (Clerk not yet mounted)
+// After hydration: render AuthContent with useUser() (ClerkProvider IS in tree)
+const AuthButtons = memo(function AuthButtons() {
+  const t = useTranslations();
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) {
+    return <GuestButtons t={t} />;
+  }
+
+  return <AuthContent t={t} />;
 });
 
 // ── Main Navigation ──

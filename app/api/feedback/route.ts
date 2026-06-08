@@ -7,8 +7,14 @@ import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    const clerkId = userId;
+    // Clerk may be unavailable (custom domain SSL pending) — fall back to anonymous
+    let clerkId: string | null = null;
+    try {
+      const { userId } = await auth();
+      clerkId = userId;
+    } catch {
+      // Clerk unavailable — feedback still accepted as anonymous
+    }
 
     // Rate limiting: 3 feedback submissions per hour per client
     const clientId = getClientIdentifier(clerkId || "anonymous");
