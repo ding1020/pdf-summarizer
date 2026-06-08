@@ -1,7 +1,7 @@
 "use client";
 
-import React, { Component, ErrorInfo, ReactNode } from "react";
-import { ClerkProvider } from "@clerk/nextjs";
+import React, { Component, ReactNode, useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 
 // ── Clerk-specific Error Boundary ──
 // If clerk.pdfsum.com has no SSL (DNS pending), Clerk SDK crashes.
@@ -36,17 +36,34 @@ class ClerkErrorBoundary extends Component<ClerkErrorProps, ClerkErrorState> {
   }
 }
 
-// ClerkProvider MUST always wrap children — never conditionally render it.
-// Clerk handles SSR hydration natively, so no manual mount trick is needed.
-// During SSR, Clerk hooks return safe defaults until JS hydrates on client.
+// Dynamically import ClerkProvider — if clerk.pdfsum.com SSL is broken,
+// the dynamic import will fail at runtime and ErrorBoundary catches it.
+// Using ssr:false to avoid SSR crash when Clerk domain is unreachable.
+const DynamicClerkProvider = dynamic(
+  () => import("@clerk/nextjs").then((mod) => mod.ClerkProvider),
+  {
+    ssr: false,
+    loading: () => null, // render nothing during load — no flash
+  }
+);
+
 export default function ClientClerkProvider({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  // During SSR and before hydration, render children without Clerk wrapper
+  // (prevents SSR crash from Clerk SDK init)
+  if (!mounted) {
+    return <div suppressHydrationWarning>{children}</div>;
+  }
+
   return (
     <ClerkErrorBoundary>
-      <ClerkProvider>
+      <DynamicClerkProvider>
         <div suppressHydrationWarning>
           {children}
         </div>
-      </ClerkProvider>
+      </DynamicClerkProvider>
     </ClerkErrorBoundary>
   );
 }
