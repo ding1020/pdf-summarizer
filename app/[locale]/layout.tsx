@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
-import ClientClerkProvider from "@/components/ClientClerkProvider";
 import ErrorBoundary from "@/components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -19,7 +18,7 @@ export default async function LocaleLayout({
 }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const messages = await getMessages({ locale });
-  const errorMessages = {
+  const em = {
     title: messages.error?.title || "Error",
     description: "Something went wrong",
     tryAgain: "Try Again",
@@ -37,14 +36,12 @@ export default async function LocaleLayout({
       </head>
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
-          <ClientClerkProvider>
-            <ErrorBoundary messages={errorMessages}>
-              <div style={{ padding: 50, fontFamily: "sans-serif" }}>
-                <p style={{ color: "green" }}>✅ Step 3: + ClientClerkProvider + ErrorBoundary works</p>
-                {children}
-              </div>
-            </ErrorBoundary>
-          </ClientClerkProvider>
+          <ErrorBoundary messages={em}>
+            <div style={{ padding: 50, fontFamily: "sans-serif" }}>
+              <p style={{ color: "green" }}>✅ Step 3a: + ErrorBoundary only works</p>
+              {children}
+            </div>
+          </ErrorBoundary>
         </NextIntlClientProvider>
       </body>
     </html>
