@@ -2,23 +2,22 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
-import { Suspense } from "react";
-import dynamic from "next/dynamic";
 
-// ── Lazy-load Clerk-dependent auth buttons ──
-// NEVER import @clerk/nextjs at module level in this file — Clerk SDK
-// top-level init tries clerk.pdfsum.com which has no SSL yet → 500.
-// Dynamic import with ssr:false ensures the module is only loaded on
-// the client after hydration.
-const AuthButtonsClient = dynamic(() => import("./AuthButtonsClient"), {
-  ssr: false,
-  loading: () => (
+// ── Guest auth buttons (Clerk disabled until SSL issued) ──
+// TODO: Once clerk.pdfsum.com SSL is active, restore:
+//   const AuthButtonsClient = dynamic(() => import("./AuthButtonsClient"), { ssr: false, ... });
+function GuestAuthButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
+  return (
     <div className="flex items-center gap-4">
-      <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
-      <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
+      <Link href="/sign-in" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+        {t("common.signIn")}
+      </Link>
+      <Link href="/sign-up" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+        {t("common.signUp")}
+      </Link>
     </div>
-  ),
-});
+  );
+}
 
 // ── Main Navigation ──
 export default function Navigation() {
@@ -77,10 +76,8 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Auth Buttons — dynamically loaded, SSRing-safe */}
-          <Suspense fallback={<div className="h-9 w-40 bg-gray-100 animate-pulse rounded-lg" />}>
-            <AuthButtonsClient />
-          </Suspense>
+          {/* Auth Buttons — guest mode (Clerk SSL pending) */}
+          <GuestAuthButtons t={t} />
         </div>
       </div>
     </nav>
