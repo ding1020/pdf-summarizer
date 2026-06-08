@@ -8,7 +8,28 @@ import { Suspense, memo } from "react";
 // ── Auth-aware buttons (isolated to avoid blocking navigation) ──
 const AuthButtons = memo(function AuthButtons() {
   const t = useTranslations();
-  const { isLoaded, isSignedIn } = useUser();
+
+  // Gracefully degrade if Clerk is unavailable (e.g., custom domain SSL pending)
+  let isLoaded = false;
+  let isSignedIn = false;
+
+  try {
+    const user = useUser();
+    isLoaded = user.isLoaded;
+    isSignedIn = user.isSignedIn;
+  } catch {
+    // Clerk not available — show sign-in link (will work once SSL is issued)
+    return (
+      <div className="flex items-center gap-4">
+        <Link href="/sign-in" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
+          {t("common.signIn")}
+        </Link>
+        <Link href="/sign-up" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+          {t("common.signUp")}
+        </Link>
+      </div>
+    );
+  }
 
   if (!isLoaded) {
     return (
