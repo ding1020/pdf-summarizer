@@ -43,7 +43,7 @@ export async function POST() {
 
     // 查找或创建 Paddle 客户
     // Paddle SDK v2: types are incomplete; use any cast for runtime-compatible API
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line
     const customers = await (paddle as any).customers.list({
       email: [user.email],
     });
@@ -53,7 +53,7 @@ export async function POST() {
     if (customers?.data && customers.data.length > 0) {
       customerId = customers.data[0].id;
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line
       const newCustomer = await (paddle as any).customers.create({
         email: user.email,
         name: user.email.split("@")[0],
@@ -66,7 +66,7 @@ export async function POST() {
     }
 
     // 创建客户门户会话
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line
     const portalSession = await (paddle as any).portalCustomers.createSession({
       customerId: customerId,
       returnUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard/subscription`,

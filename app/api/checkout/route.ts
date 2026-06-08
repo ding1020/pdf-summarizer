@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
     const paddle = await getPaddleClient();
 
     // 创建 Paddle 客户链接结
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line
     const customer = await (paddle as any).customers.create({
       email: user.email,
       name: user.email.split("@")[0],
@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
     });
 
     // 创建结账会话
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line
     const checkoutSession = await (paddle as any).checkouts.create({
       customerId: customer.id,
       items: [
