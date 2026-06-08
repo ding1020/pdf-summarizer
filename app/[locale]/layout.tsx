@@ -5,7 +5,7 @@ import { getMessages } from "next-intl/server";
 import Navigation from "@/components/Navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ErrorBoundary from "@/components/ErrorBoundary";
-// import CookieConsent from "@/components/CookieConsent";
+import CookieConsent from "@/components/CookieConsent";
 import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -65,13 +65,13 @@ export default async function LocaleLayout({
               </div>
               <Navigation />
               <div style={{ padding: "20px 50px", fontFamily: "sans-serif" }}>
-                <p style={{ color: "green" }}>✅ Step 5: Navigation + LanguageSwitcher</p>
+                <p style={{ color: "green" }}>✅ All components restored (no Clerk)</p>
               </div>
               {children}
             </div>
           </ErrorBoundary>
         </NextIntlClientProvider>
-        {/* <CookieConsent /> */}
+        <CookieConsent />
       </body>
     </html>
   );
