@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
 import Navigation from "@/components/Navigation";
-// import LanguageSwitcher from "@/components/LanguageSwitcher";
+import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ErrorBoundary from "@/components/ErrorBoundary";
 // import CookieConsent from "@/components/CookieConsent";
 import "@/app/globals.css";
@@ -58,9 +58,14 @@ export default async function LocaleLayout({
         <NextIntlClientProvider messages={messages}>
           <ErrorBoundary messages={em}>
             <div className="min-h-screen bg-white">
+              <div className="bg-gray-50 border-b">
+                <div className="max-w-6xl mx-auto px-4 py-2 flex justify-end">
+                  <LanguageSwitcher />
+                </div>
+              </div>
               <Navigation />
               <div style={{ padding: "20px 50px", fontFamily: "sans-serif" }}>
-                <p style={{ color: "green" }}>✅ Step 4: Navigation only (no LangSwitcher no CookieConsent)</p>
+                <p style={{ color: "green" }}>✅ Step 5: Navigation + LanguageSwitcher</p>
               </div>
               {children}
             </div>
