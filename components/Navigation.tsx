@@ -2,67 +2,22 @@
 
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
-import { useUser, UserButton } from "@clerk/nextjs";
-import { Suspense, memo, useState, useEffect } from "react";
+import { Suspense } from "react";
+import dynamic from "next/dynamic";
 
-// ── Guest buttons (always safe, no Clerk dependency) ──
-function GuestButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
-  return (
+// ── Lazy-load Clerk-dependent auth buttons ──
+// NEVER import @clerk/nextjs at module level in this file — Clerk SDK
+// top-level init tries clerk.pdfsum.com which has no SSL yet → 500.
+// Dynamic import with ssr:false ensures the module is only loaded on
+// the client after hydration.
+const AuthButtonsClient = dynamic(() => import("./AuthButtonsClient"), {
+  ssr: false,
+  loading: () => (
     <div className="flex items-center gap-4">
-      <Link href="/sign-in" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-        {t("common.signIn")}
-      </Link>
-      <Link href="/sign-up" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-        {t("common.signUp")}
-      </Link>
+      <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
+      <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
     </div>
-  );
-}
-
-// ── Auth-aware content (only mounted on client AFTER ClerkProvider is ready) ──
-function AuthContent({ t }: { t: ReturnType<typeof useTranslations> }) {
-  // Always called unconditionally at top level — React Hooks rules satisfied
-  const { isLoaded, isSignedIn } = useUser();
-
-  if (!isLoaded) {
-    return (
-      <div className="flex items-center gap-4">
-        <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
-        <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
-      </div>
-    );
-  }
-
-  if (!isSignedIn) {
-    return <GuestButtons t={t} />;
-  }
-
-  return (
-    <div className="flex items-center gap-4">
-      <Link
-        href="/dashboard"
-        className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors"
-      >
-        {t("nav.dashboard")}
-      </Link>
-      <UserButton />
-    </div>
-  );
-}
-
-// ── Auth-aware buttons wrapper ──
-// During SSR / before hydration: show guest buttons (Clerk not yet mounted)
-// After hydration: render AuthContent with useUser() (ClerkProvider IS in tree)
-const AuthButtons = memo(function AuthButtons() {
-  const t = useTranslations();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
-  if (!mounted) {
-    return <GuestButtons t={t} />;
-  }
-
-  return <AuthContent t={t} />;
+  ),
 });
 
 // ── Main Navigation ──
@@ -122,9 +77,9 @@ export default function Navigation() {
             </Link>
           </div>
 
-          {/* Auth Buttons — gracefully degrades if Clerk unavailable */}
+          {/* Auth Buttons — dynamically loaded, SSRing-safe */}
           <Suspense fallback={<div className="h-9 w-40 bg-gray-100 animate-pulse rounded-lg" />}>
-            <AuthButtons />
+            <AuthButtonsClient />
           </Suspense>
         </div>
       </div>
