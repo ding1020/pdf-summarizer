@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages } from "next-intl/server";
+import ClientClerkProvider from "@/components/ClientClerkProvider";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -17,6 +19,15 @@ export default async function LocaleLayout({
 }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const messages = await getMessages({ locale });
+  const errorMessages = {
+    title: messages.error?.title || "Error",
+    description: "Something went wrong",
+    tryAgain: "Try Again",
+    goHome: "Go Home",
+    errorDetails: "Details",
+    contactSupport: "contact",
+    ifKeepsHappening: "If this keeps happening,",
+  };
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -26,10 +37,14 @@ export default async function LocaleLayout({
       </head>
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
-          <div style={{ padding: 50, fontFamily: "sans-serif" }}>
-            <p style={{ color: "green" }}>✅ Step 2: i18n + font + metadata works</p>
-            {children}
-          </div>
+          <ClientClerkProvider>
+            <ErrorBoundary messages={errorMessages}>
+              <div style={{ padding: 50, fontFamily: "sans-serif" }}>
+                <p style={{ color: "green" }}>✅ Step 3: + ClientClerkProvider + ErrorBoundary works</p>
+                {children}
+              </div>
+            </ErrorBoundary>
+          </ClientClerkProvider>
         </NextIntlClientProvider>
       </body>
     </html>
