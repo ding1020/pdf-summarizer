@@ -52,7 +52,7 @@ export default function LanguageSwitcher() {
           {languages.map((lang) => (
             <button
               key={lang.code}
-              onClick={() => handleChange(lang.code)}
+              onMouseDown={() => handleChange(lang.code)}
               role="option"
               aria-selected={locale === lang.code}
               className={`w-full flex items-center gap-2 px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
