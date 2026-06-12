@@ -1,5 +1,7 @@
 "use client";
 
+import { useTranslations } from "next-intl";
+
 export default function DashboardError({
   error,
   reset,
@@ -7,6 +9,8 @@ export default function DashboardError({
   error: Error & { digest?: string };
   reset: () => void;
 }) {
+  const t = useTranslations("error");
+
   return (
     <div className="min-h-[60vh] flex flex-col items-center justify-center px-4">
       <div className="text-center max-w-md">
@@ -16,6 +20,7 @@ export default function DashboardError({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -26,19 +31,14 @@ export default function DashboardError({
           </svg>
         </div>
         
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Something went wrong!
-        </h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t("title")}</h2>
         
-        <p className="text-gray-600 mb-6">
-          We encountered an error loading the dashboard. Please try again.
-        </p>
+        <p className="text-gray-600 mb-6">{t("boundaryDescription")}</p>
 
-        {/* Show error details in development */}
         {process.env.NODE_ENV === "development" && (
           <details className="text-left mb-6 p-4 bg-gray-100 rounded-lg text-sm">
             <summary className="font-medium cursor-pointer text-gray-700 mb-2">
-              Error Details
+              {t("errorDetails")}
             </summary>
             <pre className="overflow-x-auto text-red-600 whitespace-pre-wrap text-xs">
               {error.message}
@@ -57,6 +57,7 @@ export default function DashboardError({
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -65,7 +66,7 @@ export default function DashboardError({
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
             />
           </svg>
-          Try again
+          {t("tryAgain")}
         </button>
       </div>
     </div>

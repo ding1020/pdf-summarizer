@@ -95,7 +95,8 @@ export async function POST(req: NextRequest) {
     // Always verify webhook signature (production or test mode)
     if (!webhookSecret) {
       logger.error("Paddle webhook secret not configured");
-      return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
+      // 503 = Service Unavailable — Paddle will retry later
+      return NextResponse.json({ error: "Webhook not configured" }, { status: 503 });
     }
 
     const isValid = await verifyPaddleWebhook(payload, signature, webhookSecret);
@@ -235,12 +236,66 @@ export async function POST(req: NextRequest) {
       case "transaction.completed":
       case "transaction.paid": {
         logger.info("Transaction completed", { transactionId: data.id });
+        // transaction events may arrive before subscription events —
+        // proactively sync subscription status from Paddle
+        if (user) {
+          try {
+            const { Paddle, Environment } = await import("@paddle/paddle-node-sdk");
+            const environment =
+              process.env.PADDLE_ENVIRONMENT === "production"
+                ? Environment.production
+                : Environment.sandbox;
+            const paddleClient = new Paddle(process.env.PADDLE_SECRET_KEY!, { environment });
+            const customerId = user.paddleCustomerId;
+            if (customerId) {
+              const subs = await (paddleClient as any).subscriptions.list({
+                customerId: [customerId],
+                perPage: 5,
+              });
+              const activeSub = subs?.data?.find(
+                (s: any) => s.status === "active" || s.status === "trialing"
+              );
+              await prisma.user.update({
+                where: { id: user.id },
+                data: {
+                  subscriptionStatus: activeSub ? "pro" : "free",
+                  subscriptionId: activeSub?.id || null,
+                  paddleSubscriptionId: activeSub?.id || null,
+                },
+              });
+              logger.info("Subscription status synced from transaction event", {
+                userId: user.id,
+                hasActiveSub: !!activeSub,
+              });
+            }
+          } catch (syncErr) {
+            logger.warn("Failed to sync subscription on transaction event", {
+              userId: user.id,
+              error: syncErr instanceof Error ? syncErr.message : String(syncErr),
+            });
+          }
+        }
         break;
       }
 
       case "transaction.failed":
       case "transaction.past_due": {
-        logger.warn("Transaction failed", { transactionId: data.id, eventType });
+        logger.warn("Transaction failed/past_due", { transactionId: data.id, eventType });
+        // Flag user for payment retry; don't immediately downgrade
+        if (user) {
+          try {
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { subscriptionStatus: "past_due" },
+            });
+            logger.info("User flagged as past_due", { userId: user.id });
+          } catch (updateErr) {
+            logger.warn("Failed to update past_due status", {
+              userId: user.id,
+              error: updateErr instanceof Error ? updateErr.message : String(updateErr),
+            });
+          }
+        }
         break;
       }
 

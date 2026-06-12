@@ -49,23 +49,43 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    // Get all documents for the user
-    const documents = await prisma.document.findMany({
-      where: { userId: user.id },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        filename: true,
-        fileSize: true,
-        pageCount: true,
-        status: true,
-        summary: true,
-        createdAt: true,
-      },
-    });
+    // Pagination
+    const url = new URL(req.url);
+    const page = Math.max(1, parseInt(url.searchParams.get("page") || "1"));
+    const limit = Math.min(50, Math.max(1, parseInt(url.searchParams.get("limit") || "20")));
+    const skip = (page - 1) * limit;
+
+    // Get total count for pagination metadata
+    const [documents, total] = await Promise.all([
+      prisma.document.findMany({
+        where: { userId: user.id },
+        orderBy: { createdAt: "desc" },
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          filename: true,
+          fileSize: true,
+          pageCount: true,
+          status: true,
+          summary: true,
+          createdAt: true,
+        },
+      }),
+      prisma.document.count({ where: { userId: user.id } }),
+    ]);
 
     return NextResponse.json(
-      { success: true, documents },
+      {
+        success: true,
+        documents,
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
+      },
       { headers: { ...getRateLimitHeaders(rateLimitResult) } }
     );
   } catch (error) {

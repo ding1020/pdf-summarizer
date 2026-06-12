@@ -179,7 +179,18 @@
       "resultsDesc": "使用文字清晰的PDF。扫描文档可能精度较低。",
       "secure": "安全处理",
       "secureDesc": "您的文档经过加密处理，处理后自动删除。"
-    }
+    },
+    "onboarding": {
+      "step1Title": "上传您的 PDF",
+      "step1Desc": "拖放任意 PDF 文件到上传区域，最大支持 20MB。",
+      "step2Title": "AI 生成摘要",
+      "step2Desc": "AI 将阅读您的文档，几秒内生成清晰的结构化摘要。",
+      "step3Title": "升级解锁更多",
+      "step3Desc": "免费账户每天 5 次摘要。升级 Pro 即可无限使用并解锁高级功能。"
+    },
+    "skip": "跳过",
+    "next": "下一步",
+    "getStarted": "知道了！"
   },
   "documents": {
     "historyTitle": "文档历史",

@@ -179,7 +179,18 @@
       "resultsDesc": "Use PDFs with clear text. Scanned documents may have lower accuracy.",
       "secure": "Secure Processing",
       "secureDesc": "Your documents are encrypted and automatically deleted after processing."
-    }
+    },
+    "onboarding": {
+      "step1Title": "Upload Your PDF",
+      "step1Desc": "Drag and drop any PDF file onto the upload area. We support files up to 20MB in size.",
+      "step2Title": "AI Generates Summary",
+      "step2Desc": "Our AI reads your document and produces a clear, structured summary in seconds.",
+      "step3Title": "Upgrade for More",
+      "step3Desc": "Free accounts get 5 summaries per day. Upgrade to Pro for unlimited access and advanced features."
+    },
+    "skip": "Skip",
+    "next": "Next",
+    "getStarted": "Got it!"
   },
   "documents": {
     "historyTitle": "Document History",

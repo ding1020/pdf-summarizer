@@ -10,11 +10,13 @@
     "error": "Error",
     "success": "Éxito",
     "learnMore": "Más Información",
-    "contact": "Contáctanos"
+    "contact": "Contáctanos",
+    "selectLanguage": "Seleccionar idioma"
   },
   "nav": {
     "features": "Características",
     "pricing": "Precios",
+    "help": "Ayuda",
     "howItWorks": "Cómo Funciona",
     "dashboard": "Panel",
     "logout": "Cerrar Sesión"
@@ -38,28 +40,16 @@
   "features": {
     "title": "¿Por Qué Elegir PDF Summary?",
     "subtitle": "Nuestra plataforma impulsada por IA hace que el análisis de documentos sea más rápido y fácil que nunca.",
-    "fast": {
-      "title": "Ultra Rápido",
-      "desc": "Obtén resúmenes completos en segundos. Nuestra IA optimizada procesa documentos al instante, ahorrándote horas de lectura."
-    },
-    "secure": {
-      "title": "Seguro y Privado",
-      "desc": "Tus documentos están cifrados y se procesan de forma segura. Nunca compartimos tus datos con terceros."
-    },
-    "free": {
-      "title": "Gratis para Empezar",
-      "desc": "Obtén 5 resúmenes gratis cada día. Sin tarjeta de crédito requerida. Actualiza solo cuando lo necesites."
-    }
+    "fast": { "title": "Ultra Rápido", "desc": "Obtén resúmenes completos en segundos. Nuestra IA optimizada procesa documentos al instante, ahorrándote horas de lectura." },
+    "secure": { "title": "Seguro y Privado", "desc": "Tus documentos están cifrados y se procesan de forma segura. Nunca compartimos tus datos con terceros." },
+    "free": { "title": "Gratis para Empezar", "desc": "Obtén 5 resúmenes gratis cada día. Sin tarjeta de crédito requerida. Actualiza solo cuando lo necesites." }
   },
   "howItWorks": {
     "title": "Cómo Funciona",
     "subtitle": "Tres simples pasos para obtener información de tus PDFs",
-    "step1Title": "Crear Cuenta",
-    "step1Desc": "Regístrate en segundos solo con tu email. Sin tarjeta de crédito.",
-    "step2Title": "Subir PDF",
-    "step2Desc": "Arrastra y suelta tu archivo PDF o haz clic para explorar. Soporta archivos hasta 20MB.",
-    "step3Title": "Obtener Resumen",
-    "step3Desc": "Recibe un resumen completo generado por IA en segundos."
+    "step1Title": "Crear Cuenta", "step1Desc": "Regístrate en segundos solo con tu email. Sin tarjeta de crédito.",
+    "step2Title": "Subir PDF", "step2Desc": "Arrastra y suelta tu archivo PDF o haz clic para explorar. Soporta archivos hasta 20MB.",
+    "step3Title": "Obtener Resumen", "step3Desc": "Recibe un resumen completo generado por IA en segundos."
   },
   "cta": {
     "title": "¿Listo para ahorrar tiempo?",
@@ -70,37 +60,18 @@
     "title": "Precios Simples y Transparentes",
     "subtitle": "Elige el plan que se ajuste a tus necesidades. Actualiza cuando quieras.",
     "mostPopular": "Más Popular",
+    "bestValue": "Mejor Valor",
     "free": {
-      "name": "Gratis",
-      "price": "€0",
-      "period": "para siempre",
-      "description": "Perfecto para empezar",
-      "features": [
-        "5 resúmenes de PDF por día",
-        "Resúmenes IA básicos",
-        "Historial de documentos (7 días)",
-        "Soporte por email"
-      ],
-      "limitations": [
-        "Sin documentos largos",
-        "Sin funciones de exportación"
-      ],
+      "name": "Gratis", "price": "€0", "period": "para siempre", "description": "Perfecto para empezar",
+      "features": ["5 resúmenes de PDF por día", "Resúmenes IA básicos", "Historial de documentos (7 días)", "Soporte por email"],
+      "limitations": ["Sin documentos largos", "Sin funciones de exportación"],
       "button": "Plan Actual"
     },
     "pro": {
-      "name": "Pro",
-      "price": "€9",
-      "period": "/mes",
-      "description": "Para usuarios avanzados",
-      "features": [
-        "Resúmenes PDF ilimitados",
-        "IA avanzada con mejor calidad",
-        "Historial de documentos ilimitado",
-        "Exportar a Word/PDF",
-        "Soporte prioritario",
-        "Documentos más largos (hasta 200 páginas)"
-      ],
-      "button": "Actualizar a Pro"
+      "name": "Pro", "price": "€9", "yearlyPrice": "€79", "period": "/mes", "yearlyPeriod": "/año (Ahorra 27%)",
+      "description": "Para usuarios avanzados y profesionales",
+      "features": ["Resúmenes PDF ilimitados", "IA avanzada con mejor calidad", "Historial de documentos ilimitado", "Exportar a Word/PDF", "Soporte prioritario", "Documentos más largos (hasta 200 páginas)"],
+      "button": "Actualizar a Pro", "pricePerMonth": "Equivalente a €6,58/mes"
     },
     "faq": {
       "title": "Preguntas Frecuentes",
@@ -110,29 +81,63 @@
       "paymentAnswer": "Aceptamos todas las principales tarjetas de crédito a través de nuestro socio de pago seguro, Paddle.",
       "trial": "¿Hay una prueba gratuita?",
       "trialAnswer": "Nuestro plan Gratis te permite probar el servicio sin compromiso. Actualiza a Pro cuando estés listo."
-    }
+    },
+    "badges": { "secure": "Pago Seguro", "poweredBy": "Ofrecido por Paddle", "cancel": "Cancela Cuando Quieras", "support": "Soporte 24/7" },
+    "billing": { "monthly": "Mensual", "yearly": "Anual", "savePercent": "Ahorra 27%" },
+    "errors": {
+      "paymentFailed": "Pago fallido. Verifica los datos de tu tarjeta e intenta de nuevo.",
+      "cardDeclined": "Tu tarjeta fue rechazada. Prueba con otro método de pago.",
+      "insufficientFunds": "Fondos insuficientes. Prueba con otra tarjeta.",
+      "configError": "El sistema de pago no está disponible temporalmente. Intenta más tarde.",
+      "generic": "Algo salió mal. Intenta de nuevo.",
+      "notConfigured": "El sistema de pago está en configuración. Contacta al soporte para asistencia."
+    },
+    "processing": "Procesando...",
+    "securePayment": "Pago seguro a través de Paddle",
+    "socialProof": { "line1": "Con la confianza de más de 10.000 profesionales", "line2": "Únete a miles de investigadores, estudiantes y profesionales de negocios" },
+    "questions": "¿Preguntas?",
+    "contactUs": "Contáctanos"
+  },
+  "guest": {
+    "welcomeTitle": "Prueba PDF Summarizer Gratis",
+    "welcomeDesc": "Sube tu PDF y obtén un resumen con IA al instante, sin necesidad de registrarte.",
+    "tryForFree": "Estás usando la prueba gratuita. No se requiere cuenta.",
+    "signUpToSave": "Regístrate para guardar tu historial y desbloquear más funciones.",
+    "createAccountTitle": "¿Quieres guardar tus resúmenes?",
+    "createAccountDesc": "Crea una cuenta gratuita para seguir tu historial, obtener 5 resúmenes diarios y desbloquear funciones Pro."
   },
   "dashboard": {
     "welcome": "Bienvenido de nuevo",
     "subtitle": "Sube documentos PDF y obtén resúmenes impulsados por IA al instante.",
-    "uploadTitle": "Sube Tu PDF",
-    "uploadSubtitle": "Formato soportado: PDF (máx 20MB)",
-    "historyTitle": "Tus Resúmenes",
-    "historySubtitle": "Ver y gestionar tus resúmenes de PDF anteriores",
+    "uploadTitle": "Sube Tu PDF", "uploadSubtitle": "Formato soportado: PDF (máx 20MB)",
+    "historyTitle": "Tus Resúmenes", "historySubtitle": "Ver y gestionar tus resúmenes de PDF anteriores",
     "dailyLimit": "Gratis: 5 resúmenes/día",
-    "signInRequired": "Inicio de Sesión Requerido",
-    "signInDesc": "Por favor inicia sesión para acceder a tu panel y comenzar a resumir PDFs.",
-    "subscription": "Suscripción",
+    "signInRequired": "¡Bienvenido! Empecemos",
+    "signInDesc": "Crea una cuenta gratuita para empezar a resumir tus PDFs al instante. Sin tarjeta de crédito.",
+    "signUpFree": "Regístrate Gratis", "haveAccount": "¿Ya tienes cuenta?", "orSignIn": "Iniciar Sesión",
+    "subscription": "Suscripción", "proUnlimited": "Pro - Ilimitado",
+    "summariesToday": "{used}/{limit} resúmenes hoy", "upgrade": "Actualizar", "signOut": "Cerrar Sesión",
+    "dailyUsage": "Uso Diario", "xOfYUsed": "{used} de {limit} usados",
+    "dailyLimitReached": "Has alcanzado tu límite diario. Actualiza a Pro para resúmenes ilimitados.",
     "tips": {
-      "results": "Mejores Resultados",
-      "resultsDesc": "Usa PDFs con texto claro. Los documentos escaneados pueden tener menor precisión.",
-      "secure": "Procesamiento Seguro",
-      "secureDesc": "Tus documentos están cifrados y se eliminan automáticamente después del procesamiento."
-    }
+      "results": "Mejores Resultados", "resultsDesc": "Usa PDFs con texto claro. Los documentos escaneados pueden tener menor precisión.",
+      "secure": "Procesamiento Seguro", "secureDesc": "Tus documentos están cifrados y se eliminan automáticamente después del procesamiento."
+    },
+    "onboarding": {
+      "step1Title": "Sube tu PDF",
+      "step1Desc": "Arrastra y suelta cualquier archivo PDF en el área de carga. Máximo 20 MB.",
+      "step2Title": "IA genera resumen",
+      "step2Desc": "Nuestra IA lee tu documento y genera un resumen estructurado en segundos.",
+      "step3Title": "Mejora para más",
+      "step3Desc": "Cuentas gratuitas: 5 resúmenes/día. Actualiza a Pro para acceso ilimitado y funciones avanzadas."
+    },
+    "skip": "Saltar",
+    "next": "Siguiente",
+    "getStarted": "¡Entendido!"
   },
   "documents": {
     "historyTitle": "Historial de Documentos",
-    "confirmDelete": "¿Está seguro de que desea eliminar este documento?",
+    "confirmDelete": "¿Seguro que deseas eliminar este documento?",
     "noDocuments": "Aún no hay documentos. ¡Sube tu primer PDF!",
     "selectToView": "Selecciona un documento para ver el resumen",
     "generatingSummary": "Generando resumen...",
@@ -155,12 +160,192 @@
     "analyzing": "Analizando documento...",
     "analyzingDesc": "Esto puede tomar unos segundos",
     "summaryHere": "El resumen aparecerá aquí",
-    "cancel": "Cancelar"
+    "cancel": "Cancelar",
+    "onlyPdfError": "Solo se permiten archivos PDF",
+    "uploadFailed": "Carga fallida",
+    "summarizeFailed": "Error al generar el resumen",
+    "streamFailed": "Error al leer el flujo de datos",
+    "needHelp": "¿Necesitas ayuda con la carga de PDF?",
+    "errorTitle": "Error"
   },
   "footer": {
-    "privacy": "Privacidad",
-    "terms": "Términos",
+    "brand": "PDF Summary", "pricing": "Precios",
+    "privacy": "Privacidad", "terms": "Términos", "refund": "Reembolso",
     "copyright": "PDF Summary. Todos los derechos reservados."
+  },
+  "feedback": {
+    "title": "Envíanos tu opinión",
+    "categoryLabel": "¿De qué se trata?",
+    "messageLabel": "Tu mensaje",
+    "messagePlaceholder": "Cuéntanos qué piensas: informes de errores, sugerencias de funciones o comentarios generales...",
+    "minChars": "Al menos 10 caracteres",
+    "submit": "Enviar Comentarios",
+    "submitting": "Enviando...",
+    "successTitle": "¡Gracias!",
+    "successMessage": "Hemos recibido tu comentario y te contactaremos si es necesario.",
+    "submitAnother": "Enviar otro",
+    "errorMessage": "Algo salió mal. Intenta de nuevo.",
+    "categories": { "general": "General", "bug": "Error", "feature": "Función", "billing": "Facturación" }
+  },
+  "error": {
+    "title": "Algo salió mal",
+    "description": "Ocurrió un error inesperado. Intenta de nuevo.",
+    "boundaryDescription": "Encontramos un error inesperado. Esto ha sido reportado y lo solucionaremos lo antes posible.",
+    "errorDetails": "Detalles del Error (Solo Desarrollo)",
+    "contactSupport": "contactar al soporte",
+    "ifKeepsHappening": "Si esto sigue ocurriendo, por favor ",
+    "tryAgain": "Intentar de Nuevo",
+    "goHome": "Ir al Inicio"
+  },
+  "notFound": {
+    "title": "Página No Encontrada",
+    "description": "La página que buscas no existe o ha sido movida.",
+    "goHome": "Ir al Inicio"
+  },
+  "help": {
+    "title": "Centro de Ayuda",
+    "subtitle": "Encuentra respuestas a preguntas frecuentes y obtén soporte",
+    "quickActions": "Acciones Rápidas",
+    "emailSupport": "Soporte por Email",
+    "emailSupportDesc": "Obtén ayuda por email",
+    "upgradePro": "Actualizar a Pro",
+    "upgradeProDesc": "Desbloquea acceso ilimitado",
+    "faqTitle": "Preguntas Frecuentes",
+    "faq1q": "¿Qué formatos de archivo son compatibles?",
+    "faq1a": "Actualmente solo admitimos archivos PDF. Asegúrate de que tu PDF contenga texto seleccionable; los documentos escaneados pueden no funcionar correctamente.",
+    "faq2q": "¿Cuál es el tamaño máximo de archivo?",
+    "faq2a": "Los usuarios gratuitos pueden subir PDFs de hasta 20MB. Los usuarios Pro tienen acceso a archivos más grandes (hasta 50MB) y documentos más largos (hasta 200 páginas).",
+    "faq3q": "¿Cómo funciona el límite diario?",
+    "faq3a": "Los usuarios gratuitos obtienen 5 resúmenes de PDF por día. Este límite se restablece a medianoche (UTC). Los usuarios Pro tienen acceso ilimitado.",
+    "faq4q": "¿Puedo cancelar mi suscripción en cualquier momento?",
+    "faq4a": "Sí, puedes cancelar tu suscripción en cualquier momento a través de tu portal de facturación. Seguirás teniendo acceso hasta el final de tu período de facturación.",
+    "faq5q": "¿Mis datos están seguros?",
+    "faq5a": "Absolutamente. Todos tus documentos están encriptados y se procesan de forma segura. Nunca compartimos tus datos con terceros. Los archivos subidos se eliminan automáticamente después del procesamiento.",
+    "faq6q": "¿Qué pasa si falla la carga de mi PDF?",
+    "faq6a": "Si la carga falla, verifica: 1) El archivo está en formato PDF, 2) El tamaño del archivo es inferior a 20MB, 3) Tu conexión a internet es estable. Si los problemas persisten, contacta al soporte.",
+    "faq7q": "¿Por qué mi resumen está incompleto?",
+    "faq7a": "Para documentos muy largos, procesamos hasta 15.000 caracteres. Para resúmenes completos de PDFs extensos, actualiza a Pro.",
+    "faq8q": "¿Puedo exportar mis resúmenes?",
+    "faq8a": "Los usuarios Pro pueden exportar resúmenes en múltiples formatos, incluyendo PDF y Word. Los usuarios gratuitos pueden copiar el texto del resumen directamente.",
+    "footerLinks": { "privacy": "Política de Privacidad", "terms": "Términos del Servicio", "refund": "Política de Reembolso" }
+  },
+  "legal": {
+    "cookies": {
+      "title": "Política de Cookies",
+      "updated": "Última actualización",
+      "whatAre": "¿Qué son las Cookies?",
+      "whatAreDesc": "Las cookies son pequeños archivos de texto que se colocan en tu ordenador o dispositivo móvil cuando visitas nuestro sitio web. Nos ayudan a ofrecerte una mejor experiencia y permiten que ciertas funciones funcionen correctamente.",
+      "howWeUse": "Cómo Usamos las Cookies",
+      "essential": "Cookies Esenciales",
+      "essentialDesc": "Necesarias para que el sitio web funcione correctamente. Incluyen cookies de autenticación, cookies de seguridad y cookies necesarias para recordar tus preferencias.",
+      "analytics": "Cookies de Análisis",
+      "analyticsDesc": "Nos ayudan a entender cómo los visitantes interactúan con nuestro sitio web recopilando información anónima. Esto nos ayuda a mejorar nuestro servicio.",
+      "auth": "Cookies de Autenticación",
+      "authDesc": "Utilizadas por Clerk (nuestro proveedor de autenticación) para mantener tu sesión de inicio de sesión y autenticarte de forma segura.",
+      "thirdParty": "Cookies de Terceros",
+      "thirdPartyDesc": "Utilizamos servicios de terceros que también pueden establecer cookies:",
+      "clerk": "Autenticación y gestión de sesiones",
+      "paddle": "Procesamiento de pagos",
+      "vercel": "Alojamiento web y análisis",
+      "managing": "Gestionar Cookies",
+      "managingDesc": "La mayoría de los navegadores web te permiten controlar las cookies a través de su configuración. Sin embargo, deshabilitar las cookies puede afectar la funcionalidad de nuestro sitio web.",
+      "updates": "Actualizaciones de esta Política",
+      "updatesDesc": "Podemos actualizar esta Política de Cookies ocasionalmente. Cualquier cambio se publicará en esta página.",
+      "contact": "Contáctanos",
+      "contactDesc": "Si tienes preguntas sobre nuestro uso de cookies, contáctanos en"
+    },
+    "privacy": {
+      "title": "Política de Privacidad",
+      "metaDescription": "Política de Privacidad de PDF Summary, herramienta de resumen de PDF con IA",
+      "updated": "Última actualización",
+      "s1Title": "1. Información que Recopilamos", "s1Intro": "Recopilamos información que nos proporcionas directamente:",
+      "s1AccountLabel": "Información de la Cuenta", "s1Account": "Dirección de correo electrónico, nombre y credenciales de autenticación",
+      "s1UploadLabel": "Archivos Subidos", "s1Upload": "Documentos PDF que subes para resumir",
+      "s1UsageLabel": "Datos de Uso", "s1Usage": "Cómo interactúas con nuestro Servicio",
+      "s1PaymentLabel": "Información de Pago", "s1Payment": "Gestionada por nuestro procesador de pagos (Paddle)",
+      "s2Title": "2. Cómo Usamos tu Información", "s2Intro": "Usamos la información recopilada para:",
+      "s2a": "Proporcionar y mantener el Servicio", "s2b": "Procesar pagos y gestionar suscripciones",
+      "s2c": "Mejorar y optimizar nuestro Servicio", "s2d": "Enviarte comunicaciones relacionadas con el servicio",
+      "s2e": "Detectar y prevenir fraude o abuso",
+      "s3Title": "3. Almacenamiento y Seguridad de Datos",
+      "s3Body": "Tus archivos PDF se procesan temporalmente y se eliminan después de completar el resumen. Implementamos medidas de seguridad adecuadas para proteger tu información personal. Todos los datos se cifran en tránsito mediante TLS/SSL.",
+      "s4Title": "4. Cookies y Seguimiento", "s4Intro": "Utilizamos cookies y tecnologías de seguimiento similares para:",
+      "s4a": "Mantener tu sesión iniciada", "s4b": "Recordar tus preferencias", "s4c": "Entender cómo usas nuestro Servicio",
+      "s5Title": "5. Servicios de Terceros", "s5Intro": "Utilizamos servicios de terceros:",
+      "s5Clerk": "Autenticación y gestión de usuarios", "s5Paddle": "Procesamiento de pagos",
+      "s5AI": "DeepSeek, Groq, SiliconFlow para resúmenes",
+      "s5Note": "Estos servicios tienen sus propias políticas de privacidad que rigen el uso de tu información.",
+      "s6Title": "6. Retención de Datos",
+      "s6Body": "Conservamos la información de tu cuenta mientras esté activa. Puedes solicitar la eliminación de tu cuenta y datos asociados en cualquier momento.",
+      "s7Title": "7. Tus Derechos", "s7Intro": "Dependiendo de tu ubicación, puedes tener derecho a:",
+      "s7a": "Acceder a tus datos personales", "s7b": "Corregir datos inexactos", "s7c": "Eliminar tus datos",
+      "s7d": "Exportar tus datos", "s7e": "Oponerte al procesamiento",
+      "s8Title": "8. Privacidad Infantil",
+      "s8Body": "Nuestro Servicio no está destinado a usuarios menores de 16 años. No recopilamos información de niños a sabiendas.",
+      "s9Title": "9. Cambios en esta Política",
+      "s9Body": "Podemos actualizar esta Política de Privacidad ocasionalmente. Te notificaremos cambios significativos por correo electrónico o a través del Servicio.",
+      "s10Title": "10. Contacto", "s10Body1": "Para preguntas relacionadas con la privacidad, contáctanos por correo electrónico en"
+    },
+    "terms": {
+      "title": "Términos del Servicio",
+      "metaDescription": "Términos del Servicio de PDF Summary, herramienta de resumen de PDF con IA",
+      "updated": "Última actualización",
+      "s1Title": "1. Aceptación de los Términos", "s1Body": "Al acceder y usar PDF Summary (\"el Servicio\"), aceptas y aceptas estar sujeto a los términos de este acuerdo.",
+      "s2Title": "2. Descripción del Servicio", "s2Body": "PDF Summary proporciona servicios de resumen de documentos con IA. Extraemos texto de documentos PDF y generamos resúmenes concisos utilizando tecnología de inteligencia artificial.",
+      "s3Title": "3. Cuentas de Usuario", "s3Body": "Para acceder a ciertas funciones, debes crear una cuenta. Eres responsable de mantener la confidencialidad de tus credenciales.",
+      "s4Title": "4. Suscripción y Pago", "s4Body": "Las suscripciones de pago proporcionan acceso a funciones premium. Las suscripciones se facturan según el plan seleccionado. Todas las tarifas no son reembolsables excepto cuando lo exija la ley.",
+      "s5Title": "5. Uso Aceptable", "s5Intro": "Aceptas no:", "s5a": "Usar el Servicio con fines ilegales",
+      "s5b": "Subir archivos o contenido malicioso", "s5c": "Intentar obtener acceso no autorizado", "s5d": "Revender o redistribuir el Servicio",
+      "s6Title": "6. Propiedad Intelectual", "s6Body": "El Servicio y su contenido original son propiedad de PDF Summary y están protegidos por leyes internacionales de derechos de autor.",
+      "s7Title": "7. Limitación de Responsabilidad", "s7Body": "PDF Summary no será responsable de daños indirectos, incidentales, especiales o consecuentes que resulten del uso o la imposibilidad de usar el Servicio.",
+      "s8Title": "8. Cambios en los Términos", "s8Body": "Nos reservamos el derecho de modificar estos términos en cualquier momento. Notificaremos cambios significativos por correo electrónico o a través del Servicio.",
+      "s9Title": "9. Contacto", "s9Body1": "Si tienes preguntas sobre estos Términos, contáctanos por correo electrónico en"
+    },
+    "refund": {
+      "title": "Política de Reembolso",
+      "metaDescription": "Política de Reembolso de PDF Summary, herramienta de resumen de PDF con IA",
+      "updated": "Última actualización",
+      "s1Title": "1. Elegibilidad de Reembolso", "s1Intro": "Queremos que estés satisfecho con PDF Summary. Debido a la naturaleza de los productos digitales, ofrecemos reembolsos en las siguientes circunstancias:",
+      "s1TechLabel": "Problemas Técnicos", "s1Tech": "Si el Servicio no funciona como se describe y no podemos resolver el problema",
+      "s1DupLabel": "Cargos Duplicados", "s1Dup": "Si se te cobró varias veces por la misma suscripción",
+      "s1UnauthLabel": "Cargos No Autorizados", "s1Unauth": "Si no autorizaste el pago",
+      "s2Title": "2. Cómo Solicitar un Reembolso", "s2Body1": "Para solicitar un reembolso, contáctanos por correo electrónico en",
+      "s2Body2": " con:", "s2a": "Tu dirección de correo electrónico de la cuenta", "s2b": "ID del pedido o suscripción", "s2c": "Motivo de la solicitud de reembolso",
+      "s3Title": "3. Proceso de Reembolso", "s3Intro": "Una vez recibida tu solicitud de reembolso:",
+      "s3a": "Revisaremos tu solicitud en un plazo de 3 a 5 días hábiles",
+      "s3b": "Si se aprueba, los reembolsos se procesan a través de nuestro proveedor de pagos (Paddle)",
+      "s3c": "Los reembolsos suelen aparecer en un plazo de 5 a 10 días hábiles, según tu banco",
+      "s4Title": "4. Cancelación", "s4Intro": "Puedes cancelar tu suscripción en cualquier momento. Después de la cancelación:",
+      "s4a": "Conservarás el acceso a las funciones premium hasta el final de tu período de facturación actual",
+      "s4b": "No se realizarán más cargos después de la cancelación",
+      "s4c": "Las suscripciones no se renuevan automáticamente después de la cancelación",
+      "s5Title": "5. Excepciones", "s5Intro": "Es posible que no haya reembolsos para:",
+      "s5a": "Cambio de opinión después de usar el Servicio",
+      "s5b": "Solicitudes realizadas más de 14 días después de la compra original",
+      "s5c": "Violación de nuestros Términos del Servicio",
+      "s6Title": "6. Contacto", "s6Body1": "Para preguntas relacionadas con reembolsos, contáctanos por correo electrónico en"
+    }
+  },
+  "subscription": {
+    "title": "Gestión de Suscripción",
+    "subtitle": "Administra tu plan y configuración de facturación",
+    "currentPlan": "Plan Actual", "planFree": "Gratis", "planPro": "Pro",
+    "billedAnnually": "Facturado anualmente", "billedMonthly": "Facturado mensualmente",
+    "freeLimit": "5 resúmenes por día", "renews": "Se renueva", "statusActive": "Activo",
+    "upgradeTitle": "Actualizar a Pro",
+    "upgradeDesc": "Obtén resúmenes ilimitados, soporte prioritario y más funciones.",
+    "upgradeButton": "Actualizar Ahora", "processing": "Procesando...",
+    "savePercent": "Ahorra 27%", "perMonth": "/mes",
+    "billingTitle": "Configuración de Facturación",
+    "billingDesc": "Accede a tu portal de facturación para administrar métodos de pago y ver facturas.",
+    "billingButton": "Abrir Portal de Facturación",
+    "cancelTitle": "Cancelar Suscripción",
+    "cancelDesc": "Cancela tu suscripción en cualquier momento. Seguirás teniendo acceso hasta el final de tu período de facturación.",
+    "cancelButton": "Cancelar Suscripción",
+    "helpText": "¿Necesitas ayuda? Contáctanos en",
+    "errorGeneric": "Algo salió mal. Intenta de nuevo.",
+    "errorPortal": "Error al acceder al portal del cliente",
+    "errorPaymentConfig": "El sistema de pago está en configuración. Contacta al soporte."
   },
   "seo": {
     "homeTitle": "PDF Resumen AI - Obtén Información en Segundos",
