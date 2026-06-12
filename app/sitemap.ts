@@ -10,6 +10,9 @@ const routesWithoutLocale = ["/sign-in", "/sign-up"];
 // Routes with locale prefix
 const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund", "/help", "/cookies"];
 
+// Stable build date — prevents unnecessary sitemap churn on every deploy
+const BUILD_DATE = "2026-06-11";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapRoutes: MetadataRoute.Sitemap = [];
 
@@ -17,7 +20,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   routesWithoutLocale.forEach((route) => {
     sitemapRoutes.push({
       url: `${baseUrl}${route}`,
-      lastModified: new Date(),
+      lastModified: new Date(BUILD_DATE),
       changeFrequency: "weekly" as const,
       priority: 0.6,
     });
@@ -28,7 +31,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.forEach((locale) => {
       sitemapRoutes.push({
         url: `${baseUrl}/${locale}${route}`,
-        lastModified: new Date(),
+        lastModified: new Date(BUILD_DATE),
         changeFrequency: "weekly" as const,
         priority: route === "" ? 1 : 0.8,
         alternates: {

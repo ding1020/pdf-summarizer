@@ -4,7 +4,7 @@ import { getAIProvider, getSystemPrompt, getModelForProvider, type AIProvider } 
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
-import { summarizeSchema } from "@/lib/schemas";
+import { summarizeSchema, type SummarizeInput } from "@/lib/schemas";
 
 export async function POST(req: NextRequest) {
   try {
@@ -44,7 +44,69 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { documentId, content, provider = "deepseek", language = "multilingual" } = parsed.data;
+    const { documentId, content, provider = "deepseek", language = "multilingual", streamSummary } = parsed.data as SummarizeInput & { streamSummary?: string };
+
+    // ==================== Daily Usage Limit Enforcement ====================
+    const FREE_DAILY_LIMIT = 5;
+    if (!isGuest) {
+      try {
+        const userRecord = await prisma.user.findUnique({
+          where: { clerkId: userId! },
+          select: { id: true, subscriptionStatus: true },
+        });
+        if (userRecord && userRecord.subscriptionStatus !== "pro" && userRecord.subscriptionStatus !== "active") {
+          const startOfDay = new Date();
+          startOfDay.setUTCHours(0, 0, 0, 0);
+          const todayCount = await prisma.document.count({
+            where: {
+              userId: userRecord.id,
+              summary: { not: null },
+              createdAt: { gte: startOfDay },
+            },
+          });
+          if (todayCount >= FREE_DAILY_LIMIT) {
+            return NextResponse.json(
+              {
+                error: "Daily free limit reached (5/day). Upgrade to Pro for unlimited access.",
+                code: "usage_limit_reached",
+                upgradeUrl: "/pricing",
+              },
+              {
+                status: 402,
+                headers: { ...getRateLimitHeaders(rateLimitResult), "Content-Type": "application/json" },
+              }
+            );
+          }
+        }
+      } catch (limitError) {
+        logger.warn("Failed to check daily usage limit", {
+          error: limitError instanceof Error ? limitError.message : String(limitError),
+        });
+        // Don't block the request on limit-check failure — fail open
+      }
+    }
+
+    // If a stream-generated summary was already provided, skip AI re-call
+    if (streamSummary) {
+      logger.info("Summary provided from stream — skipping AI re-generation", { documentId });
+      
+      // Still save to DB if signed-in
+      if (!isGuest && documentId) {
+        try {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: { summary: streamSummary, status: "completed" },
+          });
+        } catch (dbError) {
+          logger.warn("Failed to save stream summary to DB", { documentId });
+        }
+      }
+
+      return NextResponse.json(
+        { success: true, summary: streamSummary, documentId, provider: "stream" },
+        { headers: getRateLimitHeaders(rateLimitResult) }
+      );
+    }
 
     const maxLength = 15000;
     const truncatedContent = content.length > maxLength 

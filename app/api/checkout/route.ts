@@ -12,8 +12,9 @@ let _paddleClient: PaddleType | null = null;
 async function getPaddleClient(): Promise<PaddleType> {
   if (_paddleClient) return _paddleClient;
   const { Paddle, Environment } = await import("@paddle/paddle-node-sdk");
+  // PADDLE_ENVIRONMENT controls sandbox/production independently of NODE_ENV
   const environment =
-    (process.env.PADDLE_ENVIRONMENT === "production" || process.env.NODE_ENV === "production")
+    process.env.PADDLE_ENVIRONMENT === "production"
       ? Environment.production
       : Environment.sandbox;
   _paddleClient = new Paddle(process.env.PADDLE_SECRET_KEY!, { environment });
@@ -88,21 +89,31 @@ export async function POST(req: NextRequest) {
 
     const paddle = await getPaddleClient();
 
-    // 创建 Paddle 客户链接结
-    // eslint-disable-next-line
-    const customer = await (paddle as any).customers.create({
-      email: user.email,
-      name: user.email.split("@")[0],
-      customData: {
-        clerkId,
-        dbUserId: String(user.id),
-      },
-    });
+    // Reuse existing Paddle customer if already created
+    let paddleCustomerId = user.paddleCustomerId;
+    if (!paddleCustomerId) {
+      // eslint-disable-next-line
+      const customer = await (paddle as any).customers.create({
+        email: user.email,
+        name: user.email.split("@")[0],
+        customData: {
+          clerkId,
+          dbUserId: String(user.id),
+        },
+      });
+      paddleCustomerId = customer.id;
+
+      // Save the Paddle customer ID to our database for future reuse
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { paddleCustomerId: customer.id },
+      });
+    }
 
     // 创建结账会话
     // eslint-disable-next-line
     const checkoutSession = await (paddle as any).checkouts.create({
-      customerId: customer.id,
+      customerId: paddleCustomerId,
       items: [
         {
           priceId: priceId,
@@ -115,6 +126,7 @@ export async function POST(req: NextRequest) {
         billingCycle,
       },
       successUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/dashboard?payment=success`,
+      cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pricing?payment=cancelled`,
     });
 
     logger.info("[Checkout] Created checkout session", { clerkId, sessionId: checkoutSession.id });

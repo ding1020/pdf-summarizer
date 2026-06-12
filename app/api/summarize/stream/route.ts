@@ -171,6 +171,44 @@ export async function POST(req: NextRequest) {
       ? content.substring(0, maxLength) + "\n\n[Content truncated...]"
       : content;
 
+  // ── Daily Usage Limit Enforcement (free users: 5/day) ──
+  const FREE_DAILY_LIMIT = 5;
+  if (userId) {
+    try {
+      const { prisma: prismaDb } = await import("@/lib/db");
+      const userRecord = await prismaDb.user.findUnique({
+        where: { clerkId: userId },
+        select: { id: true, subscriptionStatus: true },
+      });
+      if (userRecord && userRecord.subscriptionStatus !== "pro" && userRecord.subscriptionStatus !== "active") {
+        const startOfDay = new Date();
+        startOfDay.setUTCHours(0, 0, 0, 0);
+        const todayCount = await prismaDb.document.count({
+          where: {
+            userId: userRecord.id,
+            summary: { not: null },
+            createdAt: { gte: startOfDay },
+          },
+        });
+        if (todayCount >= FREE_DAILY_LIMIT) {
+          return new Response(
+            JSON.stringify({
+              error: "Daily free limit reached (5/day). Upgrade to Pro for unlimited access.",
+              code: "usage_limit_reached",
+              upgradeUrl: "/pricing",
+            }),
+            { status: 402, headers: { "Content-Type": "application/json" } },
+          );
+        }
+      }
+    } catch (limitError) {
+      logger.warn("Failed to check daily usage limit in stream", {
+        error: limitError instanceof Error ? limitError.message : String(limitError),
+      });
+      // Fail open — don't block on limit-check failure
+    }
+  }
+
   // ── Try providers in fallback order ──
   const startIndex = FALLBACK_CHAIN.findIndex((p) => p.provider === provider);
   const orderedProviders =

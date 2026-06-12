@@ -181,8 +181,8 @@ export const RATE_LIMITS = {
   auth: { windowMs: 60_000, maxRequests: 10 } as RateLimitConfig,
   /** Checkout: 5 req/min */
   checkout: { windowMs: 60_000, maxRequests: 5 } as RateLimitConfig,
-  /** Guest users: 3 req/min */
-  guest: { windowMs: 60_000, maxRequests: 3 } as RateLimitConfig,
+  /** Guest users: 5 req/min (upload + stream + save ≈ 3 req, plus safety margin) */
+  guest: { windowMs: 60_000, maxRequests: 5 } as RateLimitConfig,
 };
 
 // ── Helpers ──

@@ -1,4 +1,4 @@
- import { Metadata } from "next";
+import { Metadata } from "next";
 
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
 

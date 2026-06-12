@@ -8,9 +8,10 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
-  // Skip type-check & lint during build (faster deploy, fix later)
-  typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
+  // TypeScript & ESLint: use strict mode for production safety
+  // If build fails due to type errors, fix them rather than ignoring
+  typescript: { ignoreBuildErrors: false },
+  eslint: { ignoreDuringBuilds: false },
 
   // pdf-parse must be bundled as server external
   serverExternalPackages: ["pdf-parse"],
@@ -22,16 +23,18 @@ const nextConfig = {
 
   // 🔒 Security headers
   async headers() {
-    // Use Clerk default *.clerk.accounts.com until custom domain SSL is issued.
-    // Once SSL is active, switch back to clerk.pdfsum.com / accounts.pdfsum.com
+    // Support both Clerk default domain and custom domain
+    // Custom domain (clerk.pdfsum.com) SSL is pending — default domain used as fallback
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.accounts.com",
+      "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.com https://clerk.pdfsum.com https://accounts.pdfsum.com https://www.googletagmanager.com",
+      "script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.com https://clerk.pdfsum.com https://accounts.pdfsum.com https://www.googletagmanager.com",
       "style-src 'self' 'unsafe-inline'",
       "img-src 'self' data: blob: https://img.clerk.com",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://*.clerk.accounts.com https://api.paddle.com",
-      "frame-src https://*.clerk.accounts.com https://checkout.paddle.com",
+      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://*.clerk.accounts.com https://clerk.pdfsum.com https://accounts.pdfsum.com https://www.google-analytics.com https://region1.google-analytics.com",
+      "frame-src https://*.clerk.accounts.com https://checkout.paddle.com https://clerk.pdfsum.com https://accounts.pdfsum.com",
+      "frame-ancestors 'none'",
       "media-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",

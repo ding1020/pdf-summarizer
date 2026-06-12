@@ -1,20 +1,22 @@
 "use client";
 
+import { useState, useCallback, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
+import dynamic from "next/dynamic";
+import { Suspense } from "react";
 
-// ── Guest auth buttons (Clerk disabled until SSL issued) ──
-// TODO: Once clerk.pdfsum.com SSL is active, restore:
-//   const AuthButtonsClient = dynamic(() => import("./AuthButtonsClient"), { ssr: false, ... });
-function GuestAuthButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
+// ── Dynamic import: Clerk auth buttons (client-only, no SSR) ──
+const AuthButtonsClient = dynamic(
+  () => import("./AuthButtonsClient"),
+  { ssr: false }
+);
+
+function LoadingSkeleton() {
   return (
     <div className="flex items-center gap-4">
-      <Link href="/sign-in" className="text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">
-        {t("common.signIn")}
-      </Link>
-      <Link href="/sign-up" className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
-        {t("common.signUp")}
-      </Link>
+      <div className="h-9 w-20 bg-gray-100 animate-pulse rounded-lg" />
+      <div className="h-9 w-24 bg-gray-100 animate-pulse rounded-lg" />
     </div>
   );
 }
@@ -23,17 +25,46 @@ function GuestAuthButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
 export default function Navigation() {
   const t = useTranslations();
   const pathname = usePathname();
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  // Close mobile menu on route change
+  useEffect(() => {
+    setMobileOpen(false);
+  }, [pathname]);
+
+  // Close mobile menu on Escape key
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [mobileOpen]);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [mobileOpen]);
 
   const isActive = (path: string) => pathname.includes(path);
 
+  const navLinks = [
+    { href: "/#features", label: t("nav.features") },
+    { href: "/pricing", label: t("nav.pricing") },
+    { href: "/help", label: t("nav.help") },
+    { href: "/#how-it-works", label: t("nav.howItWorks") },
+  ];
+
   return (
-    <nav className="bg-white border-b">
+    <nav className="bg-white border-b" aria-label="Main navigation">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-white" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
@@ -42,44 +73,79 @@ export default function Navigation() {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-8">
-            <Link
-              href="/#features"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/features") ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("nav.features")}
-            </Link>
-            <Link
-              href="/pricing"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/pricing") ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("nav.pricing")}
-            </Link>
-            <Link
-              href="/help"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/help") ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("nav.help")}
-            </Link>
-            <Link
-              href="/#how-it-works"
-              className={`text-sm font-medium transition-colors ${
-                isActive("/how-it-works") ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("nav.howItWorks")}
-            </Link>
+            {navLinks.map((link) => (
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`text-sm font-medium transition-colors ${
+                  isActive(link.href.replace("/#", "/")) ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
+                }`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </div>
 
-          {/* Auth Buttons — guest mode (Clerk SSL pending) */}
-          <GuestAuthButtons t={t} />
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex">
+            <Suspense fallback={<LoadingSkeleton />}>
+              <AuthButtonsClient />
+            </Suspense>
+          </div>
+
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setMobileOpen(!mobileOpen)}
+            className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            aria-label={mobileOpen ? "Close menu" : "Open menu"}
+            aria-expanded={mobileOpen}
+          >
+            {mobileOpen ? (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            )}
+          </button>
         </div>
       </div>
+
+      {/* Mobile Menu Overlay + Drawer */}
+      {mobileOpen && (
+        <>
+          <div
+            className="fixed inset-0 bg-black/20 z-40 md:hidden"
+            onClick={() => setMobileOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="fixed top-16 left-0 right-0 bg-white border-b shadow-lg z-50 md:hidden animate-slide-in">
+            <div className="px-4 py-4 space-y-1">
+              {navLinks.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  onClick={() => setMobileOpen(false)}
+                  className={`block px-3 py-3 rounded-lg text-base font-medium transition-colors ${
+                    isActive(link.href.replace("/#", "/"))
+                      ? "bg-blue-50 text-blue-600"
+                      : "text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+              <div className="pt-3 border-t border-gray-100 mt-3 px-3">
+                <Suspense fallback={<LoadingSkeleton />}>
+                  <AuthButtonsClient />
+                </Suspense>
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </nav>
   );
 }

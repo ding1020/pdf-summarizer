@@ -15,7 +15,8 @@ model User {
   id                   String    @id @default(uuid())
   clerkId              String    @unique
   email                String    @unique
-  subscriptionStatus   String    @default("free") // free, pro
+  paddleCustomerId     String?   @unique
+  subscriptionStatus   String    @default("free") // free, pro, past_due, canceled
   subscriptionId       String?
   paddleSubscriptionId String?
   paddlePlanId         String?
@@ -26,6 +27,7 @@ model User {
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
   documents            Document[]
+  feedbacks            Feedback[]
 }
 
 model Document {
@@ -48,6 +50,7 @@ model Document {
 model Feedback {
   id        String   @id @default(uuid())
   userId    String?
+  user      User?    @relation(fields: [userId], references: [id])
   userName  String?
   userEmail String?
   category  String   @default("general") // general, bug, feature, billing

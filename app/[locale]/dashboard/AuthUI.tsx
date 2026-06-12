@@ -5,6 +5,7 @@ import { useUser, useClerk } from "@clerk/nextjs";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 import DocumentHistory from "@/components/DocumentHistory";
+import OnboardingGuide from "@/components/OnboardingGuide";
 
 interface UsageData {
   used: number;
@@ -88,6 +89,9 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
   // === Signed-in: full header + usage + history ===
   return (
     <>
+      {/* Onboarding guide for first-time users */}
+      <OnboardingGuide />
+
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">

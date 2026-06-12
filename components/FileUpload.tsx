@@ -110,11 +110,15 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         }
       }
 
-      // Save summary to database
+      // Save summary to database (uses stream-generated summary, no re-call)
       await fetch("/api/summarize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ documentId, content }),
+        body: JSON.stringify({
+          documentId,
+          content: content.slice(0, 100), // minimal — stream already generated summary
+          streamSummary: fullSummary,     // pass stream result to avoid re-generation
+        }),
       });
     } catch (err) {
       // Handle abort error gracefully (user cancelled)

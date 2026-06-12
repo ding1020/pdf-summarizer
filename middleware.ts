@@ -2,14 +2,19 @@ import type { NextRequest } from "next/server";
 import createMiddleware from "next-intl/middleware";
 import { routing } from "./navigation";
 
-// ── i18n-ONLY middleware ──
-// Clerk is completely disabled until clerk.pdfsum.com SSL is issued.
-// The Clerk SDK crashes in Edge Runtime even with dynamic import + try/catch
-// when the custom domain is unreachable.
+// ── i18n middleware ──
+// NOTE: clerkMiddleware is intentionally NOT included here.
+// The custom domain clerk.pdfsum.com has verified DNS but its SSL cert is still Pending.
+// Adding clerkMiddleware here would crash EVERY page request in Edge Runtime.
 //
-// TODO: Once Clerk SSL is active, restore:
+// Clerk authentication is handled purely client-side via dynamic imports in:
+//   - ClientClerkProvider.tsx (ssr: false)
+//   - Navigation.tsx → AuthButtonsClient (dynamic, ssr: false)
+//   - Sign-in/Sign-up pages (already client components)
+//
+// TODO: Once clerk.pdfsum.com SSL is Active (green check), re-enable:
 //   import { clerkMiddleware } from "@clerk/nextjs/server";
-//   export default clerkMiddleware((auth, req) => createMiddleware(routing)(req));
+//   export default clerkMiddleware((auth) => (req) => intlMiddleware(req), { ... });
 
 const intlMiddleware = createMiddleware(routing);
 
