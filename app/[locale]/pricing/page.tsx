@@ -40,7 +40,7 @@ export default function PricingPage() {
       period: t("free.period"),
       description: t("free.description"),
       features: t.raw("free.features") as string[],
-      limitations: t.raw("limitations") as string[] | undefined,
+      limitations: t.raw("free.limitations") as string[] | undefined,
       buttonText: t("free.button"),
       buttonVariant: "outline" as const,
       highlighted: false,
