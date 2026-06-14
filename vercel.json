@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm run vercel-build",
+  "buildCommand": "prisma db push --skip-generate --accept-data-loss && prisma generate && next build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "regions": ["iad1"],
