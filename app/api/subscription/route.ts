@@ -20,8 +20,8 @@ export async function GET() {
       select: {
         subscriptionStatus: true,
         subscriptionEndDate: true,
-        paddleSubscriptionId: true,
-        paddlePlanId: true,
+      paddleSubscriptionId: true,  // kept for legacy data
+      paddlePlanId: true,           // kept for legacy data
         billingCycle: true,
       },
     });

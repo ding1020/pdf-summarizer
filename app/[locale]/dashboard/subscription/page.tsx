@@ -8,7 +8,6 @@ import { useState, useEffect } from "react";
 interface SubscriptionData {
   subscriptionStatus: string;
   subscriptionEndDate: string | null;
-  paddleSubscriptionId: string | null;
   billingCycle: string | null;
 }
 
@@ -16,8 +15,6 @@ export default function SubscriptionPage() {
   const t = useTranslations("subscription");
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
 
@@ -37,69 +34,14 @@ export default function SubscriptionPage() {
         setSubscription(data);
       }
     } catch {
-      // Silently handle — user sees loading state resolve
+      // silent
     } finally {
       setLoadingSubscription(false);
     }
   };
 
-  const handleManageSubscription = async () => {
-    if (!isSignedIn) {
-      router.push("/sign-in");
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const response = await fetch("/api/customer-portal", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setMessage({ type: "error", text: data.error || t("errorPortal") });
-      }
-    } catch {
-      setMessage({ type: "error", text: t("errorGeneric") });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleUpgrade = async () => {
-    if (!isSignedIn) {
-      router.push("/sign-in");
-      return;
-    }
-
-    setLoading(true);
-    setMessage(null);
-
-    try {
-      const response = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan: "pro" }),
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        setMessage({ type: "error", text: data.error || t("errorPaymentConfig") });
-      }
-    } catch {
-      setMessage({ type: "error", text: t("errorGeneric") });
-    } finally {
-      setLoading(false);
-    }
+  const handleUpgrade = () => {
+    router.push("/pricing");
   };
 
   if (!isLoaded || loadingSubscription) {
@@ -116,7 +58,7 @@ export default function SubscriptionPage() {
   }
 
   const isPro = subscription?.subscriptionStatus === "pro";
-  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
+  const supportEmail = "support@pdfsum.com";
 
   return (
     <div className="min-h-[80vh] py-12 px-4">
@@ -128,18 +70,6 @@ export default function SubscriptionPage() {
           </div>
 
           <div className="p-8">
-            {message && (
-              <div
-                className={`mb-6 p-4 rounded-lg ${
-                  message.type === "success"
-                    ? "bg-green-50 text-green-700 border border-green-200"
-                    : "bg-red-50 text-red-700 border border-red-200"
-                }`}
-              >
-                {message.text}
-              </div>
-            )}
-
             <div className="space-y-6">
               {/* Current Plan */}
               <div className="border rounded-xl p-6">
@@ -150,8 +80,8 @@ export default function SubscriptionPage() {
                       {isPro ? t("planPro") : t("planFree")}
                     </p>
                     <p className="text-gray-500 text-sm mt-1">
-                      {isPro 
-                        ? subscription?.billingCycle === "year" 
+                      {isPro
+                        ? subscription?.billingCycle === "year"
                           ? t("billedAnnually")
                           : t("billedMonthly")
                         : t("freeLimit")
@@ -164,8 +94,8 @@ export default function SubscriptionPage() {
                     )}
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    isPro 
-                      ? "bg-blue-100 text-blue-700" 
+                    isPro
+                      ? "bg-blue-100 text-blue-700"
                       : "bg-green-100 text-green-700"
                   }`}>
                     {t("statusActive")}
@@ -173,70 +103,35 @@ export default function SubscriptionPage() {
                 </div>
               </div>
 
-              {/* Upgrade Option - Only show for free users */}
+              {/* Upgrade Option */}
               {!isPro && (
                 <div className="border-2 border-blue-200 rounded-xl p-6 bg-blue-50">
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-xs font-medium rounded">
-                      {t("savePercent")}
-                    </span>
-                    <span className="text-sm text-gray-500 line-through">$108/year</span>
-                    <span className="text-lg font-bold text-gray-900">$79/year</span>
-                  </div>
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("upgradeTitle")}</h2>
-                  <p className="text-gray-600 mb-4">
-                    {t("upgradeDesc")}
-                  </p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-3xl font-bold text-gray-900">$9</span>
-                      <span className="text-gray-500">{t("perMonth")}</span>
-                    </div>
-                    <button
-                      onClick={handleUpgrade}
-                      disabled={loading}
-                      className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
-                    >
-                      {loading ? t("processing") : t("upgradeButton")}
-                    </button>
-                  </div>
+                  <p className="text-gray-600 mb-4">{t("upgradeDesc")}</p>
+                  <button
+                    onClick={handleUpgrade}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  >
+                    {t("upgradeButton")}
+                  </button>
                 </div>
               )}
 
-              {/* Billing Portal */}
-              <div className="border rounded-xl p-6">
-                <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("billingTitle")}</h2>
-                <p className="text-gray-600 mb-4">
-                  {t("billingDesc")}
-                </p>
-                <button
-                  onClick={handleManageSubscription}
-                  disabled={loading}
-                  className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
-                >
-                  {t("billingButton")}
-                </button>
-              </div>
-
-              {/* Danger Zone - Only show for pro users */}
+              {/* Pro Info */}
               {isPro && (
-                <div className="border border-red-200 rounded-xl p-6 bg-red-50">
-                  <h2 className="text-lg font-semibold text-red-700 mb-2">{t("cancelTitle")}</h2>
-                  <p className="text-gray-600 mb-4">
-                    {t("cancelDesc")}
+                <div className="border rounded-xl p-6">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("cancelTitle")}</h2>
+                  <p className="text-gray-600 mb-2">{t("cancelDesc")}</p>
+                  <p className="text-sm text-gray-500">
+                    {t("helpText")}{" "}
+                    <a href={`mailto:${supportEmail}`} className="text-blue-600 hover:underline">
+                      {supportEmail}
+                    </a>
                   </p>
-                  <button
-                    onClick={handleManageSubscription}
-                    disabled={loading}
-                    className="px-6 py-2 border border-red-300 text-red-700 rounded-lg hover:bg-red-100 transition-colors disabled:opacity-50"
-                  >
-                    {t("cancelButton")}
-                  </button>
                 </div>
               )}
             </div>
 
-            {/* Help Text */}
             <p className="text-center text-gray-500 text-sm mt-8">
               {t("helpText")}{" "}
               <a href={`mailto:${supportEmail}`} className="text-blue-600 hover:underline">

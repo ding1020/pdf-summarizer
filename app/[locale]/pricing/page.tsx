@@ -4,8 +4,8 @@ import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
+import PaymentModal from "@/components/PaymentModal";
 
-// Toast notification state
 interface Toast {
   id: string;
   message: string;
@@ -16,21 +16,20 @@ export default function PricingPage() {
   const t = useTranslations("pricing");
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
-  const [loading, setLoading] = useState<string | null>(null);
   const [selectedBilling, setSelectedBilling] = useState<"monthly" | "yearly">("monthly");
+  const [showModal, setShowModal] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
 
-  // Toast helper functions
   const showToast = (message: string, type: Toast["type"] = "info") => {
     const id = Date.now().toString();
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
-      setToasts((prev) => prev.filter((toast) => toast.id !== id));
+      setToasts((prev) => prev.filter((t) => t.id !== id));
     }, 5000);
   };
 
   const dismissToast = (id: string) => {
-    setToasts((prev) => prev.filter((toast) => toast.id !== id));
+    setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
   const plans = [
@@ -60,47 +59,16 @@ export default function PricingPage() {
     highlighted: true,
   };
 
-  const handleUpgrade = async (planName: string) => {
+  const handleUpgrade = () => {
     if (!isSignedIn) {
       router.push("/sign-in");
       return;
     }
-
-    if (planName.toLowerCase() === "pro") {
-      setLoading(planName);
-      try {
-        const response = await fetch("/api/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ 
-            plan: "pro",
-            billingCycle: selectedBilling 
-          }),
-        });
-
-        const data = await response.json();
-
-        if (data.url) {
-          window.location.href = data.url;
-        } else if (data.error) {
-          // Handle specific error codes
-          const errorMessages: Record<string, string> = {
-            payment_failed: t("errors.paymentFailed"),
-            card_declined: t("errors.cardDeclined"),
-            insufficient_funds: t("errors.insufficientFunds"),
-            configuration_error: t("errors.configError"),
-          };
-          showToast(errorMessages[data.code] || data.error, "error");
-        } else {
-          showToast(t("errors.notConfigured"), "info");
-        }
-      } catch {
-        showToast(t("errors.generic"), "error");
-      } finally {
-        setLoading(null);
-      }
-    }
+    setShowModal(true);
   };
+
+  const priceAmount = selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice;
+  const planType = selectedBilling === "yearly" ? "pro_yearly" : "pro_monthly";
 
   if (!isLoaded) {
     return (
@@ -201,65 +169,34 @@ export default function PricingPage() {
                 <ul className="mt-8 space-y-4">
                   {plan.features.map((feature, index) => (
                     <li key={index} className="flex items-start">
-                      <svg
-                        className="h-6 w-6 text-green-500 mr-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M5 13l4 4L19 7"
-                        />
+                      <svg className="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
                       <span className="text-gray-700">{feature}</span>
                     </li>
                   ))}
                   {plan.limitations?.map((limitation, index) => (
                     <li key={index} className="flex items-start opacity-50">
-                      <svg
-                        className="h-6 w-6 text-gray-400 mr-3"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M6 18L18 6M6 6l12 12"
-                        />
+                      <svg className="h-6 w-6 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                       <span className="text-gray-500">{limitation}</span>
                     </li>
                   ))}
                 </ul>
 
-                {isSignedIn ? (
-                  <button
-                    disabled
-                    className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg opacity-50 cursor-not-allowed"
-                  >
-                    {plan.buttonText}
-                  </button>
-                ) : (
-                  <button
-                    onClick={() => router.push("/sign-up")}
-                    className="mt-8 w-full py-3 px-6 border-2 border-blue-500 text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-colors"
-                  >
-                    {t("free.button")}
-                  </button>
-                )}
+                <button
+                  disabled
+                  className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg opacity-50 cursor-not-allowed"
+                >
+                  {isSignedIn ? plan.buttonText : t("free.button")}
+                </button>
               </div>
             </div>
           ))}
 
           {/* Pro Plan Card */}
-          <div
-            className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-blue-500 relative"
-          >
+          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-blue-500 relative">
             {selectedBilling === "yearly" && (
               <div className="absolute top-4 right-4">
                 <span className="px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-full">
@@ -285,26 +222,14 @@ export default function PricingPage() {
                 </span>
               </div>
               {selectedBilling === "yearly" && (
-                <p className="text-sm text-gray-500 mt-1">
-                  {t("pro.pricePerMonth")}
-                </p>
+                <p className="text-sm text-gray-500 mt-1">{t("pro.pricePerMonth")}</p>
               )}
 
               <ul className="mt-8 space-y-4">
                 {proPlan.features.map((feature, index) => (
                   <li key={index} className="flex items-start">
-                    <svg
-                      className="h-6 w-6 text-green-500 mr-3"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 13l4 4L19 7"
-                      />
+                    <svg className="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                     </svg>
                     <span className="text-gray-700">{feature}</span>
                   </li>
@@ -312,21 +237,10 @@ export default function PricingPage() {
               </ul>
 
               <button
-                onClick={() => handleUpgrade(proPlan.name)}
-                disabled={loading !== null}
-                className="mt-8 w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+                onClick={handleUpgrade}
+                className="mt-8 w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
               >
-                {loading === proPlan.name ? (
-                  <span className="flex items-center justify-center">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    {t("processing")}
-                  </span>
-                ) : (
-                  proPlan.buttonText
-                )}
+                {proPlan.buttonText}
               </button>
 
               <p className="text-center text-xs text-gray-500 mt-4">
@@ -336,19 +250,6 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* Social Proof */}
-        <div className="text-center mb-16">
-          <div className="flex items-center justify-center gap-1 mb-4">
-            {[...Array(5)].map((_, i) => (
-              <svg key={i} className="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
-          </div>
-          <p className="text-gray-600 mb-2">{t("socialProof.line1")}</p>
-          <p className="text-sm text-gray-500">{t("socialProof.line2")}</p>
-        </div>
-
         {/* FAQ */}
         <div className="mt-16 max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-8">{t("faq.title")}</h2>
@@ -356,23 +257,15 @@ export default function PricingPage() {
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold text-gray-900">{t("faq.cancel")}</h3>
-              <p className="text-gray-600 mt-1">
-                {t("faq.cancelAnswer")}
-              </p>
+              <p className="text-gray-600 mt-1">{t("faq.cancelAnswer")}</p>
             </div>
-            
             <div>
               <h3 className="font-semibold text-gray-900">{t("faq.payment")}</h3>
-              <p className="text-gray-600 mt-1">
-                {t("faq.paymentAnswer")}
-              </p>
+              <p className="text-gray-600 mt-1">{t("faq.paymentAnswer")}</p>
             </div>
-            
             <div>
               <h3 className="font-semibold text-gray-900">{t("faq.trial")}</h3>
-              <p className="text-gray-600 mt-1">
-                {t("faq.trialAnswer")}
-              </p>
+              <p className="text-gray-600 mt-1">{t("faq.trialAnswer")}</p>
             </div>
           </div>
         </div>
@@ -389,34 +282,21 @@ export default function PricingPage() {
           {toasts.map((toast) => (
             <div
               key={toast.id}
-              className={`
-                flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md
-                animate-slide-in
-                ${toast.type === "error" ? "bg-red-50 border border-red-200 text-red-800" : ""}
-                ${toast.type === "success" ? "bg-green-50 border border-green-200 text-green-800" : ""}
-                ${toast.type === "info" ? "bg-blue-50 border border-blue-200 text-blue-800" : ""}
-              `}
+              className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md animate-slide-in ${
+                toast.type === "error" ? "bg-red-50 border border-red-200 text-red-800" :
+                toast.type === "success" ? "bg-green-50 border border-green-200 text-green-800" :
+                "bg-blue-50 border border-blue-200 text-blue-800"
+              }`}
             >
-              {toast.type === "error" && (
-                <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              )}
-              {toast.type === "success" && (
-                <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-              )}
-              {toast.type === "info" && (
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              )}
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={
+                  toast.type === "error" ? "M6 18L18 6M6 6l12 12" :
+                  toast.type === "success" ? "M5 13l4 4L19 7" :
+                  "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                } />
+              </svg>
               <span className="flex-1 text-sm">{toast.message}</span>
-              <button
-                onClick={() => dismissToast(toast.id)}
-                className="p-1 hover:bg-black/10 rounded"
-              >
+              <button onClick={() => dismissToast(toast.id)} className="p-1 hover:bg-black/10 rounded">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
@@ -425,6 +305,14 @@ export default function PricingPage() {
           ))}
         </div>
       </div>
+
+      {/* Payment Modal */}
+      <PaymentModal
+        plan={planType}
+        amount={priceAmount}
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+      />
     </div>
   );
 }

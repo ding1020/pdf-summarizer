@@ -31,6 +31,7 @@ model User {
   updatedAt            DateTime  @updatedAt
   documents            Document[]
   feedbacks            Feedback[]
+  paymentRequests      PaymentRequest[]
 }
 
 model Document {
@@ -61,6 +62,23 @@ model Feedback {
   status    String   @default("open") // open, in_progress, resolved, closed
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentRequest {
+  id         String    @id @default(uuid())
+  userId     String
+  user       User      @relation(fields: [userId], references: [id])
+  plan       String    // "pro_monthly" | "pro_yearly"
+  amount     Int       // amount in cents (e.g. 5900 = ¥59.00)
+  channel    String    // "alipay" | "wechat" | "manual"
+  txnRef     String?   // last 4 digits of transaction ID from user
+  status     String    @default("pending") // pending | approved | rejected
+  createdAt  DateTime  @default(now())
+  reviewedAt DateTime?
 
   @@index([userId])
   @@index([status])

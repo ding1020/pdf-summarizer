@@ -94,13 +94,13 @@
       "cancel": "可以随时取消吗？",
       "cancelAnswer": "是的，您可以随时取消订阅。在计费周期结束前，您仍可继续使用服务。",
       "payment": "支持哪些支付方式？",
-      "paymentAnswer": "我们通过安全的支付合作伙伴Paddle接受所有主流信用卡。",
+      "paymentAnswer": "国内用户支持支付宝和微信支付。海外用户请通过邮件联系我们。",
       "trial": "有免费试用吗？",
       "trialAnswer": "我们的免费版让您无需任何承诺即可试用。需要时再升级到专业版。"
     },
     "badges": {
       "secure": "安全支付",
-      "poweredBy": "由Paddle提供支持",
+      "poweredBy": "支持支付宝/微信",
       "cancel": "随时取消",
       "support": "全天候支持"
     },
@@ -129,15 +129,32 @@
     },
     "bestValue": "最超值",
     "errors": {
-      "paymentFailed": "支付失败。请检查您的银行卡信息后重试。",
-      "cardDeclined": "银行卡被拒。请尝试其他支付方式。",
-      "insufficientFunds": "余额不足。请尝试其他银行卡。",
-      "configError": "支付系统暂时不可用，请稍后再试。",
-      "generic": "出了点问题，请重试。",
-      "notConfigured": "支付系统正在配置中。请联系客服获取升级帮助。"
+      "generic": "出了点问题，请重试。"
     },
     "processing": "处理中...",
-    "securePayment": "通过Paddle安全支付",
+    "securePayment": "扫码付款，手动开通",
+    "submitting": "提交中...",
+    "modal": {
+      "monthly": "专业版 · 月付",
+      "yearly": "专业版 · 年付",
+      "subtitle": "请使用支付宝或微信扫描下方金额付款",
+      "alipay": "支付宝",
+      "wechat": "微信支付",
+      "qrPlaceholder": "请将收款码图片放在此处",
+      "qrHint": "（替换为您的真实支付宝/微信收款码）",
+      "amountLabel": "应付金额",
+      "txnRefLabel": "付款单号（后4位以上）",
+      "txnRefPlaceholder": "请输入付款单号",
+      "txnRefHint": "请填写支付宝/微信的付款单号后4位以上，用于核对",
+      "txnRefRequired": "请输入付款单号后4位",
+      "txnRefTooShort": "付款单号至少4位",
+      "submitError": "提交失败，请稍后重试",
+      "submit": "我已完成付款",
+      "notice": "提交后我们将在1小时内核对并为您开通",
+      "successTitle": "付款凭证已提交！",
+      "successDesc": "我们将在核对后为您开通专业版，通常1小时内完成。如有问题请邮件联系。",
+      "gotIt": "知道了"
+    },
     "socialProof": {
       "line1": "已获得超过10,000名专业人士的信赖",
       "line2": "加入成千上万的研究人员、学生和商业专业人士的行列"
@@ -477,5 +494,20 @@
     "learnMore": "了解更多",
     "essentialOnly": "仅必要",
     "acceptAll": "全部接受"
+  },
+  "admin": {
+    "title": "付款审核",
+    "subtitle": "审核用户提交的付款凭证",
+    "refresh": "刷新",
+    "empty": "暂无待审核的付款",
+    "forbidden": "无权访问",
+    "loadError": "加载失败",
+    "approve": "批准",
+    "reject": "拒绝",
+    "planMonthly": "月付",
+    "planYearly": "年付",
+    "alipay": "支付宝",
+    "wechat": "微信",
+    "txnRef": "单号"
   }
 }
