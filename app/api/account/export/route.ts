@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -11,13 +11,13 @@ import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders }
  */
 export async function GET(req: Request) {
   try {
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const userId = await getAuthUserId();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Rate limit — prevent abuse
-    const identifier = getClientIdentifier(clerkId);
+    const identifier = getClientIdentifier(userId);
     const rateLimitResult = await rateLimitAsync(identifier, {
       windowMs: 300_000, // 5 minutes — export is heavy
       maxRequests: 2,
@@ -30,7 +30,7 @@ export async function GET(req: Request) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
       include: {
         documents: {
           orderBy: { createdAt: "desc" },
@@ -94,7 +94,7 @@ export async function GET(req: Request) {
       })),
     };
 
-    logger.info("User data exported", { clerkId, documentCount: user.documents.length });
+    logger.info("User data exported", { userId, documentCount: user.documents.length });
 
     return NextResponse.json(exportData, {
       headers: {

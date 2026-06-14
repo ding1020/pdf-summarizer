@@ -8,11 +8,11 @@ const FREE_DAILY_LIMIT = 5;
 
 export async function GET(req: Request) {
   try {
-    const clerkId = await getAuthUserId();
+    const userId = await getAuthUserId();
 
     // Rate limiting
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
-    const identifier = getClientIdentifier(clerkId, clientIp);
+    const identifier = getClientIdentifier(userId, clientIp);
     const rateLimitResult = await rateLimitAsync(identifier, RATE_LIMITS.free);
     if (!rateLimitResult.success) {
       return NextResponse.json(
@@ -21,7 +21,7 @@ export async function GET(req: Request) {
       );
     }
     
-    if (!clerkId) {
+    if (!userId) {
       return NextResponse.json({
         used: 0,
         limit: FREE_DAILY_LIMIT,
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
     }
 
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
       select: { id: true, subscriptionStatus: true },
     });
 

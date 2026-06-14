@@ -61,23 +61,23 @@ async function verifyPaddleWebhook(
   }
 }
 
-// Find user by clerkId from custom_data, fallback to email
-async function findUserByEvent(event: { custom_data?: { clerkId?: string; dbUserId?: string } | null; customer?: { email?: string } | null }) {
-  // Priority 1: Look up by clerkId from checkout custom_data
+// Find user by custom_data (dbUserId preferred), fallback to email
+async function findUserByEvent(event: { custom_data?: { clerkId?: string; dbUserId?: string; userId?: string } | null; customer?: { email?: string } | null }) {
+  // Priority 1: Look up by dbUserId from checkout custom_data (Primary — native auth UUID)
+  const dbUserId = event.custom_data?.dbUserId || event.custom_data?.userId;
+  if (dbUserId) {
+    const user = await prisma.user.findUnique({ where: { id: dbUserId } });
+    if (user) return user;
+  }
+
+  // Priority 2: Look up by legacy clerkId (backward compat)
   const clerkId = event.custom_data?.clerkId;
   if (clerkId) {
     const user = await prisma.user.findUnique({ where: { clerkId } });
     if (user) return user;
   }
 
-  // Priority 2: Look up by dbUserId from checkout custom_data
-  const dbUserId = event.custom_data?.dbUserId;
-  if (dbUserId) {
-    const user = await prisma.user.findUnique({ where: { id: dbUserId } });
-    if (user) return user;
-  }
-
-  // Priority 3: Look up by customer email (Paddle customer email)
+  // Priority 3: Look up by customer email
   const email = event.customer?.email;
   if (email) {
     return prisma.user.findUnique({ where: { email } });

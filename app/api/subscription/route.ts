@@ -1,13 +1,13 @@
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 export async function GET() {
   try {
-    const { userId: clerkId } = await auth();
+    const userId = await getAuthUserId();
     
-    if (!clerkId) {
+    if (!userId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -16,7 +16,7 @@ export async function GET() {
 
     // Get user with subscription info
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
       select: {
         subscriptionStatus: true,
         subscriptionEndDate: true,

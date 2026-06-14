@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import {
   getAIProvider,
   getSystemPrompt,
@@ -99,17 +99,8 @@ async function tryStreamWithProvider(
 }
 
 export async function POST(req: NextRequest) {
-  // ── Auth (safe wrapper) ──
-  let userId: string | null = null;
-  try {
-    const authResult = await auth();
-    userId = authResult.userId || null;
-  } catch (authError) {
-    logger.warn("Auth check failed in summarize stream", {
-      error: authError instanceof Error ? authError.message : String(authError),
-    });
-    userId = null;
-  }
+  // ── Auth ──
+  const userId = await getAuthUserId();
 
   // ── Rate Limiting ──
   try {
@@ -177,7 +168,7 @@ export async function POST(req: NextRequest) {
     try {
       const { prisma: prismaDb } = await import("@/lib/db");
       const userRecord = await prismaDb.user.findUnique({
-        where: { clerkId: userId },
+        where: { id: userId },
         select: { id: true, subscriptionStatus: true },
       });
       if (userRecord && userRecord.subscriptionStatus !== "pro" && userRecord.subscriptionStatus !== "active") {

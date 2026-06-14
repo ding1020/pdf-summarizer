@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
 export async function POST() {
   try {
-    const { userId } = await auth();
+    const userId = await getAuthUserId();
     
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -21,7 +21,7 @@ export async function POST() {
 
     // 获取用户信息
     const user = await prisma.user.findUnique({
-      where: { clerkId: userId },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -58,7 +58,7 @@ export async function POST() {
         email: user.email,
         name: user.email.split("@")[0],
         customData: {
-          clerkId: userId,
+          userId,
           dbUserId: String(user.id),
         },
       });

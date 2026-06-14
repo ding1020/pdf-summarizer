@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
     if (!isGuest) {
       try {
         const userRecord = await prisma.user.findUnique({
-          where: { clerkId: userId! },
+          where: { id: userId! },
           select: { id: true, subscriptionStatus: true },
         });
         if (userRecord && userRecord.subscriptionStatus !== "pro" && userRecord.subscriptionStatus !== "active") {

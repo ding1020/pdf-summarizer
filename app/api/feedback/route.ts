@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { feedbackSchema } from "@/lib/schemas";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -7,17 +7,10 @@ import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
-    // Clerk may be unavailable (custom domain SSL pending) — fall back to anonymous
-    let clerkId: string | null = null;
-    try {
-      const { userId } = await auth();
-      clerkId = userId;
-    } catch {
-      // Clerk unavailable — feedback still accepted as anonymous
-    }
+    const userId = await getAuthUserId();
 
     // Rate limiting: 3 feedback submissions per hour per client
-    const clientId = getClientIdentifier(clerkId || "anonymous");
+    const clientId = getClientIdentifier(userId || "anonymous");
     const rateLimitResult = await rateLimitAsync(clientId, {
       maxRequests: 3,
       windowMs: 60 * 60 * 1000, // 1 hour
@@ -42,7 +35,7 @@ export async function POST(req: NextRequest) {
     if (!parsed.success) {
       logger.warn("[Feedback] Validation failed", {
         errors: parsed.error.flatten().fieldErrors,
-        userId: clerkId,
+        userId,
       });
       return NextResponse.json(
         { error: "Invalid input", details: parsed.error.flatten().fieldErrors },
@@ -56,23 +49,23 @@ export async function POST(req: NextRequest) {
     let userEmail: string | null = null;
     let dbUserId: string | null = null;
 
-    // Enrich with authenticated user info — Clerk session provides implicit CSRF protection
-    if (clerkId) {
+    // Enrich with authenticated user info
+    if (userId) {
       try {
         const user = await prisma.user.findUnique({
-          where: { clerkId },
+          where: { id: userId },
         });
         if (user) {
           dbUserId = user.id;
           userEmail = user.email;
         }
       } catch {
-        logger.warn("[Feedback] User lookup failed", { clerkId });
+        logger.warn("[Feedback] User lookup failed", { userId });
       }
     }
 
-    // Require authentication for feedback submission (Clerk handles CSRF via session tokens)
-    if (!clerkId && message.length > 500) {
+    // Require authentication for feedback submission
+    if (!userId && message.length > 500) {
       return NextResponse.json(
         { error: "Please sign in to submit longer feedback." },
         { status: 401 }
@@ -92,7 +85,7 @@ export async function POST(req: NextRequest) {
     logger.info("[Feedback] Created", {
       feedbackId: feedback.id,
       category,
-      userId: clerkId || "anonymous",
+      userId: userId || "anonymous",
     });
 
     return NextResponse.json(
@@ -117,14 +110,14 @@ export async function POST(req: NextRequest) {
 
 export async function GET(req: NextRequest) {
   try {
-    const { userId: clerkId } = await auth();
+    const userId = await getAuthUserId();
 
-    if (!clerkId) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Rate limiting for feedback queries
-    const clientId = getClientIdentifier(clerkId);
+    const clientId = getClientIdentifier(userId);
     const rateLimitResult = await rateLimitAsync(clientId, {
       maxRequests: 30,
       windowMs: 60 * 1000, // 1 minute
@@ -139,7 +132,7 @@ export async function GET(req: NextRequest) {
 
     // Only allow users to view their own feedback
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
     });
 
     if (!user) {

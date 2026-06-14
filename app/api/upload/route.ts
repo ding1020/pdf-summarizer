@@ -15,8 +15,8 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   // ==================== Auth (safe wrapper) ====================
-  const clerkId = await getAuthUserId();
-  const isGuest = !clerkId;
+  const userId = await getAuthUserId();
+  const isGuest = !userId;
 
   // ==================== Rate Limiting ====================
   try {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
       || "anonymous";
     const identifier = isGuest
       ? getClientIdentifier(null, clientIp)
-      : getClientIdentifier(clerkId, clientIp);
+      : getClientIdentifier(userId, clientIp);
     const rateLimitConfig = isGuest ? RATE_LIMITS.guest : RATE_LIMITS.free;
     const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
     
@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
   try {
     let documentId: string;
 
-    if (isGuest || !clerkId) {
+    if (isGuest || !userId) {
       documentId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
       
       logger.info("PDF uploaded by guest", {
@@ -166,14 +166,9 @@ export async function POST(req: NextRequest) {
         duration: `${Date.now() - startTime}ms`,
       });
     } else {
-      let dbUser = await prisma.user.findUnique({ where: { clerkId } });
+      const dbUser = await prisma.user.findUnique({ where: { id: userId } });
       if (!dbUser) {
-        dbUser = await prisma.user.create({
-          data: {
-            clerkId,
-            email: `${clerkId}@clerk.pdfsum.com`,
-          },
-        });
+        return NextResponse.json({ error: "User not found" }, { status: 404 });
       }
 
       const document = await prisma.document.create({

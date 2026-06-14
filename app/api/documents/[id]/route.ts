@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -11,8 +11,8 @@ export async function GET(
     const { id } = await params;
     
     // Require authentication
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const userId = await getAuthUserId();
+    if (!userId) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -21,7 +21,7 @@ export async function GET(
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -67,8 +67,8 @@ export async function DELETE(
     const { id } = await params;
     
     // Require authentication
-    const { userId: clerkId } = await auth();
-    if (!clerkId) {
+    const userId = await getAuthUserId();
+    if (!userId) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -77,7 +77,7 @@ export async function DELETE(
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
     });
 
     if (!user) {

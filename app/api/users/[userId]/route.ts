@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 
@@ -9,10 +9,10 @@ export async function GET(
 ) {
   try {
     const { userId: targetUserId } = await params;
-    const { userId: clerkId } = await auth();
+    const userId = await getAuthUserId();
 
     // Only allow users to access their own data
-    if (!clerkId || clerkId !== targetUserId) {
+    if (!userId || userId !== targetUserId) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
@@ -20,7 +20,7 @@ export async function GET(
     }
 
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
       select: {
         id: true,
         email: true,

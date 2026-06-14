@@ -7,8 +7,8 @@ import { logger } from "@/lib/logger";
 export async function GET(req: NextRequest) {
   try {
     // Require authentication
-    const clerkId = await getAuthUserId();
-    if (!clerkId) {
+    const userId = await getAuthUserId();
+    if (!userId) {
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 
     // Rate limiting
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
-    const identifier = getClientIdentifier(clerkId, clientIp);
+    const identifier = getClientIdentifier(userId, clientIp);
     const rateLimitResult = await rateLimitAsync(identifier, RATE_LIMITS.free);
     
     if (!rateLimitResult.success) {
@@ -39,7 +39,7 @@ export async function GET(req: NextRequest) {
 
     // Get user from database
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
     });
 
     if (!user) {
