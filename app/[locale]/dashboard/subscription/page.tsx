@@ -1,6 +1,6 @@
 "use client";
 
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
@@ -14,7 +14,7 @@ interface SubscriptionData {
 
 export default function SubscriptionPage() {
   const t = useTranslations("subscription");
-  const { isLoaded, isSignedIn, user } = useUser();
+  const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);

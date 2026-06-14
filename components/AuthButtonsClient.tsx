@@ -2,10 +2,8 @@
 
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
-import { useUser, UserButton } from "@clerk/nextjs";
-import { useState, useEffect } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
-// ── Guest buttons (always safe, no Clerk dependency) ──
 function GuestButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="flex items-center gap-4">
@@ -19,9 +17,9 @@ function GuestButtons({ t }: { t: ReturnType<typeof useTranslations> }) {
   );
 }
 
-// ── Auth-aware content (only after ClerkProvider is ready) ──
-function AuthContent({ t }: { t: ReturnType<typeof useTranslations> }) {
-  const { isLoaded, isSignedIn } = useUser();
+export default function AuthButtonsClient() {
+  const t = useTranslations();
+  const { isLoaded, isSignedIn, user } = useAuth();
 
   if (!isLoaded) {
     return (
@@ -44,21 +42,15 @@ function AuthContent({ t }: { t: ReturnType<typeof useTranslations> }) {
       >
         {t("nav.dashboard")}
       </Link>
-      <UserButton />
+      <div className="flex items-center gap-2">
+        {user?.imageUrl ? (
+          <img src={user.imageUrl} alt="" className="w-8 h-8 rounded-full" />
+        ) : (
+          <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
+            {user?.firstName?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || "?"}
+          </div>
+        )}
+      </div>
     </div>
   );
-}
-
-// ── Exported component for dynamic import ──
-export default function AuthButtonsClient() {
-  const t = useTranslations();
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
-
-  // Before hydration: show guest buttons (no Clerk hooks)
-  if (!mounted) {
-    return <GuestButtons t={t} />;
-  }
-
-  return <AuthContent t={t} />;
 }

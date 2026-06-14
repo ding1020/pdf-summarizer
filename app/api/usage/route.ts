@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
@@ -8,7 +8,7 @@ const FREE_DAILY_LIMIT = 5;
 
 export async function GET(req: Request) {
   try {
-    const { userId: clerkId } = await auth();
+    const clerkId = await getAuthUserId();
 
     // Rate limiting
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";

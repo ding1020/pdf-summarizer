@@ -27,13 +27,13 @@ const nextConfig = {
     // Custom domain (clerk.pdfsum.com) SSL is pending — default domain used as fallback
     const csp = [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://*.clerk.accounts.com https://*.clerk.accounts.dev https://clerk.pdfsum.com https://accounts.pdfsum.com https://www.googletagmanager.com",
-      "script-src-elem 'self' 'unsafe-inline' https://*.clerk.accounts.com https://*.clerk.accounts.dev https://clerk.pdfsum.com https://accounts.pdfsum.com https://www.googletagmanager.com",
+      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms",
+      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms",
       "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob: https://img.clerk.com",
+      "img-src 'self' data: blob:",
       "font-src 'self' data:",
-      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://*.clerk.accounts.com https://*.clerk.accounts.dev https://clerk.pdfsum.com https://accounts.pdfsum.com https://www.google-analytics.com https://region1.google-analytics.com",
-      "frame-src https://*.clerk.accounts.com https://*.clerk.accounts.dev https://checkout.paddle.com https://clerk.pdfsum.com https://accounts.pdfsum.com",
+      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.clerk.com https://www.google-analytics.com https://region1.google-analytics.com",
+      "frame-src 'self' https://checkout.paddle.com",
       "frame-ancestors 'none'",
       "media-src 'none'",
       "object-src 'none'",

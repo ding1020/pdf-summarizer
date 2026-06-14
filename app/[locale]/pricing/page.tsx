@@ -2,7 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 
 // Toast notification state
@@ -14,7 +14,7 @@ interface Toast {
 
 export default function PricingPage() {
   const t = useTranslations("pricing");
-  const { isLoaded, isSignedIn } = useUser();
+  const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
   const [loading, setLoading] = useState<string | null>(null);
   const [selectedBilling, setSelectedBilling] = useState<"monthly" | "yearly">("monthly");

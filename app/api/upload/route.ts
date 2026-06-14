@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
@@ -15,18 +15,7 @@ export async function POST(req: NextRequest) {
   const startTime = Date.now();
   
   // ==================== Auth (safe wrapper) ====================
-  let clerkId: string | null = null;
-  try {
-    const authResult = await auth();
-    clerkId = authResult.userId || null;
-  } catch (authError) {
-    // Clerk unavailable — treat as guest
-    logger.warn("Auth check failed, treating as guest", {
-      error: authError instanceof Error ? authError.message : String(authError),
-    });
-    clerkId = null;
-  }
-  
+  const clerkId = await getAuthUserId();
   const isGuest = !clerkId;
 
   // ==================== Rate Limiting ====================

@@ -8,7 +8,7 @@ import Navigation from "@/components/Navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ClientCookieConsent from "@/components/ClientCookieConsent";
-import ClerkWrapper from "@/components/ClerkWrapper";
+import AuthProvider from "@/components/AuthProvider";
 import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -153,7 +153,7 @@ export default async function LocaleLayout({
       <body className={inter.className}>
         <NextIntlClientProvider messages={messages}>
           <ErrorBoundary messages={em}>
-            <ClerkWrapper>
+            <AuthProvider>
               <div className="min-h-screen bg-white">
                 <div className="bg-gray-50 border-b">
                   <div className="max-w-6xl mx-auto px-4 py-2 flex justify-end">
@@ -163,7 +163,7 @@ export default async function LocaleLayout({
                 <Navigation />
                 {children}
               </div>
-            </ClerkWrapper>
+            </AuthProvider>
           </ErrorBoundary>
           <ClientCookieConsent />
           {process.env.NEXT_PUBLIC_GA_ID && (

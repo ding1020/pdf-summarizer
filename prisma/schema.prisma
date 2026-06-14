@@ -13,8 +13,11 @@ datasource db {
 
 model User {
   id                   String    @id @default(uuid())
-  clerkId              String    @unique
+  clerkId              String?   @unique  // Legacy Clerk ID (optional now)
   email                String    @unique
+  passwordHash         String?   // Native auth password hash
+  firstName            String?
+  lastName             String?
   paddleCustomerId     String?   @unique
   subscriptionStatus   String    @default("free") // free, pro, past_due, canceled
   subscriptionId       String?

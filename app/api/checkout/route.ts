@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
@@ -23,14 +23,14 @@ async function getPaddleClient(): Promise<PaddleType> {
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId: clerkId } = await auth();
+    const userId = await getAuthUserId();
 
-    if (!clerkId) {
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Rate limiting for checkout (very strict)
-    const clientId = getClientIdentifier(clerkId);
+    const clientId = getClientIdentifier(userId);
     const rateLimitResult = await rateLimitAsync(clientId, RATE_LIMITS.checkout);
     
     if (!rateLimitResult.success) {
@@ -68,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     // 获取用户信息
     const user = await prisma.user.findUnique({
-      where: { clerkId },
+      where: { id: userId },
     });
 
     if (!user) {
@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
         email: user.email,
         name: user.email.split("@")[0],
         customData: {
-          clerkId,
+          userId,
           dbUserId: String(user.id),
         },
       });
@@ -121,7 +121,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       customData: {
-        clerkId,
+        userId,
         dbUserId: String(user.id),
         billingCycle,
       },
@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
       cancelUrl: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/pricing?payment=cancelled`,
     });
 
-    logger.info("[Checkout] Created checkout session", { clerkId, sessionId: checkoutSession.id });
+    logger.info("[Checkout] Created checkout session", { userId, sessionId: checkoutSession.id });
 
     return NextResponse.json({
       url: checkoutSession.url,

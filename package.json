@@ -36,6 +36,7 @@
     "@sentry/nextjs": "^10.56.0",
     "@upstash/redis": "^1.38.0",
     "@vercel/og": "^0.11.1",
+    "bcryptjs": "^3.0.3",
     "lucide-react": "^1.9.0",
     "next": "^15.2.4",
     "next-intl": "^4.9.1",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { useUser, useClerk } from "@clerk/nextjs";
+import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 import DocumentHistory from "@/components/DocumentHistory";
@@ -18,21 +18,20 @@ interface UsageData {
 export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) {
   const t = useTranslations("dashboard");
   const ct = useTranslations();
-  const { user, isLoaded: isUserLoaded, isSignedIn } = useUser();
-  const { signOut } = useClerk();
+  const { user, isLoaded, isSignedIn, signOut } = useAuth();
   const [usage, setUsage] = useState<UsageData | null>(null);
   const [loadingUsage, setLoadingUsage] = useState(true);
-  const [clerkTimedOut, setClerkTimedOut] = useState(false);
+  const [authTimedOut, setAuthTimedOut] = useState(false);
 
   // Timeout guard
   useEffect(() => {
-    if (isUserLoaded) {
-      setClerkTimedOut(false);
+    if (isLoaded) {
+      setAuthTimedOut(false);
       return;
     }
-    const timer = setTimeout(() => setClerkTimedOut(true), 3000);
+    const timer = setTimeout(() => setAuthTimedOut(true), 3000);
     return () => clearTimeout(timer);
-  }, [isUserLoaded]);
+  }, [isLoaded]);
 
   const fetchUsage = useCallback(async () => {
     try {
@@ -42,7 +41,7 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
         setUsage(data);
       }
     } catch {
-      // Silently handle — usage bar will just not render
+      // Silently handle
     } finally {
       setLoadingUsage(false);
     }
@@ -56,17 +55,17 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
     }
   }, [isSignedIn, refreshKey, fetchUsage]);
 
-  const displayName = user?.firstName || user?.emailAddresses?.[0]?.emailAddress?.split("@")[0] || ct("common.brand");
+  const displayName = user?.firstName || user?.email?.split("@")[0] || ct("common.brand");
 
-  // === Clerk still loading ===
-  if (!isUserLoaded && !clerkTimedOut) {
+  // === Still loading ===
+  if (!isLoaded && !authTimedOut) {
     return (
       <div className="h-10 bg-gray-100 animate-pulse rounded-lg w-40 inline-block"></div>
     );
   }
 
   // === Guest mode ===
-  if (!isSignedIn || clerkTimedOut) {
+  if (!isSignedIn || authTimedOut) {
     return (
       <div className="flex items-center gap-3">
         <span className="text-sm text-gray-500">{ct("guest.tryForFree")}</span>
@@ -86,13 +85,11 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
     );
   }
 
-  // === Signed-in: full header + usage + history ===
+  // === Signed-in ===
   return (
     <>
-      {/* Onboarding guide for first-time users */}
       <OnboardingGuide />
 
-      {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -125,7 +122,7 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
                 </div>
               ) : null}
               <button
-                onClick={() => signOut(() => { window.location.href = "/"; })}
+                onClick={() => signOut()}
                 className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 {t("signOut")}
@@ -135,7 +132,6 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
         </div>
       </div>
 
-      {/* Usage Bar */}
       {!loadingUsage && usage && !usage.isPro && usage.limit > 0 && (
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
           <div className="flex items-center justify-between mb-2">
@@ -155,7 +151,6 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
         </div>
       )}
 
-      {/* History */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-200 p-6 md:p-8 mb-8">
         <DocumentHistory key={refreshKey} />
       </div>

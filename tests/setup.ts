@@ -22,21 +22,43 @@ vi.mock('@clerk/nextjs', () => ({
     id: 'test-user-id',
     emailAddresses: [{ emailAddress: 'test@example.com' }],
   })),
-  ClerkProvider: ({ children }: { children: React.ReactNode }) => children,
-  useUser: () => ({
+}));
+
+// Mock @clerk/nextjs/server
+vi.mock('@clerk/nextjs/server', () => ({
+  auth: vi.fn(() => Promise.resolve({ userId: 'test-user-id' })),
+  currentUser: vi.fn(() => Promise.resolve({
+    id: 'test-user-id',
+    emailAddresses: [{ emailAddress: 'test@example.com' }],
+  })),
+  clerkClient: vi.fn(() => Promise.resolve({
+    users: {
+      createUser: vi.fn(() => Promise.resolve({ id: 'test-user-id' })),
+    },
+    signInTokens: {
+      create: vi.fn(() => Promise.resolve({ token: 'test-token' })),
+    },
+  })),
+  clerkMiddleware: vi.fn((handler: any) => handler),
+}));
+
+// Mock auth hook
+vi.mock('@/hooks/useAuth', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => children,
+  useAuth: () => ({
+    user: {
+      id: 'test-user-id',
+      email: 'test@example.com',
+      firstName: 'Test',
+      lastName: 'User',
+      imageUrl: null,
+    },
     isLoaded: true,
     isSignedIn: true,
-    user: {
-      id: 'test-user-id',
-      emailAddresses: [{ emailAddress: 'test@example.com' }],
-    },
-  }),
-  useClerk: () => ({
+    signIn: vi.fn(() => Promise.resolve({ success: true })),
+    signUp: vi.fn(() => Promise.resolve({ success: true })),
     signOut: vi.fn(),
-    user: {
-      id: 'test-user-id',
-      emailAddresses: [{ emailAddress: 'test@example.com' }],
-    },
+    refresh: vi.fn(),
   }),
 }));
 

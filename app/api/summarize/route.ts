@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getAuthUserId } from "@/lib/get-auth";
 import { getAIProvider, getSystemPrompt, getModelForProvider, type AIProvider } from "@/lib/ai";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
   try {
     // ==================== Rate Limiting ====================
     const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
-    const { userId } = await auth();
+    const userId = await getAuthUserId();
     const isGuest = !userId;
     const identifier = getClientIdentifier(userId, clientIp);
     const guestRateLimit = { windowMs: 60 * 1000, maxRequests: 3 };

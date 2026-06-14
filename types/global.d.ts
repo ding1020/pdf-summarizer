@@ -12,8 +12,6 @@ export {};
 
 declare global {
   interface Window {
-    Clerk?: {
-      signOut: () => void;
-    };
+    // custom global types
   }
 }
