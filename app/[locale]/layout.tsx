@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
+import { getMessages, setRequestLocale } from "next-intl/server";
+import { routing } from "@/navigation";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import Navigation from "@/components/Navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -109,6 +110,7 @@ export default async function LocaleLayout({
   params,
 }: { children: React.ReactNode; params: Promise<{ locale: string }> }) {
   const { locale } = await params;
+  setRequestLocale(locale);
   const messages = await getMessages({ locale });
   const em = {
     title: messages.error?.title || "Error",
@@ -151,7 +153,7 @@ export default async function LocaleLayout({
         />
       </head>
       <body className={inter.className}>
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <ErrorBoundary messages={em}>
             <AuthProvider>
               <div className="min-h-screen bg-white">

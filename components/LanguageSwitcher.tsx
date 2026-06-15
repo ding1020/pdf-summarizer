@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { usePathname, useRouter } from "@/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useLocale } from "next-intl";
 import { Globe } from "lucide-react";
 
 const languages = [
@@ -17,54 +16,68 @@ const languages = [
 
 export default function LanguageSwitcher() {
   const locale = useLocale();
-  const router = useRouter();
-  const pathname = usePathname();
-  const t = useTranslations();
   const [open, setOpen] = useState(false);
 
-  const handleChange = (newLocale: string) => {
+  const switchTo = (newLocale: string) => {
     setOpen(false);
-    router.replace(pathname, { locale: newLocale });
+    if (newLocale === locale) return;
+
+    // Set cookie so middleware remembers preference
+    document.cookie =
+      `NEXT_LOCALE=${newLocale};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
+
+    // Full navigation: ensures cookie is sent to server and middleware
+    // redirects based on it. More reliable than client-side router.push
+    // which may conflict with next-intl locale prefixing.
+    const parts = window.location.pathname.split("/").filter(Boolean);
+    if (parts.length > 0 && languages.some((l) => l.code === parts[0])) {
+      parts[0] = newLocale;
+    } else {
+      parts.unshift(newLocale);
+    }
+    window.location.href = "/" + parts.join("/") + window.location.search;
   };
 
   return (
-    <div className="relative" onBlur={(e) => {
-      if (!e.currentTarget.contains(e.relatedTarget)) setOpen(false);
-    }}>
+    <div className="relative">
       <button
+        onClick={() => setOpen((prev) => !prev)}
         className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:text-gray-900 transition-colors rounded-lg"
-        aria-label={t("common.selectLanguage")}
         aria-expanded={open}
         aria-haspopup="listbox"
-        onClick={() => setOpen(!open)}
       >
         <Globe className="w-4 h-4" />
-        <span className="hidden sm:inline">{languages.find(l => l.code === locale)?.name}</span>
+        <span className="hidden sm:inline">
+          {languages.find((l) => l.code === locale)?.name ?? "English"}
+        </span>
       </button>
-      
-      <div
-        className={`absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 transition-all z-50 ${
-          open ? "opacity-100 visible" : "opacity-0 invisible"
-        }`}
-        role="listbox"
-      >
-        <div className="py-1">
-          {languages.map((lang) => (
-            <button
-              key={lang.code}
-              onMouseDown={() => handleChange(lang.code)}
-              role="option"
-              aria-selected={locale === lang.code}
-              className={`w-full flex items-center gap-2 px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
-                locale === lang.code ? "bg-blue-50 text-blue-600 font-medium" : "text-gray-700"
-              }`}
-            >
-              <span>{lang.flag}</span>
-              <span>{lang.name}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+
+      {open && (
+        <>
+          {/* Backdrop to close on outside click */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setOpen(false)}
+            aria-hidden="true"
+          />
+          <div className="absolute right-0 top-full mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            {languages.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => switchTo(lang.code)}
+                className={`w-full flex items-center gap-2 px-4 py-2 text-sm text-left hover:bg-gray-50 transition-colors ${
+                  locale === lang.code
+                    ? "bg-blue-50 text-blue-600 font-medium"
+                    : "text-gray-700"
+                }`}
+              >
+                <span>{lang.flag}</span>
+                <span>{lang.name}</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

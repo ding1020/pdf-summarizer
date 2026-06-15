@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/navigation";
 import FileUploadWrapper from "./FileUploadWrapper";
 import AuthDependentUI from "./AuthUI";
@@ -15,7 +15,13 @@ function AuthUISkeleton() {
 }
 
 // Server Component: always renders. Client components handle auth state internally.
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("dashboard");
   const ct = await getTranslations();
 

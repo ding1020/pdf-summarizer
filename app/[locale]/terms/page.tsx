@@ -1,9 +1,15 @@
 import { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
 
 const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
 
-export async function generateMetadata(): Promise<Metadata> {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("legal.terms");
   return {
     title: `${t("title")} - PDF Summary`,
@@ -11,7 +17,13 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default async function TermsPage() {
+export default async function TermsPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const t = await getTranslations("legal.terms");
 
   return (

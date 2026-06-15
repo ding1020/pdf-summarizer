@@ -117,14 +117,15 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
               </button>
             </div>
 
-            {/* QR code placeholder */}
-            <div className="bg-gray-50 rounded-xl p-6 mb-6 text-center border-2 border-dashed border-gray-300">
-              <p className="text-gray-400 text-sm mb-1">{t("modal.qrPlaceholder")}</p>
-              <p className="text-gray-300 text-xs">
-                {t("modal.qrHint")}
-              </p>
-              <div className="mt-3 text-xs text-gray-400">
-                {t("modal.amountLabel")}: <span className="font-bold text-gray-600 text-base">{amount}</span>
+            {/* QR Code */}
+            <div className="bg-white rounded-xl p-6 mb-6 text-center border border-gray-200 shadow-sm">
+              <img
+                src={channel === "alipay" ? "/qrcodes/alipay.jpg" : "/qrcodes/wechat.jpg"}
+                alt={channel === "alipay" ? "支付宝收款码" : "微信收款码"}
+                className="w-56 h-56 mx-auto rounded-lg"
+              />
+              <div className="mt-3 text-sm text-gray-600">
+                {t("modal.amountLabel")}: <span className="font-bold text-gray-900 text-base">{amount}</span>
               </div>
             </div>
 

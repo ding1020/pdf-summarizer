@@ -17,7 +17,7 @@ export async function GET() {
         where: { id: userId },
         select: { email: true },
       });
-      if (!user || user.email !== adminEmail) {
+      if (!user || user.email.trim() !== adminEmail.trim()) {
         return NextResponse.json({ error: "Forbidden" }, { status: 403 });
       }
     }
