@@ -81,7 +81,7 @@ export default function SubscriptionPage() {
                     </p>
                     <p className="text-gray-500 text-sm mt-1">
                       {isPro
-                        ? subscription?.billingCycle === "year"
+                        ? subscription?.billingCycle === "yearly"
                           ? t("billedAnnually")
                           : t("billedMonthly")
                         : t("freeLimit")

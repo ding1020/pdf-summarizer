@@ -104,6 +104,12 @@ export default function SignInPage() {
             >
               {loading ? t("common.loading") : t("common.signIn")}
             </button>
+
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Forgot password?
+              </Link>
+            </div>
           </form>
 
           <p className="text-center text-sm text-gray-500 mt-6">

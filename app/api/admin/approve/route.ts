@@ -11,14 +11,19 @@ export async function POST(req: NextRequest) {
     }
 
     const adminEmail = process.env.ADMIN_EMAIL;
-    if (adminEmail) {
-      const user = await prisma.user.findUnique({
-        where: { id: userId },
-        select: { email: true },
-      });
-      if (!user || user.email.trim() !== adminEmail.trim()) {
-        return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-      }
+    if (!adminEmail) {
+      logger.error("[Admin] ADMIN_EMAIL environment variable not configured — blocking admin access");
+      return NextResponse.json(
+        { error: "Admin access is not configured on this server." },
+        { status: 403 },
+      );
+    }
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true },
+    });
+    if (!user || user.email.trim() !== adminEmail.trim()) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
 
     const { paymentId } = await req.json();

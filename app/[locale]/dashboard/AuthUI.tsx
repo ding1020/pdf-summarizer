@@ -13,6 +13,9 @@ interface UsageData {
   remaining: number;
   isPro: boolean;
   resetAt: string | null;
+  subscriptionEndDate: string | null;
+  billingCycle: string | null;
+  subscriptionStatus: string;
 }
 
 export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) {
@@ -147,6 +150,65 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
               }`}
               style={{ width: `${Math.min((usage.used / usage.limit) * 100, 100)}%` }}
             ></div>
+          </div>
+        </div>
+      )}
+
+      {/* Past Due Warning */}
+      {!loadingUsage && usage?.subscriptionStatus === "past_due" && (
+        <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+          <div className="flex items-start gap-3">
+            <span className="text-red-500 text-lg shrink-0 mt-0.5">⚠️</span>
+            <div>
+              <p className="font-semibold text-red-800">{t("pastDueTitle")}</p>
+              <p className="text-sm text-red-600 mt-0.5">{t("pastDueDesc")}</p>
+              <Link
+                href="/dashboard/subscription"
+                className="inline-block mt-2 text-sm text-red-700 underline hover:text-red-900"
+              >
+                {t("manageSubscription")}
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pro Subscription Card */}
+      {!loadingUsage && usage?.isPro && usage.subscriptionEndDate && (
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-4 mb-6">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <span className="text-sm font-semibold text-blue-700">
+                {usage.billingCycle === "yearly" ? t("proYearly") : t("proMonthly")}
+              </span>
+              <p className="text-sm text-gray-600 mt-1">
+                {t("renewsIn", {
+                  date: new Date(usage.subscriptionEndDate).toLocaleDateString(
+                    typeof navigator !== "undefined" ? navigator.language : "en-US",
+                    { year: "numeric", month: "long", day: "numeric" }
+                  ),
+                })}
+                {(() => {
+                  const daysLeft = Math.ceil(
+                    (new Date(usage.subscriptionEndDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                  );
+                  if (daysLeft > 0 && daysLeft <= 7) {
+                    return (
+                      <span className="ml-2 text-xs bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded-full">
+                        {t("daysLeft", { days: daysLeft })}
+                      </span>
+                    );
+                  }
+                  return null;
+                })()}
+              </p>
+            </div>
+            <Link
+              href="/dashboard/subscription"
+              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors whitespace-nowrap"
+            >
+              {t("manageSubscription")}
+            </Link>
           </div>
         </div>
       )}

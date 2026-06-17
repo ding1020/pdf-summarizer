@@ -13,6 +13,7 @@
  */
 
 import { Redis } from "@upstash/redis";
+import { logger } from "./logger";
 
 // ── Types ──
 export interface RateLimitConfig {
@@ -39,8 +40,8 @@ function getRedis(): Redis | null {
 
   if (!url || !token) {
     if (process.env.NODE_ENV === "production") {
-      console.warn(
-        "[rate-limit] UPSTASH_REDIS_* env vars not set — using in-memory store (NOT shared across Vercel instances)"
+      logger.warn(
+        "[rate-limit] UPSTASH_REDIS_* env vars not set — using in-memory store (NOT shared across Vercel instances)",
       );
     }
     return null;
@@ -50,7 +51,7 @@ function getRedis(): Redis | null {
     _redis = new Redis({ url, token });
     return _redis;
   } catch (err) {
-    console.error("[rate-limit] Failed to create Redis client:", err);
+    logger.error("[rate-limit] Failed to create Redis client", err instanceof Error ? err : new Error(String(err)));
     return null;
   }
 }
@@ -164,7 +165,7 @@ export async function rateLimitAsync(
     try {
       return await redisRateLimit(`rl:${identifier}`, config);
     } catch (err) {
-      console.warn("[rate-limit] Redis error, falling back to memory:", err);
+      logger.warn("[rate-limit] Redis error, falling back to memory", { error: err instanceof Error ? err.message : String(err) });
     }
   }
 

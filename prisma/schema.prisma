@@ -18,13 +18,21 @@ model User {
   passwordHash         String?   // Native auth password hash
   firstName            String?
   lastName             String?
-  paddleCustomerId     String?   @unique
-  subscriptionStatus   String    @default("free") // free, pro, past_due, canceled
+  paddleCustomerId     String?   @unique  // Legacy Paddle (kept for data compatibility)
+  subscriptionStatus   String    @default("free") // free, pro, past_due, canceled, active
   subscriptionId       String?
-  paddleSubscriptionId String?
-  paddlePlanId         String?
-  billingCycle         String?
+  paddleSubscriptionId String?   // Legacy Paddle
+  paddlePlanId         String?   // Legacy Paddle
+  billingCycle         String?               // monthly, yearly
   subscriptionEndDate  DateTime?
+  // ── Creem payment integration ──
+  creemCustomerId      String?   @unique
+  creemSubscriptionId String?
+  creemPriceId         String?
+  // ── Password reset ──
+  resetToken           String?   @unique
+  resetExpires         DateTime?
+  // ── Usage tracking ──
   usageCount           Int       @default(0)
   usageResetAt         DateTime  @default(now())
   createdAt            DateTime  @default(now())

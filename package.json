@@ -9,7 +9,7 @@
     "dev": "next dev",
     "build": "prisma generate && next build",
     "build:local": "prisma generate && next build",
-    "vercel-build": "prisma db push --skip-generate --accept-data-loss && prisma generate && next build",
+    "vercel-build": "npx prisma db push --skip-generate && npx prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "postinstall": "prisma generate",
@@ -29,14 +29,16 @@
     "schema": "prisma/schema.prisma"
   },
   "dependencies": {
-    "@clerk/nextjs": "^7.4.2",
-    "@next/third-parties": "^16.2.9",
 
+
+    "@creem_io/nextjs": "^0.5.0",
+    "@next/third-parties": "^16.2.9",
     "@prisma/client": "^5.22.0",
     "@sentry/nextjs": "^10.56.0",
     "@upstash/redis": "^1.38.0",
     "@vercel/og": "^0.11.1",
     "bcryptjs": "^3.0.3",
+    "creem": "^1.4.5",
     "lucide-react": "^1.9.0",
     "next": "^15.2.4",
     "next-intl": "^4.9.1",
@@ -48,6 +50,7 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^15.0.0",
     "react-markdown": "^10.1.0",
+    "resend": "^6.12.4",
     "zod": "^3.23.8"
   },
   "devDependencies": {

@@ -29,7 +29,7 @@ async function flushLogs() {
   
   // In production, send to your logging service
   // Example: CloudWatch, Datadog, Elasticsearch, etc.
-  console.log(`[Log Batch] Flushing ${logsToSend.length} logs`);
+  logger.info(`[Log Batch] Flushing ${logsToSend.length} logs`, { count: logsToSend.length });
   
   // Uncomment to send to external service:
   // await fetch('https://your-logging-service.com/logs', {
@@ -40,6 +40,17 @@ async function flushLogs() {
 }
 
 export async function POST(req: NextRequest) {
+  // Require API key authentication for writing logs
+  const apiKey = process.env.LOG_API_KEY;
+  if (!apiKey) {
+    return NextResponse.json({ error: "Log ingestion not configured" }, { status: 500 });
+  }
+  const authHeader = req.headers.get("authorization") || "";
+  const expected = `Bearer ${apiKey}`;
+  if (!timingSafeEqual(authHeader, expected)) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   try {
     const body = await req.json();
     

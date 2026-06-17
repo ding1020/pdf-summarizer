@@ -18,11 +18,14 @@ export async function GET() {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: {
+        id: true,
+        email: true,
         subscriptionStatus: true,
         subscriptionEndDate: true,
-      paddleSubscriptionId: true,  // kept for legacy data
-      paddlePlanId: true,           // kept for legacy data
         billingCycle: true,
+        creemSubscriptionId: true,
+        creemCustomerId: true,
+        creemPriceId: true,
       },
     });
 
@@ -30,8 +33,9 @@ export async function GET() {
       return NextResponse.json({
         subscriptionStatus: "free",
         subscriptionEndDate: null,
-        paddleSubscriptionId: null,
-        paddlePlanId: null,
+        creemSubscriptionId: null,
+        creemCustomerId: null,
+        creemPriceId: null,
         billingCycle: null,
       });
     }
@@ -39,9 +43,10 @@ export async function GET() {
     return NextResponse.json({
       subscriptionStatus: user.subscriptionStatus || "free",
       subscriptionEndDate: user.subscriptionEndDate?.toISOString() || null,
-      paddleSubscriptionId: user.paddleSubscriptionId,
-      paddlePlanId: user.paddlePlanId,
-      billingCycle: user.billingCycle,
+      creemSubscriptionId: user.creemSubscriptionId || null,
+      creemCustomerId: user.creemCustomerId || null,
+      creemPriceId: user.creemPriceId || null,
+      billingCycle: user.billingCycle || null,
     });
   } catch (error) {
     logger.error("Failed to get subscription status", error instanceof Error ? error : new Error(String(error)));

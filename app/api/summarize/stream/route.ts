@@ -99,8 +99,15 @@ async function tryStreamWithProvider(
 }
 
 export async function POST(req: NextRequest) {
-  // ── Auth ──
+  // ── Auth (required) ──
   const userId = await getAuthUserId();
+
+  if (!userId) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized. Please sign in to use this feature." }),
+      { status: 401, headers: { "Content-Type": "application/json" } },
+    );
+  }
 
   // ── Rate Limiting ──
   try {

@@ -34,7 +34,7 @@ export async function GET(req: Request) {
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
-      select: { id: true, subscriptionStatus: true },
+      select: { id: true, subscriptionStatus: true, subscriptionEndDate: true, billingCycle: true },
     });
 
     if (!user) {
@@ -69,6 +69,9 @@ export async function GET(req: Request) {
       isPro,
       resetAt: resetAt?.toISOString() || null,
       isGuest: false,
+      subscriptionEndDate: user.subscriptionEndDate?.toISOString() || null,
+      billingCycle: user.billingCycle || null,
+      subscriptionStatus: user.subscriptionStatus,
     }, { headers: getRateLimitHeaders(rateLimitResult) });
   } catch (error) {
     logger.error("Failed to get usage stats:", error instanceof Error ? error : new Error(String(error)));

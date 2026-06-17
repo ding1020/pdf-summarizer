@@ -3,7 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useRouter } from "@/navigation";
+import { useRouter, Link } from "@/navigation";
 import PaymentModal from "@/components/PaymentModal";
 
 interface Toast {
@@ -245,6 +245,11 @@ export default function PricingPage() {
 
               <p className="text-center text-xs text-gray-500 mt-4">
                 {t("securePayment")}
+              </p>
+
+              <p className="text-center text-xs text-gray-500 mt-2">
+                🔒 {t("refundGuarantee")} ·{" "}
+                <Link href="/refund" className="text-blue-600 hover:underline">{t("viewRefundPolicy")}</Link>
               </p>
             </div>
           </div>
