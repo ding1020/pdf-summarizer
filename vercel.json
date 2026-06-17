@@ -1,6 +1,6 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npx prisma db push --skip-generate && npx prisma generate && next build",
+  "buildCommand": "echo DATABASE_URL starts with: && node -e \"const u=process.env.DATABASE_URL||'NOT SET';console.log(u.substring(0,80)+'...')\" && npx prisma db push --skip-generate && npx prisma generate && next build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "regions": ["iad1"],
