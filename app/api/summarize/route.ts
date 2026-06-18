@@ -44,7 +44,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { documentId, content, provider = "deepseek", language = "multilingual", streamSummary } = parsed.data as SummarizeInput & { streamSummary?: string };
+    const { documentId, content, provider = "deepseek", language = "multilingual", streamSummary } = parsed.data;
 
     // ==================== Daily Usage Limit Enforcement ====================
     const FREE_DAILY_LIMIT = 5;
