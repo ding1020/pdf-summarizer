@@ -46,6 +46,11 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     }
   }
 
+  // ── API routes: skip i18n, let the route handler respond directly ──
+  if (pathname.startsWith("/api/")) {
+    return NextResponse.next();
+  }
+
   // ── Pass through i18n routing ──
   return handleI18n(request);
 }
