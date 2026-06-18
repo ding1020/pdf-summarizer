@@ -26,13 +26,19 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
   const [creemLoading, setCreemLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // Reset state when modal opens
+  // Reset state when modal opens; handle Escape key
   useEffect(() => {
     if (!isOpen) return;
     setError("");
     setSubmitted(false);
     setTxnRef("");
-  }, [isOpen]);
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -40,6 +46,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
 
   // ── Chinese: manual Alipay/WeChat submission ──
   const handleSubmitCnPayment = async () => {
+    if (submitting) return; // Guard against double-click
     if (!txnRef.trim()) {
       setError(t("modal.txnRefRequired"));
       return;
@@ -73,6 +80,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
 
   // ── International: Creem one-click checkout ──
   const handleCreemCheckout = async () => {
+    if (creemLoading) return; // Guard against double-click
     setCreemLoading(true);
     setError("");
 
@@ -112,11 +120,20 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
   const planLabel = isYearly ? t("modal.yearly") : t("modal.monthly");
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="payment-modal-title"
+    >
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
         {/* Close button */}
         <div className="flex justify-end p-4">
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button
+            onClick={onClose}
+            className="text-gray-400 hover:text-gray-600"
+            aria-label="Close payment modal"
+          >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -131,7 +148,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">{t("modal.successTitle")}</h3>
+            <h3 id="payment-modal-title" className="text-xl font-bold text-gray-900 mb-2">{t("modal.successTitle")}</h3>
             <p className="text-gray-600 mb-6">{t("modal.successDesc")}</p>
             <button
               onClick={onClose}
@@ -144,7 +161,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
         /* ── 🇨🇳 Chinese: Alipay / WeChat + Manual Review ── */
         ) : isZh ? (
           <div className="px-6 pb-8">
-            <h3 className="text-xl font-bold text-gray-900 mb-1">
+            <h3 id="payment-modal-title" className="text-xl font-bold text-gray-900 mb-1">
               {planLabel} — {amount}
             </h3>
             <p className="text-sm text-gray-500 mb-6">{t("modal.subtitle")}</p>
@@ -177,7 +194,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
             <div className="bg-white rounded-xl p-6 mb-6 text-center border border-gray-200 shadow-sm">
               <img
                 src={channel === "alipay" ? "/qrcodes/alipay.jpg" : "/qrcodes/wechat.jpg"}
-                alt={channel === "alipay" ? "支付宝收款码" : "微信收款码"}
+                alt={channel === "alipay" ? "Alipay QR Code" : "WeChat Pay QR Code"}
                 className="w-56 h-56 mx-auto rounded-lg"
               />
               <div className="mt-3 text-sm text-gray-600">

@@ -13,7 +13,7 @@ AI-driven SaaS platform that automatically generates concise summaries from uplo
 - **Streaming SSE** — Real-time summary streaming for fast UX
 - **7-Language Support** — English, 中文, 日本語, 한국어, Español, Français, Deutsch
 - **Guest Mode** — Try without signing up (3 summaries/day)
-- **Pro Subscription** — Powered by Paddle (20+ summaries/day, priority AI)
+- **Pro Subscription** — Powered by Creem (unlimited summaries, priority AI)
 - **GDPR Compliant** — Data minimization, cookie consent, right to deletion
 - **Dark/Light Ready** — Tailwind CSS with CSS variables theming
 
@@ -29,7 +29,7 @@ AI-driven SaaS platform that automatically generates concise summaries from uplo
 | **Auth** | Clerk |
 | **Database** | PostgreSQL (NeonDB / Supabase) + Prisma ORM |
 | **AI** | DeepSeek, Groq, SiliconFlow (OpenAI-compatible) |
-| **Payments** | Paddle (subscriptions + customer portal + webhooks) |
+| **Payments** | Creem (subscriptions + customer portal + webhooks) |
 | **i18n** | next-intl v4 |
 | **CSS** | Tailwind CSS 3 |
 | **Monitoring** | Sentry |
@@ -76,10 +76,11 @@ DEEPSEEK_API_KEY=sk-***
 # GROQ_API_KEY=gsk_***
 # SILICONFLOW_API_KEY=sk-***
 
-# Paddle (optional for dev)
-PADDLE_ENV=sandbox
-PADDLE_SECRET_KEY=test_***
-PADDLE_WEBHOOK_SECRET=***
+# Creem Payments (for production)
+NEXT_PUBLIC_CREEM_PRICE_MONTHLY=prod_***
+NEXT_PUBLIC_CREEM_PRICE_YEARLY=prod_***
+CREEM_SECRET_KEY=creem_***
+CREEM_WEBHOOK_SECRET=whsec_***
 ```
 
 ### 3. Initialize Database
@@ -136,7 +137,7 @@ To add a new language:
 
 - **CSP Headers** — Strict Content Security Policy
 - **HSTS** — Preloaded with 2-year max-age
-- **HMAC Webhook Verification** — Timing-safe comparison for Paddle
+- **HMAC Webhook Verification** — Timing-safe comparison for Creem
 - **Rate Limiting** — Per-user/per-IP with LRU eviction
 - **Zod Validation** — All API inputs validated
 - **GDPR** — Data minimization, cookie consent, content truncation

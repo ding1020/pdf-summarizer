@@ -43,7 +43,6 @@ export default function OnboardingGuide({ onComplete }: { onComplete?: () => voi
   useEffect(() => {
     const done = localStorage.getItem(STORAGE_KEY);
     if (!done) {
-      // Delay to avoid flashing on mount
       const timer = setTimeout(() => setShow(true), 800);
       return () => clearTimeout(timer);
     }
@@ -57,6 +56,16 @@ export default function OnboardingGuide({ onComplete }: { onComplete?: () => voi
       onComplete?.();
     }, 300);
   };
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!show || fadeOut) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") dismiss();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [show, fadeOut]);
 
   const nextStep = () => {
     if (step < STEPS.length - 1) {
@@ -75,6 +84,9 @@ export default function OnboardingGuide({ onComplete }: { onComplete?: () => voi
       className={`fixed inset-0 z-50 flex items-center justify-center bg-black/40 transition-opacity duration-300 ${
         fadeOut ? "opacity-0" : "opacity-100"
       }`}
+      role="dialog"
+      aria-modal="true"
+      aria-label={t("onboarding.guideTitle")}
     >
       <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-8 text-center animate-in zoom-in-95 duration-300">
         {/* Step indicator */}

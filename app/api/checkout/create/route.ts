@@ -7,8 +7,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import { logger } from "@/lib/logger";
+import { ALLOWED_CREEM_PRICE_IDS } from "@/lib/constants";
 
-const CREEM_API_KEY = process.env.CREEM_SECRET_KEY;
+const CREEM_API_KEY = process.env.CREEM_SECRET_KEY?.replace(/^\uFEFF/, "");
 const CREEM_BASE_URL =
   process.env.NODE_ENV === "development"
     ? "https://test-api.creem.io/v1"
@@ -43,6 +44,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ── Validate priceId against whitelist ──
+  if (!ALLOWED_CREEM_PRICE_IDS.has(priceId)) {
+    logger.warn("Rejected non-whitelisted priceId", { userId, priceId });
+    return NextResponse.json(
+      { error: "Invalid price ID." },
+      { status: 400 },
+    );
+  }
+
   if (!CREEM_API_KEY) {
     logger.error("CREEM_SECRET_KEY not configured");
     return NextResponse.json(
@@ -52,10 +62,6 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
-    const successUrl = `${appUrl}/dashboard?checkout=success`;
-    const cancelUrl = `${appUrl}/pricing?checkout=canceled`;
-
     const response = await fetch(`${CREEM_BASE_URL}/checkouts`, {
       method: "POST",
       headers: {
@@ -64,13 +70,10 @@ export async function POST(req: NextRequest) {
       },
       body: JSON.stringify({
         product_id: priceId,
-        success_url: successUrl,
-        cancel_url: cancelUrl,
         metadata: {
           userId,
           source: "web",
           planType: body.planType || "pro_monthly",
-          timestamp: Date.now().toString(),
         },
       }),
     });
@@ -89,9 +92,19 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
 
-    logger.info("Creem checkout created", { userId, checkoutUrl: data.checkout_url });
+    const checkoutUrl = data.checkoutUrl || data.checkout_url || data.url;
 
-    return NextResponse.json({ url: data.checkout_url || data.url });
+    if (!checkoutUrl) {
+      logger.error("Creem checkout response missing URL", undefined, { data: JSON.stringify(data).slice(0, 500) });
+      return NextResponse.json(
+        { error: "Failed to create checkout session. Please try again." },
+        { status: 502 },
+      );
+    }
+
+    logger.info("Creem checkout created", { userId, checkoutUrl });
+
+    return NextResponse.json({ url: checkoutUrl });
   } catch (error) {
     logger.error("Creem checkout error", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(

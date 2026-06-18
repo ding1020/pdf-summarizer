@@ -79,7 +79,7 @@ export default function PricingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <main className="min-h-screen bg-gray-50 py-16" id="main-content">
       <div className="max-w-6xl mx-auto px-4">
         {/* Header */}
         <div className="text-center mb-12">
@@ -318,6 +318,6 @@ export default function PricingPage() {
         isOpen={showModal}
         onClose={() => setShowModal(false)}
       />
-    </div>
+    </main>
   );
 }

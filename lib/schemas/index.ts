@@ -55,7 +55,7 @@ export type LogEntryInput = z.infer<typeof logEntrySchema>;
 // User update validation schema
 export const userUpdateSchema = z.object({
   email: z.string().email({ message: 'Invalid email address' }).optional(),
-  subscriptionStatus: z.enum(['free', 'pro', 'enterprise']).optional(),
+  subscriptionStatus: z.enum(['free', 'pro', 'past_due', 'canceled']).optional(),
 });
 
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;

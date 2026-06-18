@@ -36,7 +36,9 @@ export function verifyToken(token: string): AuthToken | null {
 
     const secret = getSecret();
     const expectedSig = crypto.createHmac("sha256", secret).update(b64).digest("base64url");
-    if (sig !== expectedSig) return null;
+
+    // Timing-safe comparison
+    if (!timingSafeEqual(sig, expectedSig)) return null;
 
     const payload: AuthToken = JSON.parse(Buffer.from(b64, "base64url").toString());
     if (payload.exp < Math.floor(Date.now() / 1000)) return null;
@@ -45,4 +47,14 @@ export function verifyToken(token: string): AuthToken | null {
   } catch {
     return null;
   }
+}
+
+// ── Timing-safe string comparison ──
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+  return result === 0;
 }

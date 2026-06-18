@@ -26,7 +26,7 @@ export default async function DashboardPage({
   const ct = await getTranslations();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <main className="min-h-screen bg-gray-50" id="main-content">
       {/* Guest Header (shown when not signed in) */}
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
@@ -143,6 +143,6 @@ export default async function DashboardPage({
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

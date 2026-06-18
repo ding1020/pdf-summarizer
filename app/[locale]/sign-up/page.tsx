@@ -53,7 +53,7 @@ export default function SignUpPage() {
   if (isSignedIn) return null;
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
+    <main className="min-h-screen flex items-center justify-center bg-gray-50 p-4" id="main-content">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl shadow-lg p-8">
           <div className="text-center mb-8">
@@ -139,6 +139,6 @@ export default function SignUpPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

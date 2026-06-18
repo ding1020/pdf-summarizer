@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocale } from "next-intl";
 import { Globe } from "lucide-react";
 
@@ -17,6 +17,16 @@ const languages = [
 export default function LanguageSwitcher() {
   const locale = useLocale();
   const [open, setOpen] = useState(false);
+
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open]);
 
   const switchTo = (newLocale: string) => {
     setOpen(false);

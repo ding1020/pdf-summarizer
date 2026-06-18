@@ -48,7 +48,11 @@ export default function Navigation() {
     return () => { document.body.style.overflow = ""; };
   }, [mobileOpen]);
 
-  const isActive = (path: string) => pathname.includes(path);
+  const isActive = (path: string) => {
+    if (path === "/pricing") return pathname === "/pricing" || pathname.startsWith("/pricing");
+    if (path === "/help") return pathname === "/help" || pathname.startsWith("/help");
+    return pathname === "/" || pathname.includes(path);
+  };
 
   const navLinks = [
     { href: "/#features", label: t("nav.features") },
@@ -62,7 +66,7 @@ export default function Navigation() {
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2">
+          <Link href="/" className="flex items-center gap-2" aria-label="PDF Summary - Home">
             <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
               <svg className="w-5 h-5 text-white" aria-hidden="true" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -72,19 +76,21 @@ export default function Navigation() {
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center gap-8">
+          <ul className="hidden md:flex items-center gap-8">
             {navLinks.map((link) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                className={`text-sm font-medium transition-colors ${
-                  isActive(link.href.replace("/#", "/")) ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
-                }`}
-              >
-                {link.label}
-              </Link>
+              <li key={link.href}>
+                <Link
+                  href={link.href}
+                  className={`text-sm font-medium transition-colors ${
+                    isActive(link.href.replace("/#", "/")) ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
+                  }`}
+                  aria-current={isActive(link.href.replace("/#", "/")) ? "page" : undefined}
+                >
+                  {link.label}
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex">
@@ -99,6 +105,8 @@ export default function Navigation() {
             className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
+            aria-haspopup="menu"
+            aria-controls="mobile-menu"
           >
             {mobileOpen ? (
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -121,7 +129,12 @@ export default function Navigation() {
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
-          <div className="fixed top-16 left-0 right-0 bg-white border-b shadow-lg z-50 md:hidden animate-slide-in">
+          <div
+            className="fixed top-16 left-0 right-0 bg-white border-b shadow-lg z-50 md:hidden animate-slide-in"
+            id="mobile-menu"
+            role="dialog"
+            aria-label="Mobile navigation menu"
+          >
             <div className="px-4 py-4 space-y-1">
               {navLinks.map((link) => (
                 <Link

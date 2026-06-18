@@ -78,7 +78,7 @@ export async function GET(req: Request) {
         clerkId: user.clerkId,
         subscriptionStatus: user.subscriptionStatus,
         subscriptionId: user.subscriptionId,
-        paddleSubscriptionId: user.paddleSubscriptionId,
+        creemSubscriptionId: user.creemSubscriptionId,
         billingCycle: user.billingCycle,
         subscriptionEndDate: user.subscriptionEndDate?.toISOString() || null,
         createdAt: user.createdAt.toISOString(),

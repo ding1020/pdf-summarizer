@@ -159,11 +159,17 @@ export default async function LocaleLayout({
               <div className="min-h-screen bg-white">
                 <div className="bg-gray-50 border-b">
                   <div className="max-w-6xl mx-auto px-4 py-2 flex justify-end">
+                    <a
+                      href="#main-content"
+                      className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:shadow-lg"
+                    >
+                      Skip to content
+                    </a>
                     <LanguageSwitcher />
                   </div>
                 </div>
                 <Navigation />
-                {children}
+                <main id="main-content">{children}</main>
               </div>
             </AuthProvider>
           </ErrorBoundary>

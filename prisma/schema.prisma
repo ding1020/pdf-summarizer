@@ -17,11 +17,13 @@ model User {
   passwordHash         String?   // Native auth password hash
   firstName            String?
   lastName             String?
-  paddleCustomerId     String?   @unique  // Legacy Paddle (kept for data compatibility)
-  subscriptionStatus   String    @default("free") // free, pro, past_due, canceled, active
+  // @deprecated — Legacy Paddle fields (safe to drop in next migration)
+  paddleCustomerId     String?   @unique
+  paddleSubscriptionId String?
+  paddlePlanId         String?
+  // ── Active subscription fields ──
+  subscriptionStatus   String    @default("free") // free | pro | past_due | canceled
   subscriptionId       String?
-  paddleSubscriptionId String?   // Legacy Paddle
-  paddlePlanId         String?   // Legacy Paddle
   billingCycle         String?               // monthly, yearly
   subscriptionEndDate  DateTime?
   // ── Creem payment integration ──
@@ -39,12 +41,14 @@ model User {
   documents            Document[]
   feedbacks            Feedback[]
   paymentRequests      PaymentRequest[]
+
+  @@index([subscriptionStatus])
 }
 
 model Document {
   id        String   @id @default(uuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   filename  String
   fileSize  Int
   pageCount Int
@@ -61,7 +65,7 @@ model Document {
 model Feedback {
   id        String   @id @default(uuid())
   userId    String?
-  user      User?    @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
   userName  String?
   userEmail String?
   category  String   @default("general") // general, bug, feature, billing
@@ -78,7 +82,7 @@ model Feedback {
 model PaymentRequest {
   id         String    @id @default(uuid())
   userId     String
-  user       User      @relation(fields: [userId], references: [id])
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan       String    // "pro_monthly" | "pro_yearly"
   amount     Int       // amount in cents (e.g. 5900 = ¥59.00)
   channel    String    // "alipay" | "wechat" | "manual"

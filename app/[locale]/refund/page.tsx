@@ -26,7 +26,7 @@ export default async function RefundPage({
   const t = await getTranslations({ locale, namespace: "legal.refund" });
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <main className="min-h-screen bg-gray-50 py-16" id="main-content">
       <div className="max-w-3xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t("title")}</h1>
 
@@ -102,6 +102,6 @@ export default async function RefundPage({
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

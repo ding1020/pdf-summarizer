@@ -61,7 +61,7 @@ export default function SubscriptionPage() {
   const supportEmail = "support@pdfsum.com";
 
   return (
-    <div className="min-h-[80vh] py-12 px-4">
+    <main className="min-h-[80vh] py-12 px-4" id="main-content">
       <div className="max-w-2xl mx-auto">
         <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
           <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-8 py-6">
@@ -141,6 +141,6 @@ export default function SubscriptionPage() {
           </div>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

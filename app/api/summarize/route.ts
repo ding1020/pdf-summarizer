@@ -5,6 +5,7 @@ import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
 import { summarizeSchema, type SummarizeInput } from "@/lib/schemas";
+import { FREE_DAILY_LIMIT, GUEST_RATE_LIMIT, PRO_RATE_LIMIT, FREE_USER_RATE_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,8 +14,18 @@ export async function POST(req: NextRequest) {
     const userId = await getAuthUserId();
     const isGuest = !userId;
     const identifier = getClientIdentifier(userId, clientIp);
-    const guestRateLimit = { windowMs: 60 * 1000, maxRequests: 3 };
-    const usageRateConfig = isGuest ? guestRateLimit : { windowMs: 60 * 1000, maxRequests: 20 };
+
+    // Differentiate rate limits: Pro > Free > Guest
+    let usageRateConfig: { windowMs: number; maxRequests: number };
+    if (!isGuest) {
+      const userRecord = await prisma.user.findUnique({
+        where: { id: userId! },
+        select: { subscriptionStatus: true },
+      });
+      usageRateConfig = userRecord?.subscriptionStatus === "pro" ? PRO_RATE_LIMIT : FREE_USER_RATE_LIMIT;
+    } else {
+      usageRateConfig = GUEST_RATE_LIMIT;
+    }
     const rateLimitResult = await rateLimitAsync(identifier, usageRateConfig);
     
     if (!rateLimitResult.success) {
@@ -47,14 +58,13 @@ export async function POST(req: NextRequest) {
     const { documentId, content, provider = "deepseek", language = "multilingual", streamSummary } = parsed.data;
 
     // ==================== Daily Usage Limit Enforcement ====================
-    const FREE_DAILY_LIMIT = 5;
     if (!isGuest) {
       try {
         const userRecord = await prisma.user.findUnique({
           where: { id: userId! },
           select: { id: true, subscriptionStatus: true },
         });
-        if (userRecord && userRecord.subscriptionStatus !== "pro" && userRecord.subscriptionStatus !== "active") {
+        if (userRecord && userRecord.subscriptionStatus !== "pro") {
           const startOfDay = new Date();
           startOfDay.setUTCHours(0, 0, 0, 0);
           const todayCount = await prisma.document.count({
@@ -86,6 +96,22 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Also enforce daily limit for guests via cookie/ip tracking
+    if (isGuest) {
+      const guestKey = `guest_daily:${clientIp}`;
+      const guestDailyResult = await rateLimitAsync(guestKey, { windowMs: 24 * 60 * 60 * 1000, maxRequests: FREE_DAILY_LIMIT });
+      if (!guestDailyResult.success) {
+        return NextResponse.json(
+          {
+            error: "Daily free limit reached. Sign up for more summaries.",
+            code: "usage_limit_reached",
+            upgradeUrl: "/sign-up",
+          },
+          { status: 402, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+
     // If a stream-generated summary was already provided, skip AI re-call
     if (streamSummary) {
       logger.info("Summary provided from stream — skipping AI re-generation", { documentId });
@@ -108,7 +134,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const maxLength = 15000;
+    const maxLength = MAX_CONTENT_LENGTH;
     const truncatedContent = content.length > maxLength 
       ? content.substring(0, maxLength) + "..."
       : content;
@@ -117,9 +143,9 @@ export async function POST(req: NextRequest) {
     let usedProvider: AIProvider;
 
     try {
-      const openai = getAIProvider(provider as AIProvider);
+      const aiClient = getAIProvider(provider as AIProvider);
       const model = getModelForProvider(provider);
-      const completion = await openai.chat.completions.create({
+      const completion = await aiClient.chat.completions.create({
         model,
         messages: [
           { role: "system", content: getSystemPrompt(language) },
@@ -134,9 +160,9 @@ export async function POST(req: NextRequest) {
       logger.error("Primary AI provider failed:", primaryError instanceof Error ? primaryError : new Error(String(primaryError)));
       
       try {
-        const openai = getAIProvider("groq");
+        const groqClient = getAIProvider("groq");
         const model = getModelForProvider("groq");
-        const completion = await openai.chat.completions.create({
+        const completion = await groqClient.chat.completions.create({
           model,
           messages: [
             { role: "system", content: getSystemPrompt(language) },
@@ -150,9 +176,9 @@ export async function POST(req: NextRequest) {
       } catch (groqError) {
         logger.error("Groq also failed:", groqError instanceof Error ? groqError : new Error(String(groqError)));
         
-        const openai = getAIProvider("siliconflow");
+        const sfClient = getAIProvider("siliconflow");
         const model = getModelForProvider("siliconflow");
-        const completion = await openai.chat.completions.create({
+        const completion = await sfClient.chat.completions.create({
           model,
           messages: [
             { role: "system", content: getSystemPrompt(language) },
