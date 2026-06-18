@@ -11,7 +11,7 @@ interface Props {
 }
 
 async function getSharedDocument(shareId: string) {
-  const doc = await prisma.document.findUnique({
+  const doc = await prisma.document.findFirst({
     where: { shareId, isPublic: true },
     select: {
       filename: true,
