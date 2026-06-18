@@ -36,6 +36,8 @@ export const summarizeSchema = z.object({
     .enum(['en', 'zh', 'es', 'fr', 'de', 'ja', 'ko', 'multilingual'])
     .optional()
     .default('multilingual'),
+  // Stream-generated summary passed from frontend (avoids re-calling AI)
+  streamSummary: z.string().optional(),
 });
 
 export type SummarizeInput = z.infer<typeof summarizeSchema>;
