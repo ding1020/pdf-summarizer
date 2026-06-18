@@ -10,8 +10,8 @@ const routesWithoutLocale = ["/sign-in", "/sign-up"];
 // Routes with locale prefix
 const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund", "/help", "/cookies"];
 
-// Stable build date — prevents unnecessary sitemap churn on every deploy
-const BUILD_DATE = "2026-06-11";
+// Build date — auto-generated on each deploy to reflect last modification
+const BUILD_DATE = new Date().toISOString().split("T")[0];
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapRoutes: MetadataRoute.Sitemap = [];

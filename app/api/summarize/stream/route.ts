@@ -11,7 +11,7 @@ import {
 } from "@/lib/ai";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { FREE_DAILY_LIMIT, PRO_RATE_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
+import { FREE_DAILY_LIMIT, PRO_RATE_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
 
 // ── AI provider fallback chain: deepseek → groq → siliconflow ──
 const FALLBACK_CHAIN: { provider: AIProvider; model: string }[] = [
@@ -177,8 +177,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // ── Determine max content length (Pro: 50k, Free: 15k) ──
+  let maxLength = MAX_CONTENT_LENGTH;
+  if (userId) {
+    try {
+      const { prisma: prismaDb } = await import("@/lib/db");
+      const userRecord = await prismaDb.user.findUnique({
+        where: { id: userId },
+        select: { subscriptionStatus: true },
+      });
+      if (userRecord?.subscriptionStatus === "pro") {
+        maxLength = PRO_MAX_CONTENT_LENGTH;
+      }
+    } catch {
+      // Fallback to free limit
+    }
+  }
+
   // Truncate content if too long
-  const maxLength = MAX_CONTENT_LENGTH;
   const truncatedContent =
     content.length > maxLength
       ? content.substring(0, maxLength) + "\n\n[Content truncated...]"

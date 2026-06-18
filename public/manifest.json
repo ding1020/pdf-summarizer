@@ -1,11 +1,14 @@
 {
   "name": "PDF Summary AI",
-  "short_name": "PDF Summary",
+  "short_name": "PDFSummary",
   "description": "Upload any PDF and get AI-powered summaries instantly",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
+  "orientation": "any",
+  "categories": ["productivity", "utilities"],
+  "lang": "en",
   "icons": [
     {
       "src": "/apple-touch-icon.png",
@@ -15,7 +18,8 @@
     {
       "src": "/favicon.svg",
       "sizes": "any",
-      "type": "image/svg+xml"
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
     }
   ]
 }

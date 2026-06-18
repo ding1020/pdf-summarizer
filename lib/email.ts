@@ -149,3 +149,43 @@ export function subscriptionCanceledEmail(
     `,
   };
 }
+
+// ── Admin notification templates ──
+
+export function adminPaymentAlertEmail(details: {
+  userName: string;
+  userEmail: string;
+  plan: string;
+  amount: string;
+  channel: string;
+  txnRef: string;
+  paymentId: string;
+}): { subject: string; html: string } {
+  const planName = details.plan === "pro_yearly" ? "Pro Yearly" : "Pro Monthly";
+  const channelName = details.channel === "alipay" ? "Alipay" : "WeChat Pay";
+  return {
+    subject: `🔔 [Action Required] New ${planName} payment from ${details.userName}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+        <h1 style="color:#ea580c">New Payment Request</h1>
+        <table style="width:100%;border-collapse:collapse;margin:20px 0">
+          <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600;width:140px">User</td><td style="padding:8px;border-bottom:1px solid #e5e7eb">${details.userName} (${details.userEmail})</td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600">Plan</td><td style="padding:8px;border-bottom:1px solid #e5e7eb">${planName}</td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600">Amount</td><td style="padding:8px;border-bottom:1px solid #e5e7eb">${details.amount}</td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600">Channel</td><td style="padding:8px;border-bottom:1px solid #e5e7eb">${channelName}</td></tr>
+          <tr><td style="padding:8px;border-bottom:1px solid #e5e7eb;font-weight:600">Txn Ref</td><td style="padding:8px;border-bottom:1px solid #e5e7eb">${details.txnRef}</td></tr>
+          <tr><td style="padding:8px;font-weight:600">Payment ID</td><td style="padding:8px">${details.paymentId}</td></tr>
+        </table>
+        <p>
+          <a href="https://www.pdfsum.com/admin" style="display:inline-block;padding:12px 24px;background:#ea580c;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
+            Review in Admin Panel →
+          </a>
+        </p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
+        <p style="color:#9ca3af;font-size:12px">
+          PDFSum Admin · Auto-generated notification
+        </p>
+      </div>
+    `,
+  };
+}

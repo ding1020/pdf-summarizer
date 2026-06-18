@@ -25,6 +25,7 @@ export const ALLOWED_CREEM_PRICE_IDS = new Set([
 
 // ── Content limits ──
 export const MAX_CONTENT_LENGTH = 15_000;
+export const PRO_MAX_CONTENT_LENGTH = 50_000;
 export const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 
 // ── Subscription status values ──

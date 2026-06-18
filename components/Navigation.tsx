@@ -57,12 +57,13 @@ export default function Navigation() {
   const navLinks = [
     { href: "/#features", label: t("nav.features") },
     { href: "/pricing", label: t("nav.pricing") },
+    { href: "/api-docs", label: t("nav.api") },
     { href: "/help", label: t("nav.help") },
     { href: "/#how-it-works", label: t("nav.howItWorks") },
   ];
 
   return (
-    <nav className="bg-white border-b" aria-label="Main navigation">
+    <nav className="bg-white dark:bg-gray-950 border-b dark:border-gray-800 transition-colors" aria-label="Main navigation">
       <div className="max-w-6xl mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -72,7 +73,7 @@ export default function Navigation() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
-            <span className="font-bold text-lg text-gray-900">{t("common.brand")}</span>
+            <span className="font-bold text-lg text-gray-900 dark:text-gray-100">{t("common.brand")}</span>
           </Link>
 
           {/* Desktop Navigation */}
@@ -82,7 +83,7 @@ export default function Navigation() {
                 <Link
                   href={link.href}
                   className={`text-sm font-medium transition-colors ${
-                    isActive(link.href.replace("/#", "/")) ? "text-blue-600" : "text-gray-600 hover:text-gray-900"
+                    isActive(link.href.replace("/#", "/")) ? "text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
                   }`}
                   aria-current={isActive(link.href.replace("/#", "/")) ? "page" : undefined}
                 >
@@ -102,7 +103,7 @@ export default function Navigation() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileOpen(!mobileOpen)}
-            className="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+            className="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
             aria-haspopup="menu"
@@ -125,12 +126,12 @@ export default function Navigation() {
       {mobileOpen && (
         <>
           <div
-            className="fixed inset-0 bg-black/20 z-40 md:hidden"
+            className="fixed inset-0 bg-black/20 dark:bg-black/50 z-40 md:hidden"
             onClick={() => setMobileOpen(false)}
             aria-hidden="true"
           />
           <div
-            className="fixed top-16 left-0 right-0 bg-white border-b shadow-lg z-50 md:hidden animate-slide-in"
+            className="fixed top-16 left-0 right-0 bg-white dark:bg-gray-950 border-b dark:border-gray-800 shadow-lg z-50 md:hidden animate-slide-in"
             id="mobile-menu"
             role="dialog"
             aria-label="Mobile navigation menu"
@@ -143,14 +144,14 @@ export default function Navigation() {
                   onClick={() => setMobileOpen(false)}
                   className={`block px-3 py-3 rounded-lg text-base font-medium transition-colors ${
                     isActive(link.href.replace("/#", "/"))
-                      ? "bg-blue-50 text-blue-600"
-                      : "text-gray-700 hover:bg-gray-50"
+                      ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                      : "text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800"
                   }`}
                 >
                   {link.label}
                 </Link>
               ))}
-              <div className="pt-3 border-t border-gray-100 mt-3 px-3">
+              <div className="pt-3 border-t border-gray-100 dark:border-gray-800 mt-3 px-3">
                 <Suspense fallback={<LoadingSkeleton />}>
                   <AuthButtonsClient />
                 </Suspense>

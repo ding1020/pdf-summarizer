@@ -19,6 +19,7 @@
     "help": "帮助中心",
     "howItWorks": "使用流程",
     "dashboard": "控制面板",
+    "api": "API",
     "logout": "退出登录"
   },
   "hero": {
@@ -249,7 +250,13 @@
     "streamFailed": "读取流失败",
     "cancel": "取消",
     "needHelp": "需要帮助上传PDF？",
-    "errorTitle": "错误"
+    "errorTitle": "错误",
+    "copySummary": "复制",
+    "downloadSummary": "下载 .md",
+    "shareSummary": "分享",
+    "copied": "已复制！",
+    "shareEnabled": "分享链接已复制！",
+    "shareDisabled": "分享"
   },
   "footer": {
     "brand": "PDF智能摘要",

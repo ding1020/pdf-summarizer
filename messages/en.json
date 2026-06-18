@@ -19,6 +19,7 @@
     "help": "Help",
     "howItWorks": "How It Works",
     "dashboard": "Dashboard",
+    "api": "API",
     "logout": "Log Out"
   },
   "hero": {
@@ -249,7 +250,13 @@
     "streamFailed": "Failed to read stream",
     "cancel": "Cancel",
     "needHelp": "Need help with PDF upload?",
-    "errorTitle": "Error"
+    "errorTitle": "Error",
+    "copySummary": "Copy",
+    "downloadSummary": "Download .md",
+    "shareSummary": "Share",
+    "copied": "Copied!",
+    "shareEnabled": "Share link copied!",
+    "shareDisabled": "Share"
   },
   "footer": {
     "brand": "PDF Summary",
