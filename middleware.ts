@@ -21,7 +21,7 @@ export default async function middleware(request: NextRequest): Promise<NextResp
   const pathname = request.nextUrl.pathname;
 
   // ── 1. Protect dashboard & authenticated pages ──
-  const PROTECTED_PAGES = ["/dashboard"];
+  const PROTECTED_PAGES = ["/dashboard", "/admin"];
   const isProtectedPage = PROTECTED_PAGES.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
   if (isProtectedPage) {
@@ -32,13 +32,13 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     }
   }
 
-  // ── 2. Protect write-sensitive API routes (read-only) ──
+  // ── 2. Protect write-sensitive API routes (verify token validity) ──
   if (
     (pathname.startsWith("/api/summarize") && !pathname.startsWith("/api/summarize/stream")) ||
     (pathname.startsWith("/api/documents") && request.method !== "GET")
   ) {
     const token = request.cookies.get("__auth_token")?.value;
-    if (!token) {
+    if (!token || !(await verifyTokenEdge(token))) {
       return new Response(
         JSON.stringify({ error: "Unauthorized. Please sign in." }),
         { status: 401, headers: { "Content-Type": "application/json" } },

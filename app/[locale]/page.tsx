@@ -7,7 +7,7 @@ export default function HomePage() {
   const t = useTranslations();
 
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white" id="main-content">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800">
         {/* Background Pattern */}
@@ -303,6 +303,6 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
-    </div>
+    </main>
   );
 }

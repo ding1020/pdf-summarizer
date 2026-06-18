@@ -6,7 +6,7 @@ import type { AuthToken } from "./auth-token-types";
 
 const SECRET = process.env.AUTH_SECRET;
 // Note: In Edge middleware, throwing here would crash the middleware.
-// Instead, verifyToken will always fail if SECRET is undefined.
+// Instead, verifyToken will always fail if SECRET is undefined or too short.
 // AUTH_SECRET must be set in Vercel environment variables.
 
 /**
@@ -15,6 +15,9 @@ const SECRET = process.env.AUTH_SECRET;
  */
 export async function verifyTokenEdge(token: string): Promise<AuthToken | null> {
   try {
+    // If SECRET is not configured, reject all tokens
+    if (!SECRET || SECRET.length < 32) return null;
+
     const [b64, sig] = token.split(".");
     if (!b64 || !sig) return null;
 

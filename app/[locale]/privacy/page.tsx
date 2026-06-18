@@ -27,7 +27,7 @@ export default async function PrivacyPage({
   const t = await getTranslations("legal.privacy");
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <main className="min-h-screen bg-gray-50 py-16" id="main-content">
       <div className="max-w-3xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t("title")}</h1>
         
@@ -75,7 +75,7 @@ export default async function PrivacyPage({
             <p>{t("s5Intro")}</p>
             <ul className="list-disc pl-6 mt-2 space-y-1">
               <li><strong>Clerk:</strong> {t("s5Clerk")}</li>
-              <li><strong>Paddle:</strong> {t("s5Paddle")}</li>
+              <li><strong>Creem:</strong> {t("s5Paddle")}</li>
               <li><strong>AI Providers:</strong> {t("s5AI")}</li>
             </ul>
             <p className="mt-2">{t("s5Note")}</p>
@@ -119,6 +119,6 @@ export default async function PrivacyPage({
           <p className="text-sm text-gray-500 pt-4 border-t">{t("updated")}: {new Date().toLocaleDateString()}</p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

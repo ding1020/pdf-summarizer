@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { logger } from "@/lib/logger";
+import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/reset-password
@@ -11,6 +12,16 @@ import { logger } from "@/lib/logger";
  */
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: prevent token brute-force
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const rateResult = await rateLimitAsync(`auth:reset:${clientIp}`, RATE_LIMITS.auth);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many attempts. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateResult) },
+      );
+    }
+
     const { token, password } = await req.json();
 
     if (!token || typeof token !== "string") {

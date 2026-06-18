@@ -3,6 +3,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { sendEmail, passwordResetEmail } from "@/lib/email";
+import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
 
 /**
  * POST /api/auth/forgot-password
@@ -13,6 +14,16 @@ import { sendEmail, passwordResetEmail } from "@/lib/email";
  */
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: prevent email spam
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const rateResult = await rateLimitAsync(`auth:forgot:${clientIp}`, RATE_LIMITS.auth);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { ok: true }, // Don't reveal rate limit to prevent email enumeration
+        { status: 200, headers: getRateLimitHeaders(rateResult) },
+      );
+    }
+
     const { email } = await req.json();
 
     if (!email || typeof email !== "string") {

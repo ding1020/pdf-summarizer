@@ -8,7 +8,7 @@ export default function CookiesPage() {
   const t = useTranslations("legal.cookies");
 
   return (
-    <div className="min-h-screen bg-white">
+    <main className="min-h-screen bg-white" id="main-content">
       <div className="max-w-3xl mx-auto px-4 py-16">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t("title")}</h1>
         
@@ -40,7 +40,7 @@ export default function CookiesPage() {
           <p className="text-gray-600 mb-4">{t("thirdPartyDesc")}</p>
           <ul className="list-disc list-inside text-gray-600 mb-6 space-y-2">
             <li><strong>Clerk:</strong> {t("clerk")}</li>
-            <li><strong>Paddle:</strong> {t("paddle")}</li>
+            <li><strong>Creem:</strong> {t("paddle")}</li>
             <li><strong>Vercel:</strong> {t("vercel")}</li>
           </ul>
 
@@ -59,6 +59,6 @@ export default function CookiesPage() {
           </p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

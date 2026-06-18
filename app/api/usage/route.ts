@@ -3,8 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
-
-const FREE_DAILY_LIMIT = 5;
+import { FREE_DAILY_LIMIT } from "@/lib/constants";
 
 export async function GET(req: Request) {
   try {
@@ -44,7 +43,7 @@ export async function GET(req: Request) {
       );
     }
 
-    const isPro = user.subscriptionStatus === "pro" || user.subscriptionStatus === "active";
+    const isPro = user.subscriptionStatus === "pro";
 
     // Use UTC midnight for consistent daily reset
     const now = new Date();

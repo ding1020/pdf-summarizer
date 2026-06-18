@@ -2,9 +2,20 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { createToken } from "@/lib/auth-token";
+import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    // Rate limiting: prevent abuse
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const rateResult = await rateLimitAsync(`auth:signup:${clientIp}`, RATE_LIMITS.auth);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(rateResult) },
+      );
+    }
+
     const { email, password, firstName, lastName } = await req.json();
 
     if (!email || !password) {

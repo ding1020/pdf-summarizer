@@ -86,7 +86,7 @@ export default function AdminPage() {
   if (!isSignedIn) return null;
 
   return (
-    <div className="min-h-[80vh] py-8 px-4 max-w-4xl mx-auto">
+    <main className="min-h-[80vh] py-8 px-4 max-w-4xl mx-auto" id="main-content">
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">{t("title")}</h1>
@@ -168,6 +168,6 @@ export default function AdminPage() {
           ))}
         </div>
       )}
-    </div>
+    </main>
   );
 }

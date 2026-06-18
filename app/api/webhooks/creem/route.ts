@@ -19,9 +19,14 @@ import { sendEmail, paymentSuccessEmail, paymentFailedEmail, subscriptionCancele
 
 // ── Signature verification (timing-safe) ──
 function verifySignature(payload: string, secret: string, signature: string): boolean {
+  // Validate signature is a valid hex string to prevent Buffer.from truncation
+  if (!/^[a-f0-9]+$/i.test(signature) || signature.length < 8) return false;
+
   const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
   const expectedBuf = Buffer.from(expected, "hex");
   const sigBuf = Buffer.from(signature, "hex");
+
+  // Both must be same length for timingSafeEqual
   if (expectedBuf.length !== sigBuf.length) return false;
   return crypto.timingSafeEqual(expectedBuf, sigBuf);
 }

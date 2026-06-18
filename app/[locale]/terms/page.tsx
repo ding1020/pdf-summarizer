@@ -27,7 +27,7 @@ export default async function TermsPage({
   const t = await getTranslations("legal.terms");
 
   return (
-    <div className="min-h-screen bg-gray-50 py-16">
+    <main className="min-h-screen bg-gray-50 py-16" id="main-content">
       <div className="max-w-3xl mx-auto px-4">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t("title")}</h1>
         
@@ -89,6 +89,6 @@ export default async function TermsPage({
           <p className="text-sm text-gray-500 pt-4 border-t">{t("updated")}: {new Date().toLocaleDateString()}</p>
         </div>
       </div>
-    </div>
+    </main>
   );
 }

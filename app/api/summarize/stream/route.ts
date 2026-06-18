@@ -11,6 +11,7 @@ import {
 } from "@/lib/ai";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { FREE_DAILY_LIMIT, PRO_RATE_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
 
 // ── AI provider fallback chain: deepseek → groq → siliconflow ──
 const FALLBACK_CHAIN: { provider: AIProvider; model: string }[] = [
@@ -109,14 +110,28 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Rate Limiting ──
+  // ── Rate Limiting (differentiated: Pro > Free > Guest) ──
   try {
     const clientIp =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       req.headers.get("x-real-ip") ||
       "anonymous";
     const identifier = getClientIdentifier(userId, clientIp);
-    const rateLimitConfig = userId ? RATE_LIMITS.free : RATE_LIMITS.guest;
+
+    // Determine rate limit tier
+    let rateLimitConfig = RATE_LIMITS.guest;
+    if (userId) {
+      try {
+        const { prisma: prismaDb } = await import("@/lib/db");
+        const userRecord = await prismaDb.user.findUnique({
+          where: { id: userId },
+          select: { subscriptionStatus: true },
+        });
+        rateLimitConfig = userRecord?.subscriptionStatus === "pro" ? PRO_RATE_LIMIT : RATE_LIMITS.free;
+      } catch {
+        rateLimitConfig = RATE_LIMITS.free; // Fallback
+      }
+    }
     const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
 
     if (!rateLimitResult.success) {
@@ -163,14 +178,13 @@ export async function POST(req: NextRequest) {
   }
 
   // Truncate content if too long
-  const maxLength = 15_000;
+  const maxLength = MAX_CONTENT_LENGTH;
   const truncatedContent =
     content.length > maxLength
       ? content.substring(0, maxLength) + "\n\n[Content truncated...]"
       : content;
 
   // ── Daily Usage Limit Enforcement (free users: 5/day) ──
-  const FREE_DAILY_LIMIT = 5;
   if (userId) {
     try {
       const { prisma: prismaDb } = await import("@/lib/db");
@@ -178,7 +192,7 @@ export async function POST(req: NextRequest) {
         where: { id: userId },
         select: { id: true, subscriptionStatus: true },
       });
-      if (userRecord && userRecord.subscriptionStatus !== "pro" && userRecord.subscriptionStatus !== "active") {
+      if (userRecord && userRecord.subscriptionStatus !== "pro") {
         const startOfDay = new Date();
         startOfDay.setUTCHours(0, 0, 0, 0);
         const todayCount = await prismaDb.document.count({

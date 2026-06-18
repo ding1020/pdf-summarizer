@@ -113,13 +113,13 @@
       "cancel": "Kann ich jederzeit kündigen?",
       "cancelAnswer": "Ja, Sie können Ihr Abonnement jederzeit kündigen. Sie haben bis zum Ende Ihres Abrechnungszeitraums weiterhin Zugang.",
       "payment": "Welche Zahlungsmethoden akzeptieren Sie?",
-      "paymentAnswer": "Wir akzeptieren alle gängigen Kreditkarten über unseren sicheren Zahlungspartner Paddle.",
+      "paymentAnswer": "Wir akzeptieren alle gängigen Kreditkarten über unseren sicheren Zahlungspartner Creem.",
       "trial": "Gibt es eine kostenlose Testversion?",
       "trialAnswer": "Unser kostenloser Plan ermöglicht es Ihnen, den Service ohne Verpflichtung zu testen. Upgraden Sie auf Pro, wenn Sie bereit sind."
     },
     "badges": {
       "secure": "Sichere Zahlung",
-      "poweredBy": "Bereitgestellt von Paddle",
+      "poweredBy": "Bereitgestellt von Creem",
       "cancel": "Jederzeit kündbar",
       "support": "24/7 Support"
     },
@@ -137,7 +137,7 @@
       "notConfigured": "Zahlungssystem wird konfiguriert. Bitte kontaktieren Sie den Support für Upgrade-Unterstützung."
     },
     "processing": "Verarbeitung...",
-    "securePayment": "Sichere Zahlung über Paddle",
+    "securePayment": "Sichere Zahlung über Creem",
     "socialProof": {
       "line1": "Von über 10.000 Fachleuten vertraut",
       "line2": "Schließen Sie sich Tausenden von Forschern, Studenten und Geschäftsleuten an"
@@ -315,6 +315,8 @@
       "thirdPartyDesc": "Wir nutzen Dienste von Drittanbietern, die ebenfalls Cookies setzen können:",
       "clerk": "Authentifizierung und Sitzungsverwaltung",
       "paddle": "Zahlungsabwicklung",
+    "refundGuarantee": "30-Tage-Geld-zurück-Garantie",
+    "viewRefundPolicy": "Rückerstattungsrichtlinie ansehen",
       "vercel": "Website-Hosting und Analyse",
       "managing": "Cookies verwalten",
       "managingDesc": "Die meisten Webbrowser ermöglichen Ihnen die Kontrolle von Cookies über ihre Einstellungen. Die Deaktivierung von Cookies kann jedoch die Funktionalität unserer Website beeinträchtigen.",
@@ -336,7 +338,7 @@
       "s1UsageLabel": "Nutzungsdaten",
       "s1Usage": "Wie Sie mit unserem Service interagieren",
       "s1PaymentLabel": "Zahlungsinformationen",
-      "s1Payment": "Von unserem Zahlungsdienstleister (Paddle) verarbeitet",
+      "s1Payment": "Von unserem Zahlungsdienstleister (Creem) verarbeitet",
       "s2Title": "2. Wie wir Ihre Informationen verwenden",
       "s2Intro": "Wir verwenden die gesammelten Informationen für:",
       "s2a": "Bereitstellung und Wartung des Services",

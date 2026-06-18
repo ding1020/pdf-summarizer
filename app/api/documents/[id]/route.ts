@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 
 export async function GET(
   req: NextRequest,
@@ -16,6 +17,15 @@ export async function GET(
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting
+    const rateResult = await rateLimitAsync(`doc:${userId}`, RATE_LIMITS.free);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: getRateLimitHeaders(rateResult) },
       );
     }
 
@@ -72,6 +82,15 @@ export async function DELETE(
       return NextResponse.json(
         { error: "Authentication required" },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting
+    const rateResult = await rateLimitAsync(`doc:del:${userId}`, RATE_LIMITS.checkout);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: getRateLimitHeaders(rateResult) },
       );
     }
 

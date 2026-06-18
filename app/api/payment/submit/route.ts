@@ -3,6 +3,8 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier } from "@/lib/rate-limit";
+import { PLAN_AMOUNTS } from "@/lib/constants";
 
 const submitSchema = z.object({
   plan: z.enum(["pro_monthly", "pro_yearly"]),
@@ -10,16 +12,21 @@ const submitSchema = z.object({
   txnRef: z.string().min(1, "请输入付款单号后4位"),
 });
 
-const PLAN_AMOUNTS: Record<string, number> = {
-  pro_monthly: 5900,  // ¥59.00
-  pro_yearly: 57900,  // ¥579.00
-};
-
 export async function POST(req: NextRequest) {
   try {
     const userId = await getAuthUserId();
     if (!userId) {
       return NextResponse.json({ error: "请先登录" }, { status: 401 });
+    }
+
+    // Rate limit: 5 submissions per minute per user (anti-abuse)
+    const rateKey = getClientIdentifier(userId);
+    const rateResult = await rateLimitAsync(rateKey, RATE_LIMITS.checkout);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "请求过于频繁，请稍后再试" },
+        { status: 429 },
+      );
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
@@ -44,25 +51,37 @@ export async function POST(req: NextRequest) {
     const { plan, channel, txnRef } = parsed.data;
     const amount = PLAN_AMOUNTS[plan];
 
-    // Check for duplicate (same user, same plan, still pending)
-    const existing = await prisma.paymentRequest.findFirst({
-      where: { userId, plan, status: "pending" },
-      orderBy: { createdAt: "desc" },
-    });
+    // ── Atomic duplicate check + create (eliminates TOCTOU race) ──
+    // Use a DB-level uniqueness check: if a pending record for userId+plan exists
+    // within 30 minutes, reject. Otherwise create in the same transaction.
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
 
-    if (existing) {
-      const minutesAgo = (Date.now() - existing.createdAt.getTime()) / 60000;
-      if (minutesAgo < 30) {
-        return NextResponse.json(
-          { error: "您30分钟内已提交过相同方案的付款，请勿重复提交" },
-          { status: 409 }
-        );
+    const payment = await prisma.$transaction(async (tx) => {
+      const existing = await tx.paymentRequest.findFirst({
+        where: {
+          userId,
+          plan,
+          status: "pending",
+          createdAt: { gte: thirtyMinAgo },
+        },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (existing) {
+        return null; // Signal duplicate
       }
-    }
 
-    const payment = await prisma.paymentRequest.create({
-      data: { userId, plan, amount, channel, txnRef },
+      return tx.paymentRequest.create({
+        data: { userId, plan, amount, channel, txnRef },
+      });
     });
+
+    if (!payment) {
+      return NextResponse.json(
+        { error: "您30分钟内已提交过相同方案的付款，请勿重复提交" },
+        { status: 409 }
+      );
+    }
 
     logger.info("[Payment] New payment request", {
       paymentId: payment.id,

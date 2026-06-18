@@ -1,9 +1,10 @@
 import { getAuthUserId } from "@/lib/get-auth";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
     const userId = await getAuthUserId();
     
@@ -11,6 +12,15 @@ export async function GET() {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
+      );
+    }
+
+    // Rate limiting
+    const rateResult = await rateLimitAsync(getClientIdentifier(userId), RATE_LIMITS.free);
+    if (!rateResult.success) {
+      return NextResponse.json(
+        { error: "Too many requests" },
+        { status: 429, headers: getRateLimitHeaders(rateResult) },
       );
     }
 

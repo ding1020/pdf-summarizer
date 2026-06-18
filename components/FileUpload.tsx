@@ -34,9 +34,13 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
   // Track mounted state to prevent state updates after unmount
   const isMountedRef = useRef(true);
+  // Hold abortController ref so cancelSummary can actually abort the fetch
+  const abortControllerRef = useRef<AbortController | null>(null);
   useEffect(() => {
     return () => {
       isMountedRef.current = false;
+      // Cleanup: abort any in-flight request on unmount
+      abortControllerRef.current?.abort();
     };
   }, []);
 
@@ -54,14 +58,38 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   }, [t]);
 
   // Wrap generateSummary in useCallback to prevent recreation on each render
-  const generateSummary = useCallback(async (documentId: string, content: string) => {
+  const generateSummary = useCallback(async (documentId: string, content: string, isGuest: boolean) => {
     if (!isMountedRef.current) return;
     
     setIsSummarizing(true);
     setSummary("");
 
-    // Create AbortController for cancellation
+    // For guests, the streaming endpoint requires auth — fall back to non-streaming
+    if (isGuest) {
+      try {
+        const response = await fetch("/api/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ documentId, content }),
+        });
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.error || t("summarizeFailed"));
+        if (isMountedRef.current) {
+          setSummary(data.summary);
+        }
+      } catch (err) {
+        if (isMountedRef.current) {
+          setError(err instanceof Error ? err.message : t("summarizeFailed"));
+        }
+      } finally {
+        if (isMountedRef.current) setIsSummarizing(false);
+      }
+      return;
+    }
+
+    // Signed-in user: use streaming SSE for real-time display
     const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
       const response = await fetch("/api/summarize/stream", {
@@ -84,13 +112,18 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       }
 
       let fullSummary = "";
+      // Buffer for incomplete lines across chunk boundaries
+      let partialLine = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
-        const chunk = decoder.decode(value);
-        const lines = chunk.split("\n");
+        // Append to partial from previous chunk, then split
+        const rawText = partialLine + decoder.decode(value);
+        const lines = rawText.split("\n");
+        // The last element may be incomplete — save it for the next iteration
+        partialLine = lines.pop() ?? "";
 
         for (const line of lines) {
           if (line.startsWith("data: ")) {
@@ -111,15 +144,19 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       }
 
       // Save summary to database (uses stream-generated summary, no re-call)
-      await fetch("/api/summarize", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          documentId,
-          content: content.slice(0, 100), // minimal — stream already generated summary
-          streamSummary: fullSummary,     // pass stream result to avoid re-generation
-        }),
-      });
+      try {
+        await fetch("/api/summarize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            documentId,
+            content: content.slice(0, 100), // minimal — stream already generated summary
+            streamSummary: fullSummary,     // pass stream result to avoid re-generation
+          }),
+        });
+      } catch {
+        // Non-critical: summary already shown to user, DB save is best-effort
+      }
 
       // Notify other components that usage count has changed
       window.dispatchEvent(new CustomEvent("usage-refresh"));
@@ -135,12 +172,13 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       if (isMountedRef.current) {
         setIsSummarizing(false);
       }
+      abortControllerRef.current = null;
     }
   }, [t]);
 
-  // Cancel function exposed via ref for parent components
+  // Cancel: actually aborts the in-flight fetch via the shared ref
   const cancelSummary = useCallback(() => {
-    // This will trigger AbortController in the next fetch
+    abortControllerRef.current?.abort();
     setIsSummarizing(false);
     setSummary("");
   }, []);
@@ -184,16 +222,18 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
           pageCount: data.pageCount,
         };
 
-        setResult(uploadResult);
-        onUploadComplete?.(uploadResult);
+      setResult(uploadResult);
+      onUploadComplete?.(uploadResult);
 
-        // Automatically generate summary
-        await generateSummary(data.documentId, data.content);
-      } catch (err) {
+      // Automatically generate summary
+      await generateSummary(data.documentId, data.content, data.isGuest ?? false);
+    } catch (err) {
+      if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : "Upload failed");
-      } finally {
-        setIsUploading(false);
       }
+    } finally {
+      if (isMountedRef.current) setIsUploading(false);
+    }
     },
     [onUploadComplete, validateFile, generateSummary, t]
   );
@@ -271,7 +311,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
+        <div role="alert" className="p-4 bg-red-50 border border-red-200 rounded-xl flex items-start gap-3">
           <svg className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
@@ -334,7 +374,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
                     <p className="text-blue-700 font-medium">{t("analyzing")}</p>
                     <p className="text-blue-500 text-sm mt-1">{t("analyzingDesc")}</p>
                     <button
-                      onClick={() => setIsSummarizing(false)}
+                      onClick={cancelSummary}
                       className="mt-4 px-4 py-2 text-sm text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
                       aria-label={t("cancel")}
                     >
