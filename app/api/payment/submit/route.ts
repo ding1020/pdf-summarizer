@@ -5,6 +5,9 @@ import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier } from "@/lib/rate-limit";
 import { PLAN_AMOUNTS } from "@/lib/constants";
+import { sendEmail, adminPaymentAlertEmail } from "@/lib/email";
+
+const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 
 const submitSchema = z.object({
   plan: z.enum(["pro_monthly", "pro_yearly"]),
@@ -90,6 +93,23 @@ export async function POST(req: NextRequest) {
       amount,
       channel,
     });
+
+    // ── Notify admin via email ──
+    if (ADMIN_EMAIL) {
+      const amountStr = `¥${(amount / 100).toFixed(2)}`;
+      const template = adminPaymentAlertEmail({
+        userName: user.firstName || user.email,
+        userEmail: user.email,
+        plan,
+        amount: amountStr,
+        channel,
+        txnRef: txnRef.trim(),
+        paymentId: payment.id,
+      });
+      await sendEmail({ to: ADMIN_EMAIL, ...template }).catch((err) => {
+        logger.warn("Failed to send admin payment alert", { error: String(err) });
+      });
+    }
 
     return NextResponse.json({
       success: true,

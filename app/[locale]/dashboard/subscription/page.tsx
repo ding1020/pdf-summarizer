@@ -17,6 +17,7 @@ export default function SubscriptionPage() {
   const router = useRouter();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
+  const [managingPortal, setManagingPortal] = useState(false);
 
   useEffect(() => {
     if (isSignedIn) {
@@ -42,6 +43,23 @@ export default function SubscriptionPage() {
 
   const handleUpgrade = () => {
     router.push("/pricing");
+  };
+
+  const handleManageSubscription = async () => {
+    setManagingPortal(true);
+    try {
+      const res = await fetch("/api/customer-portal");
+      const data = await res.json();
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert(data.error || "Failed to open subscription management.");
+      }
+    } catch {
+      alert("Connection error. Please try again.");
+    } finally {
+      setManagingPortal(false);
+    }
   };
 
   if (!isLoaded || loadingSubscription) {
@@ -120,9 +138,16 @@ export default function SubscriptionPage() {
               {/* Pro Info */}
               {isPro && (
                 <div className="border rounded-xl p-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("cancelTitle")}</h2>
-                  <p className="text-gray-600 mb-2">{t("cancelDesc")}</p>
-                  <p className="text-sm text-gray-500">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("billingTitle")}</h2>
+                  <p className="text-gray-600 mb-4">{t("billingDesc")}</p>
+                  <button
+                    onClick={handleManageSubscription}
+                    disabled={managingPortal}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {managingPortal ? t("processing") : t("billingButton")}
+                  </button>
+                  <p className="text-sm text-gray-500 mt-4">
                     {t("helpText")}{" "}
                     <a href={`mailto:${supportEmail}`} className="text-blue-600 hover:underline">
                       {supportEmail}

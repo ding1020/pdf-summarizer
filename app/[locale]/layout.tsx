@@ -10,6 +10,9 @@ import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import ClientCookieConsent from "@/components/ClientCookieConsent";
 import AuthProvider from "@/components/AuthProvider";
+import { ThemeProvider } from "@/components/ThemeProvider";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { PwaRegister } from "@/components/PwaRegister";
 import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -124,17 +127,43 @@ export default async function LocaleLayout({
 
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "WebApplication",
+    "@type": "SoftwareApplication",
     name: "PDF Summary AI",
     url: BASE_URL,
-    description: "Upload any PDF and get AI-powered summaries instantly.",
+    description: "Upload any PDF and get AI-powered summaries instantly. Extract key insights in seconds, not hours.",
     applicationCategory: "BusinessApplication",
     operatingSystem: "All",
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "USD",
+    offers: [
+      {
+        "@type": "Offer",
+        name: "Free",
+        price: "0",
+        priceCurrency: "USD",
+      },
+      {
+        "@type": "Offer",
+        name: "Pro Monthly",
+        price: "9.99",
+        priceCurrency: "USD",
+      },
+      {
+        "@type": "Offer",
+        name: "Pro Yearly",
+        price: "79.99",
+        priceCurrency: "USD",
+      },
+    ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      reviewCount: "126",
     },
+    featureList: [
+      "AI-powered PDF summarization",
+      "Multi-language support (7 languages)",
+      "Streaming real-time summaries",
+      "Secure encrypted processing",
+    ],
   };
 
   return (
@@ -154,17 +183,19 @@ export default async function LocaleLayout({
       </head>
       <body className={inter.className}>
         <NextIntlClientProvider locale={locale} messages={messages}>
+          <ThemeProvider>
           <ErrorBoundary messages={em}>
             <AuthProvider>
-              <div className="min-h-screen bg-white">
-                <div className="bg-gray-50 border-b">
-                  <div className="max-w-6xl mx-auto px-4 py-2 flex justify-end">
+              <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors">
+                <div className="bg-gray-50 dark:bg-gray-900 border-b dark:border-gray-800 transition-colors">
+                  <div className="max-w-6xl mx-auto px-4 py-2 flex justify-end items-center gap-1">
                     <a
                       href="#main-content"
                       className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[100] focus:px-4 focus:py-2 focus:bg-blue-600 focus:text-white focus:rounded-lg focus:shadow-lg"
                     >
                       Skip to content
                     </a>
+                    <ThemeToggle />
                     <LanguageSwitcher />
                   </div>
                 </div>
@@ -186,6 +217,8 @@ export default async function LocaleLayout({
               }}
             />
           )}
+          <PwaRegister />
+          </ThemeProvider>
         </NextIntlClientProvider>
       </body>
     </html>

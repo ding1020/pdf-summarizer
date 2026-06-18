@@ -34,7 +34,7 @@ export default async function middleware(request: NextRequest): Promise<NextResp
 
   // ── 2. Protect write-sensitive API routes (verify token validity) ──
   if (
-    (pathname.startsWith("/api/summarize") && !pathname.startsWith("/api/summarize/stream")) ||
+    pathname.startsWith("/api/summarize") ||
     (pathname.startsWith("/api/documents") && request.method !== "GET")
   ) {
     const token = request.cookies.get("__auth_token")?.value;

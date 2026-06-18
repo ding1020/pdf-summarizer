@@ -112,6 +112,52 @@ export default function DocumentHistory() {
   const [error, setError] = useState<string | null>(null);
   const [selectedDoc, setSelectedDoc] = useState<Document | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const handleCopySummary = useCallback(async (summary: string) => {
+    try {
+      await navigator.clipboard.writeText(summary);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      const textarea = document.createElement("textarea");
+      textarea.value = summary;
+      document.body.appendChild(textarea);
+      textarea.select();
+      document.execCommand("copy");
+      document.body.removeChild(textarea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  }, []);
+
+  const handleDownloadSummary = useCallback((doc: Document) => {
+    if (!doc.summary) return;
+    const blob = new Blob([doc.summary], { type: "text/markdown;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `${doc.filename.replace(/\.pdf$/i, "")}-summary.md`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, []);
+
+  const handleShareDocument = useCallback(async (doc: Document) => {
+    try {
+      const response = await fetch(`/api/documents/${doc.id}/share`, {
+        method: "POST",
+      });
+      const data = await response.json();
+      if (data.shareUrl) {
+        await navigator.clipboard.writeText(data.shareUrl);
+        alert("Share link copied!");
+      }
+    } catch {
+      // silent
+    }
+  }, []);
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -215,7 +261,46 @@ export default function DocumentHistory() {
         <div className="border rounded-lg p-4 bg-gray-50 max-h-96 overflow-y-auto">
           {selectedDoc ? (
             <div>
-              <h3 className="font-semibold mb-2">{selectedDoc.filename}</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold">{selectedDoc.filename}</h3>
+                {selectedDoc.summary && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => handleCopySummary(selectedDoc.summary!)}
+                      className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                      title={copied ? "Copied!" : "Copy"}
+                    >
+                      {copied ? (
+                        <svg className="w-4 h-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : (
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => handleDownloadSummary(selectedDoc)}
+                      className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
+                      title="Download"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                    </button>
+                    <button
+                      onClick={() => handleShareDocument(selectedDoc)}
+                      className="p-1.5 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors"
+                      title="Share"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                      </svg>
+                    </button>
+                  </div>
+                )}
+              </div>
               {selectedDoc.summary ? (
                 <div className="prose prose-sm max-w-none">
                   <ReactMarkdown>{selectedDoc.summary}</ReactMarkdown>

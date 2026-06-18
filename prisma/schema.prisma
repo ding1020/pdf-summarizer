@@ -41,6 +41,7 @@ model User {
   documents            Document[]
   feedbacks            Feedback[]
   paymentRequests      PaymentRequest[]
+  apiKeys              ApiKey[]
 
   @@index([subscriptionStatus])
 }
@@ -55,11 +56,14 @@ model Document {
   content   String
   summary   String?
   status    String   @default("processing")
+  shareId   String?  @unique
+  isPublic  Boolean  @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, status])
+  @@index([shareId])
 }
 
 model Feedback {
@@ -94,4 +98,19 @@ model PaymentRequest {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+}
+
+model ApiKey {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name       String   // human-readable label
+  keyHash    String   @unique // SHA-256 hex hash
+  keyPrefix  String   // first 8 chars for display (key_xxxx...)
+  lastUsedAt DateTime?
+  createdAt  DateTime @default(now())
+  revokedAt  DateTime?
+
+  @@index([userId])
+  @@index([keyHash])
 }
