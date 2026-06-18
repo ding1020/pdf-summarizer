@@ -58,6 +58,15 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
     }
   }, [isSignedIn, refreshKey, fetchUsage]);
 
+  // Listen for usage-refresh events (dispatched after successful upload+summarize)
+  useEffect(() => {
+    const handleRefresh = () => {
+      if (isSignedIn) fetchUsage();
+    };
+    window.addEventListener("usage-refresh", handleRefresh);
+    return () => window.removeEventListener("usage-refresh", handleRefresh);
+  }, [isSignedIn, fetchUsage]);
+
   const displayName = user?.firstName || user?.email?.split("@")[0] || ct("common.brand");
 
   // === Still loading ===

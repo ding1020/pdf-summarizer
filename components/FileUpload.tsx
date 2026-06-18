@@ -120,6 +120,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
           streamSummary: fullSummary,     // pass stream result to avoid re-generation
         }),
       });
+
+      // Notify other components that usage count has changed
+      window.dispatchEvent(new CustomEvent("usage-refresh"));
     } catch (err) {
       // Handle abort error gracefully (user cancelled)
       if (err instanceof Error && err.name === "AbortError") {
