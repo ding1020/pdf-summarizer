@@ -56,7 +56,7 @@ model Document {
   content   String
   summary   String?
   status    String   @default("processing")
-  shareId   String?  @unique
+  shareId   String?
   isPublic  Boolean  @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
