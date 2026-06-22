@@ -25,8 +25,8 @@ function generateNonce(): string {
 function buildCsp(nonce: string): string {
   return [
     "default-src 'self'",
-    `script-src 'self' 'strict-dynamic' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
-    `script-src-elem 'self' 'strict-dynamic' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
+    `script-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
@@ -54,7 +54,9 @@ function buildCsp(nonce: string): string {
 export default async function middleware(request: NextRequest): Promise<NextResponse | Response> {
   const pathname = request.nextUrl.pathname;
 
-  // ── 0. Generate CSP nonce for all requests ──
+  // ── 0. CSP nonce (reserved for future strict-dynamic support) ──
+  // NOTE: strict-dynamic requires Next.js native nonce injection (not yet implemented).
+  // For now, use 'unsafe-inline' which is compatible with all Next.js scripts.
   const nonce = generateNonce();
 
   // ── 1. Protect dashboard & authenticated pages ──
