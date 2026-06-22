@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
-import { createToken } from "@/lib/auth-token";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
+import { sendEmail, verifyEmailEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
+
+import { getClientIP } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting: prevent abuse
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:signup:${clientIp}`, RATE_LIMITS.auth);
     if (!rateResult.success) {
       return NextResponse.json(
@@ -25,52 +29,85 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
     }
 
+    const normalizedEmail = email.trim().toLowerCase();
+
     // Check if user already exists
     const existing = await prisma.user.findUnique({
-      where: { email },
-      select: { id: true },
+      where: { email: normalizedEmail },
+      select: { id: true, emailVerified: true },
     });
 
     if (existing) {
+      // If user exists but not verified, allow re-sending verification
+      if (!existing.emailVerified) {
+        // Generate new verification token and resend
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+        const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: { verifyToken: tokenHash, verifyExpires },
+        });
+
+        const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+        const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
+        const name = firstName || "there";
+        const { subject, html } = verifyEmailEmail(name, verifyUrl);
+        await sendEmail({ to: normalizedEmail, subject, html });
+
+        return NextResponse.json({
+          success: true,
+          message: "Account exists but not verified. A new verification email has been sent.",
+          autoSignedIn: false,
+        });
+      }
+
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
     }
 
+    // Generate verification token — store only the SHA-256 hash
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
     // Create user with hashed password
     const passwordHash = await hashPassword(password);
-    const user = await prisma.user.create({
+    await prisma.user.create({
       data: {
-        email,
+        email: normalizedEmail,
         passwordHash,
         firstName: firstName || null,
         lastName: lastName || null,
-        clerkId: `native_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`,
+        emailVerified: false,
+        verifyToken: tokenHash,
+        verifyExpires,
+        clerkId: `native_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`,
       },
     });
 
-    // Issue auth token
-    const token = createToken({
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    });
+    // Send verification email
+    const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+    const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
+    const name = firstName || "there";
+    const { subject, html } = verifyEmailEmail(name, verifyUrl);
 
-    const response = NextResponse.json({
+    try {
+      await sendEmail({ to: normalizedEmail, subject, html });
+    } catch (emailErr) {
+      logger.warn("Verification email send failed, but account created", {
+        email: normalizedEmail,
+        error: emailErr instanceof Error ? emailErr.message : String(emailErr),
+      });
+    }
+
+    return NextResponse.json({
       success: true,
-      autoSignedIn: true,
+      message: "Account created. Please check your email to verify your account.",
+      autoSignedIn: false,
     });
-
-    response.cookies.set("__auth_token", token, {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-    });
-
-    return response;
   } catch (error) {
-    console.error("Sign-up error:", error);
+    logger.error("Sign-up error:", error instanceof Error ? error : new Error(String(error)));
 
     // Unique constraint violation
     if (

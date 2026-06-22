@@ -3,11 +3,13 @@ import { prisma } from "@/lib/db";
 import { verifyPassword } from "@/lib/password";
 import { createToken } from "@/lib/auth-token";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
+import { getClientIP } from "@/lib/api-utils";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting: prevent brute-force
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:signin:${clientIp}`, RATE_LIMITS.auth);
     if (!rateResult.success) {
       return NextResponse.json(
@@ -38,6 +40,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
+    // Check email verification
+    if (!user.emailVerified) {
+      return NextResponse.json(
+        { error: "Please verify your email before signing in. Check your inbox." },
+        { status: 403 }
+      );
+    }
+
     // Issue auth token
     const token = createToken({
       id: user.id,
@@ -58,7 +68,7 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    console.error("Sign-in error:", error);
+    logger.error("Sign-in error", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json(
       { error: "Sign-in failed. Please try again." },
       { status: 500 }

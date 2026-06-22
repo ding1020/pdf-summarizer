@@ -41,20 +41,12 @@ next-env.d.ts
 
 # prisma
 src/generated/prisma/
-# Migrations are gitignored because we use prisma db push in production.
-# For production safety, keep a backup of the current schema state at:
-#   prisma/schema.prisma (tracked in git)
-# To restore locally after fresh clone:
-#   1. Set DATABASE_URL in .env
-#   2. Run: npx prisma db push
-prisma/migrations/
 
 # debug test scripts (local only)
 test-*.js
 test-*.mjs
 test-report.txt
 test-output.txt
-$null
 
 # Sentry
 .sentryclirc

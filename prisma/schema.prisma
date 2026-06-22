@@ -7,7 +7,6 @@ generator client {
 
 datasource db {
   provider  = "postgresql"
-  url       = env("DATABASE_URL")
 }
 
 model User {
@@ -17,10 +16,10 @@ model User {
   passwordHash         String?   // Native auth password hash
   firstName            String?
   lastName             String?
-  // @deprecated — Legacy Paddle fields (safe to drop in next migration)
-  paddleCustomerId     String?   @unique
-  paddleSubscriptionId String?
-  paddlePlanId         String?
+  // ── Email verification ──
+  emailVerified        Boolean   @default(false)
+  verifyToken          String?   @unique
+  verifyExpires        DateTime?
   // ── Active subscription fields ──
   subscriptionStatus   String    @default("free") // free | pro | past_due | canceled
   subscriptionId       String?
@@ -56,14 +55,13 @@ model Document {
   content   String
   summary   String?
   status    String   @default("processing")
-  shareId   String?
-  isPublic  Boolean  @default(false)
+  shareId   String?   @unique
+  isPublic  Boolean   @default(false)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 
   @@index([userId, createdAt])
   @@index([userId, status])
-  @@index([shareId])
 }
 
 model Feedback {

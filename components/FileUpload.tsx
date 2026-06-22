@@ -5,6 +5,7 @@ import { useDropzone } from "react-dropzone";
 import ReactMarkdown from "react-markdown";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
+import { useToast } from "@/hooks/useToast";
 
 // Constants
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
@@ -21,6 +22,7 @@ interface FileUploadProps {
 
 export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   const t = useTranslations("upload");
+  const toast = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -193,15 +195,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // Fallback: select text manually
-      const textarea = document.createElement("textarea");
-      textarea.value = summary;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Clipboard API not available — silent fallback
     }
   }, [summary]);
 
@@ -230,7 +224,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       const data = await response.json();
       if (data.shareUrl) {
         await navigator.clipboard.writeText(data.shareUrl);
-        alert(t("shareEnabled"));
+        toast.success(t("shareEnabled"));
       }
     } catch {
       // silent – user still sees the alert or nothing
@@ -274,7 +268,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         const uploadResult = {
           documentId: data.documentId,
           filename: data.filename,
-          content: data.content,
+          content: data.content, // Guests get content; signed-in get undefined
           pageCount: data.pageCount,
         };
 
@@ -282,7 +276,11 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       onUploadComplete?.(uploadResult);
 
       // Automatically generate summary
-      await generateSummary(data.documentId, data.content, data.isGuest ?? false);
+      // For signed-in users without content: pass documentId only (server loads from DB)
+      // For guests: pass content directly
+      const summaryContent = data.isGuest ? data.content : (data.content || "");
+      const summaryDocId = data.isGuest ? data.documentId : (data.documentId || "");
+      await generateSummary(summaryDocId, summaryContent, data.isGuest ?? false);
     } catch (err) {
       if (isMountedRef.current) {
         setError(err instanceof Error ? err.message : "Upload failed");

@@ -12,10 +12,12 @@ import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-lim
  * Always returns { ok: true } even when the email doesn't exist,
  * to prevent email enumeration attacks.
  */
+import { getClientIP } from "@/lib/api-utils";
+
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting: prevent email spam
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:forgot:${clientIp}`, RATE_LIMITS.auth);
     if (!rateResult.success) {
       return NextResponse.json(
@@ -44,19 +46,20 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: true });
     }
 
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    // Generate reset token — store only the SHA-256 hash to prevent DB-leak abuse
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     const resetExpires = new Date(Date.now() + 30 * 60 * 1000); // 30 minutes
 
-    // Store token
+    // Store the hash, NOT the raw token
     await prisma.user.update({
       where: { id: user.id },
-      data: { resetToken, resetExpires },
+      data: { resetToken: tokenHash, resetExpires },
     });
 
-    // Build reset URL
+    // Build reset URL with the RAW token (only sent via email, never stored)
     const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
-    const resetUrl = `${base}/reset-password?token=${resetToken}`;
+    const resetUrl = `${base}/reset-password?token=${rawToken}`;
 
     // Send email
     const name = user.firstName || "there";

@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
 
 interface AuthUser {
   id: string;
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthState | null>(null);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
+  const router = useRouter();
 
   const fetchUser = useCallback(async () => {
     try {
@@ -82,8 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await fetch("/api/auth/sign-out", { method: "POST" });
     setUser(null);
     setIsLoaded(true);
-    window.location.href = "/";
-  }, []);
+    router.push("/");
+  }, [router]);
 
   const refresh = useCallback(async () => {
     setIsLoaded(false);

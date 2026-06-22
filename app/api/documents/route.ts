@@ -3,6 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { getClientIP } from "@/lib/api-utils";
 
 export async function GET(req: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(req: NextRequest) {
     }
 
     // Rate limiting
-    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req);
     const identifier = getClientIdentifier(userId, clientIp);
     const rateLimitResult = await rateLimitAsync(identifier, RATE_LIMITS.free);
     
