@@ -50,3 +50,7 @@ test-output.txt
 
 # Sentry
 .sentryclirc
+
+# Windows / PowerShell
+$null
+test-*.ps1

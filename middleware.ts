@@ -3,16 +3,18 @@ import { routing } from "./navigation";
 import { verifyTokenEdge } from "./lib/auth-token-edge";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import crypto from "crypto";
 
 const handleI18n = createIntlMiddleware(routing);
 
 /**
  * Generate a cryptographically random nonce for CSP.
- * Uses base64url encoding for safe use in HTML attributes.
+ * Uses Web Crypto API (Edge Runtime compatible), returns base64url string.
  */
 function generateNonce(): string {
-  return crypto.randomBytes(16).toString("base64url");
+  const bytes = crypto.getRandomValues(new Uint8Array(16));
+  // Encode as base64url (Edge‑safe, no Node.js Buffer)
+  const binary = Array.from(bytes, (b) => String.fromCharCode(b)).join("");
+  return btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 /**
