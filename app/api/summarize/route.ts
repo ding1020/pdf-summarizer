@@ -141,6 +141,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!resolvedContent) {
+      return NextResponse.json(
+        { error: "No content to summarize. Provide content or documentId." },
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const maxLength = MAX_CONTENT_LENGTH;
     const truncatedContent = resolvedContent.length > maxLength 
       ? resolvedContent.substring(0, maxLength) + "..."
