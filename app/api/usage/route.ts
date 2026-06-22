@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextResponse, type NextRequest } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
