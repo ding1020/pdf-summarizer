@@ -99,7 +99,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       const response = await fetch("/api/summarize/stream", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content }),
+        body: JSON.stringify({ content, documentId }),
         signal: abortController.signal,
       });
 

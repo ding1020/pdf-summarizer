@@ -138,17 +138,50 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Parse Request Body ──
-  let body: { content?: string; provider?: string; language?: string };
+  let body: { content?: string; documentId?: string; provider?: string; language?: string };
   try {
     body = await req.json();
   } catch {
     return new Response(
-      JSON.stringify({ error: "Invalid request body. Please provide document content." }),
+      JSON.stringify({ error: "Invalid request body. Please provide document content or documentId." }),
       { status: 400, headers: { "Content-Type": "application/json" } },
     );
   }
 
-  const { content, provider = "deepseek", language = "multilingual" } = body;
+  let { content, documentId, provider = "deepseek", language = "multilingual" } = body;
+
+  // ── Resolve content: direct or from DB ──
+  if (!content || typeof content !== "string" || content.trim().length === 0) {
+    if (documentId) {
+      // Load content from DB (for signed-in users where upload returns only documentId)
+      try {
+        const document = await prisma.document.findUnique({
+          where: { id: documentId },
+          select: { content: true, userId: true },
+        });
+        if (!document) {
+          return new Response(
+            JSON.stringify({ error: "Document not found." }),
+            { status: 404, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        // Verify ownership
+        if (document.userId !== userId) {
+          return new Response(
+            JSON.stringify({ error: "Access denied." }),
+            { status: 403, headers: { "Content-Type": "application/json" } },
+          );
+        }
+        content = document.content || "";
+      } catch (dbErr) {
+        logger.error("Failed to load document from DB in stream", dbErr instanceof Error ? dbErr : new Error(String(dbErr)));
+        return new Response(
+          JSON.stringify({ error: "Failed to load document." }),
+          { status: 500, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    }
+  }
 
   if (!content || typeof content !== "string" || content.trim().length === 0) {
     return new Response(
