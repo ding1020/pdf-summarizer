@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Could not open the customer portal. Please email support@pdfsum.com for help with your subscription.",
+            "Could not open the customer portal. Please email ding10201020@hotmail.com for help with your subscription.",
         },
         { status: 502 },
       );

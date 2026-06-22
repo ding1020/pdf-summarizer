@@ -53,7 +53,7 @@
   },
   "cta": {
     "title": "Prêt à gagner du temps ?",
-    "subtitle": "Rejoignez des milliers de professionnels qui utilisent PDF Summary pour extraire des informations plus rapidement.",
+    "subtitle": "Extrayez les informations essentielles de vos PDFs en quelques secondes grâce à l'IA.",
     "button": "Commencer Gratuitement"
   },
   "pricing": {
@@ -94,7 +94,7 @@
     },
     "processing": "Traitement...",
     "securePayment": "Paiement sécurisé via Creem",
-    "socialProof": { "line1": "Approuvé par plus de 10 000 professionnels", "line2": "Rejoignez des milliers de chercheurs, étudiants et professionnels" },
+    "socialProof": { "line1": "Approuvé par des professionnels du monde entier", "line2": "Conçu pour les chercheurs, étudiants et professionnels" },
     "questions": "Des questions ?",
     "contactUs": "Nous contacter"
   },

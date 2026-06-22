@@ -278,7 +278,7 @@ export default function PricingPage() {
         {/* Contact */}
         <div className="mt-12 text-center text-gray-500">
           <p>
-            {t("questions")} <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pdfsum.com'}`} className="text-blue-600 hover:underline">{t("contactUs")}</a>
+            {t("questions")} <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'ding10201020@hotmail.com'}`} className="text-blue-600 hover:underline">{t("contactUs")}</a>
           </p>
         </div>
 
