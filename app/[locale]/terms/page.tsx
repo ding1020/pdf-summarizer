@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
-const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "ding10201020@hotmail.com";
+const SUPPORT_EMAIL = "ding10201020@hotmail.com";
 
 export async function generateMetadata({
   params,
