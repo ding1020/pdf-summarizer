@@ -66,7 +66,7 @@ export function paymentSuccessEmail(
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
         <p style="color:#9ca3af;font-size:12px">
-          PDFSum · Need help? Reply to this email or contact support@pdfsum.com
+          PDFSum · Need help? Reply to this email or contact ding10201020@hotmail.com
         </p>
       </div>
     `,
@@ -93,7 +93,7 @@ export function paymentFailedEmail(
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
         <p style="color:#9ca3af;font-size:12px">
-          PDFSum · Need help? support@pdfsum.com
+          PDFSum · Need help? ding10201020@hotmail.com
         </p>
       </div>
     `,
@@ -119,7 +119,7 @@ export function passwordResetEmail(
         <p style="color:#6b7280">This link expires in 30 minutes. If you didn't request this, you can safely ignore this email.</p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
         <p style="color:#9ca3af;font-size:12px">
-          PDFSum · support@pdfsum.com
+          PDFSum · ding10201020@hotmail.com
         </p>
       </div>
     `,
@@ -143,7 +143,7 @@ export function subscriptionCanceledEmail(
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
         <p style="color:#9ca3af;font-size:12px">
-          PDFSum · support@pdfsum.com
+          PDFSum · ding10201020@hotmail.com
         </p>
       </div>
     `,
