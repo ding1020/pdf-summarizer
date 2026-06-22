@@ -53,7 +53,7 @@
   },
   "cta": {
     "title": "시간을 절약할 준비가 되셨나요?",
-    "subtitle": "PDF Summary를 사용하여 더 빠르게 인사이트를 추출하는 수천 명의 전문가에 합류하세요.",
+    "subtitle": "AI 기반 요약으로 PDF에서 핵심 정보를 수초 만에 추출하세요.",
     "button": "무료로 시작"
   },
   "pricing": {
@@ -94,7 +94,7 @@
     },
     "processing": "처리 중...",
     "securePayment": "Creem을 통한 안전한 결제",
-    "socialProof": { "line1": "10,000명 이상의 전문가가 신뢰", "line2": "연구자, 학생, 비즈니스 전문가 등 수천 명과 함께하세요" },
+    "socialProof": { "line1": "전 세계 전문가들의 신뢰", "line2": "연구자, 학생, 비즈니스 전문가를 위해 설계되었습니다" },
     "questions": "질문이 있으신가요?",
     "contactUs": "문의하기"
   },

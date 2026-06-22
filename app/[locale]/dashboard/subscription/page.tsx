@@ -76,7 +76,7 @@ export default function SubscriptionPage() {
   }
 
   const isPro = subscription?.subscriptionStatus === "pro";
-  const supportEmail = "support@pdfsum.com";
+  const supportEmail = "ding10201020@hotmail.com";
 
   return (
     <main className="min-h-[80vh] py-12 px-4" id="main-content">

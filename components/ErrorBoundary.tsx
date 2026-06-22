@@ -161,7 +161,7 @@ export default class ErrorBoundary extends Component<Props, State> {
             <p className="text-sm text-gray-500 mt-6">
               {msg.ifKeepsHappening}
               <a
-                href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'support@pdfsum.com'}`}
+                href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || 'ding10201020@hotmail.com'}`}
                 className="text-blue-600 hover:underline"
               >
                 {msg.contactSupport}

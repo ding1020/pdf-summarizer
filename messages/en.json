@@ -66,7 +66,7 @@
   },
   "cta": {
     "title": "Ready to save time?",
-    "subtitle": "Join thousands of professionals who use PDF Summary to extract insights faster.",
+    "subtitle": "Start extracting key insights from your PDFs in seconds with AI-powered summaries.",
     "button": "Get Started Free"
   },
   "pricing": {
@@ -157,8 +157,8 @@
       "gotIt": "Got It"
     },
     "socialProof": {
-      "line1": "Trusted by 10,000+ professionals",
-      "line2": "Join thousands of researchers, students, and business professionals"
+      "line1": "Trusted by professionals worldwide",
+      "line2": "Built for researchers, students, and business professionals"
     },
     "refundGuarantee": "30-Day Money-Back Guarantee",
     "viewRefundPolicy": "View Refund Policy",
