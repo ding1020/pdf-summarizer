@@ -31,10 +31,12 @@ export async function DELETE(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Delete all associated data in a transaction
+    // Delete all associated data in a transaction (GDPR-compliant cascade)
     await prisma.$transaction([
+      prisma.apiKey.deleteMany({ where: { userId: user.id } }),
       prisma.document.deleteMany({ where: { userId: user.id } }),
       prisma.feedback.deleteMany({ where: { userId: user.id } }),
+      prisma.paymentRequest.deleteMany({ where: { userId: user.id } }),
       prisma.user.delete({ where: { id: user.id } }),
     ]);
 

@@ -3,22 +3,18 @@ import { getAuthUserId } from "@/lib/get-auth";
 import {
   getAIProvider,
   getSystemPrompt,
-  getModelForProvider,
   estimateTokens,
   createUsageRecord,
+  getProviderFallbackChain,
+  checkAndIncrementDailyUsage,
   type AIProvider,
   type TokenUsage,
 } from "@/lib/ai";
-import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { prisma } from "@/lib/db";
+import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { FREE_DAILY_LIMIT, PRO_RATE_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
-
-// ── AI provider fallback chain: deepseek → groq → siliconflow ──
-const FALLBACK_CHAIN: { provider: AIProvider; model: string }[] = [
-  { provider: "deepseek", model: getModelForProvider("deepseek") },
-  { provider: "groq", model: getModelForProvider("groq") },
-  { provider: "siliconflow", model: getModelForProvider("siliconflow") },
-];
+import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
+import { getClientIP, getUserTier } from "@/lib/api-utils";
 
 // ── Request timeout (30s for the whole streaming operation) ──
 const STREAM_TIMEOUT_MS = 30_000;
@@ -90,7 +86,7 @@ async function tryStreamWithProvider(
       "Content-Type": "text/event-stream",
       "Cache-Control": "no-cache",
       "Connection": "keep-alive",
-      "X-Accel-Buffering": "no", // Disable nginx buffering for SSE
+      "X-Accel-Buffering": "no",
     },
   });
 
@@ -110,36 +106,20 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Rate Limiting (differentiated: Pro > Free > Guest) ──
+  // ── Rate Limiting (per-minute, differentiated: Pro > Free) ──
   try {
-    const clientIp =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      req.headers.get("x-real-ip") ||
-      "anonymous";
+    const clientIp = getClientIP(req);
     const identifier = getClientIdentifier(userId, clientIp);
 
-    // Determine rate limit tier
-    let rateLimitConfig = RATE_LIMITS.guest;
-    if (userId) {
-      try {
-        const { prisma: prismaDb } = await import("@/lib/db");
-        const userRecord = await prismaDb.user.findUnique({
-          where: { id: userId },
-          select: { subscriptionStatus: true },
-        });
-        rateLimitConfig = userRecord?.subscriptionStatus === "pro" ? PRO_RATE_LIMIT : RATE_LIMITS.free;
-      } catch {
-        rateLimitConfig = RATE_LIMITS.free; // Fallback
-      }
-    }
+    const tier = await getUserTier(userId);
+    const rateLimitConfig = tier === "pro" ? { windowMs: 60_000, maxRequests: 60 } : { windowMs: 60_000, maxRequests: 20 };
+
     const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
 
     if (!rateLimitResult.success) {
       return new Response(
         JSON.stringify({
-          error: userId
-            ? "Too many requests. Please try again later."
-            : "Free trial limit reached. Sign up for more.",
+          error: "Too many requests. Please try again later.",
           retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
         }),
         {
@@ -179,19 +159,13 @@ export async function POST(req: NextRequest) {
 
   // ── Determine max content length (Pro: 50k, Free: 15k) ──
   let maxLength = MAX_CONTENT_LENGTH;
-  if (userId) {
-    try {
-      const { prisma: prismaDb } = await import("@/lib/db");
-      const userRecord = await prismaDb.user.findUnique({
-        where: { id: userId },
-        select: { subscriptionStatus: true },
-      });
-      if (userRecord?.subscriptionStatus === "pro") {
-        maxLength = PRO_MAX_CONTENT_LENGTH;
-      }
-    } catch {
-      // Fallback to free limit
+  try {
+    const tier = await getUserTier(userId);
+    if (tier === "pro") {
+      maxLength = PRO_MAX_CONTENT_LENGTH;
     }
+  } catch {
+    // Fallback to free limit
   }
 
   // Truncate content if too long
@@ -200,49 +174,28 @@ export async function POST(req: NextRequest) {
       ? content.substring(0, maxLength) + "\n\n[Content truncated...]"
       : content;
 
-  // ── Daily Usage Limit Enforcement (free users: 5/day) ──
-  if (userId) {
-    try {
-      const { prisma: prismaDb } = await import("@/lib/db");
-      const userRecord = await prismaDb.user.findUnique({
-        where: { id: userId },
-        select: { id: true, subscriptionStatus: true },
-      });
-      if (userRecord && userRecord.subscriptionStatus !== "pro") {
-        const startOfDay = new Date();
-        startOfDay.setUTCHours(0, 0, 0, 0);
-        const todayCount = await prismaDb.document.count({
-          where: {
-            userId: userRecord.id,
-            summary: { not: null },
-            createdAt: { gte: startOfDay },
-          },
-        });
-        if (todayCount >= FREE_DAILY_LIMIT) {
-          return new Response(
-            JSON.stringify({
-              error: "Daily free limit reached (5/day). Upgrade to Pro for unlimited access.",
-              code: "usage_limit_reached",
-              upgradeUrl: "/pricing",
-            }),
-            { status: 402, headers: { "Content-Type": "application/json" } },
-          );
-        }
-      }
-    } catch (limitError) {
-      logger.warn("Failed to check daily usage limit in stream", {
-        error: limitError instanceof Error ? limitError.message : String(limitError),
-      });
-      // Fail open — don't block on limit-check failure
+  // ── Daily Usage Limit (bypass-proof: atomic counter) ──
+  try {
+    const usageCheck = await checkAndIncrementDailyUsage(userId, FREE_DAILY_LIMIT);
+    if (!usageCheck.allowed) {
+      return new Response(
+        JSON.stringify({
+          error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Upgrade to Pro for unlimited access.`,
+          code: "usage_limit_reached",
+          upgradeUrl: "/pricing",
+        }),
+        { status: 402, headers: { "Content-Type": "application/json" } },
+      );
     }
+  } catch (limitError) {
+    logger.warn("Failed to check daily usage limit in stream", {
+      error: limitError instanceof Error ? limitError.message : String(limitError),
+    });
+    // Fail open
   }
 
   // ── Try providers in fallback order ──
-  const startIndex = FALLBACK_CHAIN.findIndex((p) => p.provider === provider);
-  const orderedProviders =
-    startIndex >= 0
-      ? [...FALLBACK_CHAIN.slice(startIndex), ...FALLBACK_CHAIN.slice(0, startIndex)]
-      : FALLBACK_CHAIN;
+  const orderedProviders = getProviderFallbackChain(provider);
 
   const errors: string[] = [];
   let totalTokensUsed = 0;
@@ -260,7 +213,7 @@ export async function POST(req: NextRequest) {
         controller.signal,
       );
 
-      clearTimeout(timeoutId); // Clean up timeout on success
+      clearTimeout(timeoutId);
 
       totalTokensUsed = usage.totalTokens;
 
@@ -272,7 +225,6 @@ export async function POST(req: NextRequest) {
         costUSD: usage.costUSD.toFixed(6),
       });
 
-      // Clone response to add usage header
       const headers = new Headers(response.headers);
       headers.set("X-Provider", p);
       headers.set("X-Tokens-Used", String(totalTokensUsed));
@@ -283,7 +235,7 @@ export async function POST(req: NextRequest) {
         headers,
       });
     } catch (err) {
-      clearTimeout(timeoutId); // Clean up timeout on error
+      clearTimeout(timeoutId);
       const errMsg = err instanceof Error ? err.message : String(err);
       errors.push(`${p}: ${errMsg}`);
       logger.warn(`Stream provider ${p} failed, trying next`, { error: errMsg });

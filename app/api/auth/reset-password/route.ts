@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { logger } from "@/lib/logger";
@@ -8,12 +9,16 @@ import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-lim
  * POST /api/auth/reset-password
  *
  * Validates the reset token and updates the user's password.
+ * The incoming token is hashed (SHA-256) before lookup since
+ * we store only the hash in the database.
  * Clears the token after a successful reset.
  */
+import { getClientIP } from "@/lib/api-utils";
+
 export async function POST(req: NextRequest) {
   try {
     // Rate limiting: prevent token brute-force
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:reset:${clientIp}`, RATE_LIMITS.auth);
     if (!rateResult.success) {
       return NextResponse.json(
@@ -38,10 +43,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Find user by reset token that hasn't expired
+    // Hash the incoming raw token to match the stored hash
+    const tokenHash = crypto.createHash("sha256").update(token).digest("hex");
+
+    // Find user by hashed reset token that hasn't expired
     const user = await prisma.user.findFirst({
       where: {
-        resetToken: token,
+        resetToken: tokenHash,
         resetExpires: { gt: new Date() },
       },
       select: { id: true, email: true },

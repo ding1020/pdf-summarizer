@@ -4,13 +4,14 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { FREE_DAILY_LIMIT } from "@/lib/constants";
+import { getClientIP } from "@/lib/api-utils";
 
 export async function GET(req: Request) {
   try {
     const userId = await getAuthUserId();
 
     // Rate limiting
-    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req as unknown as NextRequest);
     const identifier = getClientIdentifier(userId, clientIp);
     const rateLimitResult = await rateLimitAsync(identifier, RATE_LIMITS.free);
     if (!rateLimitResult.success) {

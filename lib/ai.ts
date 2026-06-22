@@ -1,4 +1,7 @@
 import OpenAI from "openai";
+import { prisma } from "./db";
+import { logger } from "./logger";
+import { FREE_DAILY_LIMIT } from "./constants";
 
 export type AIProvider = "deepseek" | "groq" | "siliconflow";
 
@@ -171,4 +174,153 @@ export function createUsageRecord(
     provider,
     model,
   };
+}
+
+// ── Shared Summarize Service (used by all 3 routes: summarize, stream, v1) ──
+
+export interface SummarizeOptions {
+  content: string;
+  language?: string;
+  preferredProvider?: AIProvider;
+  maxTokens?: number;
+  maxContentLength?: number;
+}
+
+export interface SummarizeResult {
+  summary: string;
+  provider: AIProvider;
+  model: string;
+  usage: TokenUsage;
+}
+
+/** Ordered fallback chain, starting from preferred provider */
+export function getProviderFallbackChain(
+  preferred?: AIProvider | string,
+): { provider: AIProvider; model: string }[] {
+  const full: { provider: AIProvider; model: string }[] = [
+    { provider: "deepseek", model: getModelForProvider("deepseek") },
+    { provider: "groq", model: getModelForProvider("groq") },
+    { provider: "siliconflow", model: getModelForProvider("siliconflow") },
+  ];
+  if (!preferred) return full;
+  const idx = full.findIndex((p) => p.provider === preferred);
+  if (idx < 0) return full;
+  return [...full.slice(idx), ...full.slice(0, idx)];
+}
+
+/**
+ * Summarize text with automatic provider fallback (deepseek → groq → siliconflow).
+ * Shared by web UI, streaming, and developer API routes.
+ */
+export async function summarizeWithFallback(
+  options: SummarizeOptions,
+): Promise<SummarizeResult> {
+  const {
+    content,
+    language = "multilingual",
+    preferredProvider = "deepseek",
+    maxTokens = 2000,
+    maxContentLength = 15000,
+  } = options;
+
+  const truncated =
+    content.length > maxContentLength
+      ? content.substring(0, maxContentLength) + "\n\n[Content truncated...]"
+      : content;
+
+  const fallbackChain = getProviderFallbackChain(preferredProvider);
+  const errors: string[] = [];
+
+  for (const { provider, model } of fallbackChain) {
+    try {
+      const client = getAIProvider(provider);
+      const inputTokens = estimateTokens(truncated);
+
+      const completion = await client.chat.completions.create({
+        model,
+        messages: [
+          {
+            role: "system",
+            content: getSystemPrompt(language as keyof typeof SYSTEM_PROMPTS),
+          },
+          {
+            role: "user",
+            content: `Please summarize the following document:\n\n${truncated}`,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: maxTokens,
+      });
+
+      const outputText = completion.choices[0]?.message?.content || "";
+      const usage = createUsageRecord(provider, model, inputTokens, estimateTokens(outputText));
+
+      logger.info("Summarize completed", {
+        provider,
+        model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens,
+        costUSD: usage.costUSD.toFixed(6),
+      });
+
+      return { summary: outputText, provider, model, usage };
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      errors.push(`${provider}: ${errMsg}`);
+      logger.warn(`Provider fallback: ${provider} failed`, { error: errMsg });
+    }
+  }
+
+  throw new Error(`All AI providers failed: ${errors.join("; ")}`);
+}
+
+// ── Usage Limit (atomic, bypass-proof) ──
+
+/**
+ * Check & increment daily usage limit using the atomic `usageCount` field.
+ * Unlike the document-counting approach, this CANNOT be bypassed by
+ * deleting documents — the counter is monotonically increasing.
+ *
+ * Auto-resets at midnight UTC.
+ */
+export async function checkAndIncrementDailyUsage(
+  userId: string,
+  dailyLimit: number = FREE_DAILY_LIMIT,
+): Promise<{ allowed: boolean; count: number }> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: {
+      id: true,
+      usageCount: true,
+      usageResetAt: true,
+      subscriptionStatus: true,
+    },
+  });
+
+  if (!user) return { allowed: false, count: 0 };
+  if (user.subscriptionStatus === "pro") return { allowed: true, count: -1 };
+
+  const now = new Date();
+  const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+
+  // New day — reset counter
+  if (user.usageResetAt.getTime() < startOfToday.getTime()) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { usageCount: 1, usageResetAt: now },
+    });
+    return { allowed: true, count: 1 };
+  }
+
+  if (user.usageCount >= dailyLimit) {
+    return { allowed: false, count: user.usageCount };
+  }
+
+  // Atomic increment
+  await prisma.user.update({
+    where: { id: userId },
+    data: { usageCount: { increment: 1 } },
+  });
+
+  return { allowed: true, count: user.usageCount + 1 };
 }

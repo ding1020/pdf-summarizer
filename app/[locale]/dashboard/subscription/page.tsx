@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/useToast";
 
 interface SubscriptionData {
   subscriptionStatus: string;
@@ -15,6 +16,7 @@ export default function SubscriptionPage() {
   const t = useTranslations("subscription");
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
+  const toast = useToast();
   const [subscription, setSubscription] = useState<SubscriptionData | null>(null);
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const [managingPortal, setManagingPortal] = useState(false);
@@ -53,10 +55,10 @@ export default function SubscriptionPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        alert(data.error || "Failed to open subscription management.");
+        toast.error(data.error || "Failed to open subscription management.");
       }
     } catch {
-      alert("Connection error. Please try again.");
+      toast.error("Connection error. Please try again.");
     } finally {
       setManagingPortal(false);
     }

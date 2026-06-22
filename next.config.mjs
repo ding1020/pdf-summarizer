@@ -21,34 +21,14 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react"],
   },
 
-  // 🔒 Security headers
+  // 🔒 Security headers (CSP is set dynamically in middleware with per-request nonce)
   async headers() {
-    // Support both Clerk default domain and custom domain
-    // Custom domain (clerk.pdfsum.com) SSL is pending — default domain used as fallback
-    const csp = [
-      "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms",
-      "script-src-elem 'self' 'unsafe-inline' https://www.googletagmanager.com https://*.clarity.ms",
-      "style-src 'self' 'unsafe-inline'",
-      "img-src 'self' data: blob:",
-      "font-src 'self' data:",
-      "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.creem.io https://api.resend.com https://www.google-analytics.com https://region1.google-analytics.com",
-      "frame-src 'self' https://checkout.creem.io",
-      "frame-ancestors 'none'",
-      "media-src 'none'",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self'",
-    ].join("; ");
-
     return [
       {
         source: "/:path*",
         headers: [
-          { key: "Content-Security-Policy", value: csp },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "X-Content-Type-Options", value: "nosniff" },
-          // X-XSS-Protection removed — CSP with 'unsafe-inline' handles XSS; this header is deprecated
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },

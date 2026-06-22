@@ -246,7 +246,7 @@ async function updateUserPro(
           creemPriceId: opts.productId,
           billingCycle: opts.billingCycle ?? undefined,
           subscriptionEndDate: opts.endDate,
-        } as any, // New Creem fields — valid after prisma db push
+        },
       });
       logger.info(`✅ PRO granted [${opts.eventType}]`, { userId, sourceId: opts.sourceId });
     } else if (email) {
@@ -258,7 +258,7 @@ async function updateUserPro(
           creemPriceId: opts.productId,
           billingCycle: opts.billingCycle ?? undefined,
           subscriptionEndDate: opts.endDate,
-        } as any, // New Creem fields — valid after prisma db push
+        },
       });
       logger.info(`✅ PRO granted by email [${opts.eventType}]`, { email, count: updated.count, sourceId: opts.sourceId });
     }

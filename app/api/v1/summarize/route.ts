@@ -9,22 +9,13 @@ import { prisma } from "@/lib/db";
 import { createHash } from "crypto";
 import { logger } from "@/lib/logger";
 import {
-  getAIProvider,
-  getSystemPrompt,
-  getModelForProvider,
-  estimateTokens,
-  createUsageRecord,
+  summarizeWithFallback,
+  checkAndIncrementDailyUsage,
   type AIProvider,
 } from "@/lib/ai";
-import { rateLimitAsync, RATE_LIMITS, getClientIdentifier } from "@/lib/rate-limit";
-import { MAX_CONTENT_LENGTH } from "@/lib/constants";
-
-// ── AI provider fallback chain ──
-const FALLBACK_CHAIN: { provider: AIProvider; model: string }[] = [
-  { provider: "deepseek", model: getModelForProvider("deepseek") },
-  { provider: "groq", model: getModelForProvider("groq") },
-  { provider: "siliconflow", model: getModelForProvider("siliconflow") },
-];
+import { getClientIP, getUserTier } from "@/lib/api-utils";
+import { rateLimitAsync, getClientIdentifier } from "@/lib/rate-limit";
+import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
 
 async function authenticateApiKey(req: NextRequest): Promise<string | null> {
   const authHeader = req.headers.get("authorization");
@@ -43,11 +34,11 @@ async function authenticateApiKey(req: NextRequest): Promise<string | null> {
 
     if (!apiKey || apiKey.revokedAt) return null;
 
-    // Update last used timestamp
-    await prisma.apiKey.update({
+    // Update last used timestamp (fire-and-forget)
+    prisma.apiKey.update({
       where: { keyHash },
       data: { lastUsedAt: new Date() },
-    });
+    }).catch(() => {});
 
     return apiKey.userId;
   } catch {
@@ -65,12 +56,16 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // ── Rate Limit ──
+  // ── Rate Limit (per-minute, Pro-aware) ──
   try {
-    const clientIp =
-      req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "anonymous";
+    const clientIp = getClientIP(req);
     const identifier = getClientIdentifier(userId, clientIp);
-    const result = await rateLimitAsync(identifier, { windowMs: 60_000, maxRequests: 30 });
+
+    // Determine tier
+    const tier = await getUserTier(userId);
+    const maxRequests = tier === "pro" ? 60 : 30;
+
+    const result = await rateLimitAsync(identifier, { windowMs: 60_000, maxRequests });
     if (!result.success) {
       return new Response(
         JSON.stringify({ error: "Rate limit exceeded. Try again later." }),
@@ -101,79 +96,80 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const truncatedContent =
-    content.length > MAX_CONTENT_LENGTH
-      ? content.substring(0, MAX_CONTENT_LENGTH) + "\n\n[Content truncated...]"
-      : content;
+  // ── Determine content limit (Pro: 50k, Free: 15k) ──
+  let maxContentLength = MAX_CONTENT_LENGTH;
+  try {
+    const tier = await getUserTier(userId);
+    if (tier === "pro") {
+      maxContentLength = PRO_MAX_CONTENT_LENGTH;
+    }
+  } catch { /* fallback to free limit */ }
 
-  // ── Try providers in fallback order ──
-  const errors: string[] = [];
-  let lastUsage = null;
-
-  for (const { provider: p, model } of FALLBACK_CHAIN) {
-    try {
-      const openai = getAIProvider(p);
-      const inputTokens = estimateTokens(truncatedContent);
-
-      const completion = await openai.chat.completions.create({
-        model,
-        messages: [
-          {
-            role: "system",
-            content: getSystemPrompt(language as "zh" | "en" | "multilingual"),
-          },
-          { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      });
-
-      const outputText = completion.choices[0]?.message?.content || "";
-      const usage = createUsageRecord(p, model, inputTokens, estimateTokens(outputText));
-
-      logger.info("[API v1] Summarize completed", {
-        provider: p,
-        model,
-        inputTokens: usage.inputTokens,
-        outputTokens: usage.outputTokens,
-        costUSD: usage.costUSD.toFixed(6),
-      });
-
+  // ── Daily usage limit (bypass-proof) ──
+  try {
+    const usageCheck = await checkAndIncrementDailyUsage(userId, FREE_DAILY_LIMIT);
+    if (!usageCheck.allowed) {
       return new Response(
         JSON.stringify({
-          success: true,
-          summary: outputText,
-          usage: {
-            provider: p,
-            model,
-            inputTokens: usage.inputTokens,
-            outputTokens: usage.outputTokens,
-            totalTokens: usage.totalTokens,
-          },
+          error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Upgrade to Pro for unlimited access.`,
+          code: "usage_limit_reached",
+          upgradeUrl: "/pricing",
         }),
-        {
-          status: 200,
-          headers: {
-            "Content-Type": "application/json",
-            "X-Provider": p,
-            "X-Tokens-Used": String(usage.totalTokens),
-          },
-        }
+        { status: 402, headers: { "Content-Type": "application/json" } }
       );
-    } catch (err) {
-      const errMsg = err instanceof Error ? err.message : String(err);
-      errors.push(`${p}: ${errMsg}`);
-      lastUsage = err;
     }
+  } catch { /* fail open */ }
+
+  // ── Summarize with automatic provider fallback ──
+  let summaryText: string;
+  let usedProvider: AIProvider;
+  let usage: { provider: string; model: string; inputTokens: number; outputTokens: number; totalTokens: number };
+  try {
+    const result = await summarizeWithFallback({
+      content,
+      language,
+      preferredProvider: provider as AIProvider,
+      maxContentLength,
+    });
+    summaryText = result.summary;
+    usedProvider = result.provider;
+    usage = {
+      provider: result.usage.provider,
+      model: result.usage.model,
+      inputTokens: result.usage.inputTokens,
+      outputTokens: result.usage.outputTokens,
+      totalTokens: result.usage.totalTokens,
+    };
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    logger.error("[API v1] All providers failed", err instanceof Error ? err : new Error(errMsg));
+    return new Response(
+      JSON.stringify({
+        error: "AI service temporarily unavailable",
+        details: process.env.NODE_ENV === "development" ? errMsg : undefined,
+      }),
+      { status: 503, headers: { "Content-Type": "application/json" } }
+    );
   }
 
-  logger.error("[API v1] All providers failed", undefined, { errors });
+  logger.info("[API v1] Summarize completed", {
+    provider: usedProvider,
+    totalTokens: usage.totalTokens,
+  });
 
   return new Response(
     JSON.stringify({
-      error: "AI service temporarily unavailable",
-      details: process.env.NODE_ENV === "development" ? errors : undefined,
+      success: true,
+      summary: summaryText,
+      usage,
     }),
-    { status: 503, headers: { "Content-Type": "application/json" } }
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+        "X-Provider": usedProvider,
+        "X-Tokens-Used": String(usage.totalTokens),
+      },
+    }
   );
 }

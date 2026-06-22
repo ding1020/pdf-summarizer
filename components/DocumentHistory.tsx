@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, memo } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import ReactMarkdown from "react-markdown";
+import { useToast } from "@/hooks/useToast";
+import { useConfirm } from "@/hooks/useConfirm";
 
 interface Document {
   id: string;
@@ -107,6 +109,8 @@ function formatDate(dateString: string, locale: string): string {
 export default function DocumentHistory() {
   const t = useTranslations("documents");
   const locale = useLocale();
+  const toast = useToast();
+  const { confirm } = useConfirm();
   const [documents, setDocuments] = useState<Document[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -120,14 +124,7 @@ export default function DocumentHistory() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      const textarea = document.createElement("textarea");
-      textarea.value = summary;
-      document.body.appendChild(textarea);
-      textarea.select();
-      document.execCommand("copy");
-      document.body.removeChild(textarea);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      // Clipboard API not available — silent fallback
     }
   }, []);
 
@@ -152,7 +149,7 @@ export default function DocumentHistory() {
       const data = await response.json();
       if (data.shareUrl) {
         await navigator.clipboard.writeText(data.shareUrl);
-        alert("Share link copied!");
+        toast.success("Share link copied!");
       }
     } catch {
       // silent
@@ -182,7 +179,13 @@ export default function DocumentHistory() {
   }, [fetchDocuments]);
 
   const handleDelete = useCallback(async (id: string) => {
-    if (!confirm(t("confirmDelete"))) return;
+    const confirmed = await confirm({
+      title: t("confirmDeleteTitle") || "Delete Document",
+      message: t("confirmDelete") || "Are you sure you want to delete this document?",
+      confirmLabel: t("delete") || "Delete",
+      variant: "danger",
+    });
+    if (!confirmed) return;
 
     setDeleting(id);
     setError(null);
@@ -194,16 +197,19 @@ export default function DocumentHistory() {
       if (response.ok) {
         setDocuments((prev) => prev.filter((doc) => doc.id !== id));
         setSelectedDoc((prev) => (prev?.id === id ? null : prev));
+        toast.success(t("deleteSuccess") || "Document deleted");
       } else {
         const data = await response.json().catch(() => ({ error: t("deleteError") }));
         setError(data.error || t("deleteError"));
+        toast.error(data.error || t("deleteError"));
       }
     } catch {
       setError(t("deleteError"));
+      toast.error(t("deleteError"));
     } finally {
       setDeleting(null);
     }
-  }, [t]);
+  }, [t, confirm, toast]);
 
   if (loading) {
     return (

@@ -1,31 +1,23 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
-import { getAIProvider, getSystemPrompt, getModelForProvider, type AIProvider } from "@/lib/ai";
+import { summarizeWithFallback, checkAndIncrementDailyUsage, type AIProvider } from "@/lib/ai";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
-import { summarizeSchema, type SummarizeInput } from "@/lib/schemas";
-import { FREE_DAILY_LIMIT, GUEST_RATE_LIMIT, PRO_RATE_LIMIT, FREE_USER_RATE_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
+import { summarizeSchema } from "@/lib/schemas";
+import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
+import { getClientIP, resolveRateLimit } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
   try {
     // ==================== Rate Limiting ====================
-    const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+    const clientIp = getClientIP(req);
     const userId = await getAuthUserId();
     const isGuest = !userId;
     const identifier = getClientIdentifier(userId, clientIp);
 
     // Differentiate rate limits: Pro > Free > Guest
-    let usageRateConfig: { windowMs: number; maxRequests: number };
-    if (!isGuest) {
-      const userRecord = await prisma.user.findUnique({
-        where: { id: userId! },
-        select: { subscriptionStatus: true },
-      });
-      usageRateConfig = userRecord?.subscriptionStatus === "pro" ? PRO_RATE_LIMIT : FREE_USER_RATE_LIMIT;
-    } else {
-      usageRateConfig = GUEST_RATE_LIMIT;
-    }
+    const { config: usageRateConfig } = await resolveRateLimit(userId);
     const rateLimitResult = await rateLimitAsync(identifier, usageRateConfig);
     
     if (!rateLimitResult.success) {
@@ -57,42 +49,57 @@ export async function POST(req: NextRequest) {
 
     const { documentId, content, provider = "deepseek", language = "multilingual", streamSummary } = parsed.data;
 
-    // ==================== Daily Usage Limit Enforcement ====================
+    // ── Resolve content: signed-in users load from DB, guests use provided content ──
+    let resolvedContent = content;
+
+    if (!isGuest && documentId && !streamSummary) {
+      // Signed-in: load content from DB (avoids sending full content through client)
+      try {
+        const doc = await prisma.document.findUnique({
+          where: { id: documentId },
+          select: { content: true, userId: true },
+        });
+        if (doc && doc.userId === userId!) {
+          resolvedContent = doc.content;
+          logger.info("Content loaded from DB for summarization", { documentId, contentLength: doc.content.length });
+        } else {
+          logger.warn("Document not found or access denied, falling back to provided content", { documentId });
+        }
+      } catch (dbErr) {
+        logger.warn("Failed to load content from DB, falling back to provided content", { documentId });
+      }
+    }
+
+    // ── Validate content is available ──
+    if (!resolvedContent && !streamSummary) {
+      return NextResponse.json(
+        { error: "No content provided for summarization." },
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
+    // ==================== Daily Usage Limit (bypass-proof: atomic counter) ====================
     if (!isGuest) {
       try {
-        const userRecord = await prisma.user.findUnique({
-          where: { id: userId! },
-          select: { id: true, subscriptionStatus: true },
-        });
-        if (userRecord && userRecord.subscriptionStatus !== "pro") {
-          const startOfDay = new Date();
-          startOfDay.setUTCHours(0, 0, 0, 0);
-          const todayCount = await prisma.document.count({
-            where: {
-              userId: userRecord.id,
-              summary: { not: null },
-              createdAt: { gte: startOfDay },
+        const usageCheck = await checkAndIncrementDailyUsage(userId!, FREE_DAILY_LIMIT);
+        if (!usageCheck.allowed) {
+          return NextResponse.json(
+            {
+              error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Upgrade to Pro for unlimited access.`,
+              code: "usage_limit_reached",
+              upgradeUrl: "/pricing",
             },
-          });
-          if (todayCount >= FREE_DAILY_LIMIT) {
-            return NextResponse.json(
-              {
-                error: "Daily free limit reached (5/day). Upgrade to Pro for unlimited access.",
-                code: "usage_limit_reached",
-                upgradeUrl: "/pricing",
-              },
-              {
-                status: 402,
-                headers: { ...getRateLimitHeaders(rateLimitResult), "Content-Type": "application/json" },
-              }
-            );
-          }
+            {
+              status: 402,
+              headers: { ...getRateLimitHeaders(rateLimitResult), "Content-Type": "application/json" },
+            }
+          );
         }
       } catch (limitError) {
         logger.warn("Failed to check daily usage limit", {
           error: limitError instanceof Error ? limitError.message : String(limitError),
         });
-        // Don't block the request on limit-check failure — fail open
+        // Fail open — don't block the request on limit-check failure
       }
     }
 
@@ -135,67 +142,25 @@ export async function POST(req: NextRequest) {
     }
 
     const maxLength = MAX_CONTENT_LENGTH;
-    const truncatedContent = content.length > maxLength 
-      ? content.substring(0, maxLength) + "..."
-      : content;
+    const truncatedContent = resolvedContent.length > maxLength 
+      ? resolvedContent.substring(0, maxLength) + "..."
+      : resolvedContent;
 
-    let summary: string;
-    let usedProvider: AIProvider;
+    // ── Summarize with automatic provider fallback ──
+    const result = await summarizeWithFallback({
+      content: truncatedContent,
+      language,
+      preferredProvider: provider as AIProvider,
+      maxContentLength: MAX_CONTENT_LENGTH,
+    });
 
-    try {
-      const aiClient = getAIProvider(provider as AIProvider);
-      const model = getModelForProvider(provider);
-      const completion = await aiClient.chat.completions.create({
-        model,
-        messages: [
-          { role: "system", content: getSystemPrompt(language) },
-          { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
-        ],
-        temperature: 0.7,
-        max_tokens: 2000,
-      });
-      summary = completion.choices[0]?.message?.content || "Failed to generate summary";
-      usedProvider = provider as AIProvider;
-    } catch (primaryError) {
-      logger.error("Primary AI provider failed:", primaryError instanceof Error ? primaryError : new Error(String(primaryError)));
-      
-      try {
-        const groqClient = getAIProvider("groq");
-        const model = getModelForProvider("groq");
-        const completion = await groqClient.chat.completions.create({
-          model,
-          messages: [
-            { role: "system", content: getSystemPrompt(language) },
-            { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
-          ],
-          temperature: 0.7,
-          max_tokens: 2000,
-        });
-        summary = completion.choices[0]?.message?.content || "Failed to generate summary";
-        usedProvider = "groq";
-      } catch (groqError) {
-        logger.error("Groq also failed:", groqError instanceof Error ? groqError : new Error(String(groqError)));
-        
-        const sfClient = getAIProvider("siliconflow");
-        const model = getModelForProvider("siliconflow");
-        const completion = await sfClient.chat.completions.create({
-          model,
-          messages: [
-            { role: "system", content: getSystemPrompt(language) },
-            { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
-          ],
-          temperature: 0.7,
-          max_tokens: 2000,
-        });
-        summary = completion.choices[0]?.message?.content || "Failed to generate summary";
-        usedProvider = "siliconflow";
-      }
-    }
+    const summary = result.summary;
+    const usedProvider = result.provider;
 
     logger.info("Summary generated", {
       documentId,
       provider: usedProvider,
-      contentLength: content.length,
+      contentLength: resolvedContent.length,
       isGuest,
     });
 

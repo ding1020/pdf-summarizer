@@ -26,8 +26,8 @@ export const summarizeSchema = z.object({
     ),
   content: z
     .string()
-    .min(1, { message: 'Content is required' })
-    .max(100000, { message: 'Content too long' }),
+    .max(100000, { message: 'Content too long' })
+    .optional(),
   provider: z
     .enum(['deepseek', 'groq', 'siliconflow'])
     .optional()

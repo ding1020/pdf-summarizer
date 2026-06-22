@@ -3,8 +3,40 @@ import { routing } from "./navigation";
 import { verifyTokenEdge } from "./lib/auth-token-edge";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import crypto from "crypto";
 
 const handleI18n = createIntlMiddleware(routing);
+
+/**
+ * Generate a cryptographically random nonce for CSP.
+ * Uses base64url encoding for safe use in HTML attributes.
+ */
+function generateNonce(): string {
+  return crypto.randomBytes(16).toString("base64url");
+}
+
+/**
+ * Build Content-Security-Policy header with dynamic nonce.
+ * Uses 'strict-dynamic' so third-party analytics (GTM, Clarity) can inject
+ * their scripts without needing 'unsafe-inline'.
+ */
+function buildCsp(nonce: string): string {
+  return [
+    "default-src 'self'",
+    `script-src 'self' 'strict-dynamic' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
+    `script-src-elem 'self' 'strict-dynamic' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: blob:",
+    "font-src 'self' data:",
+    "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.creem.io https://api.resend.com https://www.google-analytics.com https://region1.google-analytics.com",
+    "frame-src 'self' https://checkout.creem.io",
+    "frame-ancestors 'none'",
+    "media-src 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+  ].join("; ");
+}
 
 /**
  * Middleware protects two categories of routes:
@@ -13,12 +45,15 @@ const handleI18n = createIntlMiddleware(routing);
  *    → Unauthenticated users redirected to /sign-in
  *    → Authenticated users pass through to i18n handler
  *
- * 2. Write API routes (/api/summarize/*, PATCH /api/documents/*)
+ * 2. Write API routes
  *    → No __auth_token cookie → immediate 401
  *    → Token present → passes through (API layer does full verification)
  */
 export default async function middleware(request: NextRequest): Promise<NextResponse | Response> {
   const pathname = request.nextUrl.pathname;
+
+  // ── 0. Generate CSP nonce for all requests ──
+  const nonce = generateNonce();
 
   // ── 1. Protect dashboard & authenticated pages ──
   const PROTECTED_PAGES = ["/dashboard", "/admin"];
@@ -32,10 +67,18 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     }
   }
 
-  // ── 2. Protect write-sensitive API routes (verify token validity) ──
+  // ── 2. Protect write-sensitive API routes ──
+  const WRITE_API_PATTERNS = [
+    "/api/summarize",
+    "/api/documents",
+    "/api/account",
+    "/api/payment",
+    "/api/api-keys",
+  ];
+
   if (
-    pathname.startsWith("/api/summarize") ||
-    (pathname.startsWith("/api/documents") && request.method !== "GET")
+    WRITE_API_PATTERNS.some((p) => pathname.startsWith(p)) &&
+    request.method !== "GET"
   ) {
     const token = request.cookies.get("__auth_token")?.value;
     if (!token || !(await verifyTokenEdge(token))) {
@@ -51,8 +94,27 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     return NextResponse.next();
   }
 
-  // ── Pass through i18n routing ──
-  return handleI18n(request);
+  // ── 3. Page routes: apply CSP nonce and security headers ──
+  const response = await handleI18n(request);
+  response.headers.set("Content-Security-Policy", buildCsp(nonce));
+
+  // Pass nonce to layout via short-lived httpOnly cookie
+  response.cookies.set("__csp_nonce", nonce, {
+    httpOnly: true,
+    sameSite: "strict",
+    maxAge: 60, // 1 minute — just long enough for the page render
+    path: "/",
+    secure: process.env.NODE_ENV === "production",
+  });
+
+  // These are also set in next.config.mjs static headers; middleware takes precedence
+  response.headers.set("X-Frame-Options", "DENY");
+  response.headers.set("X-Content-Type-Options", "nosniff");
+  response.headers.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
+  response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
+
+  return response;
 }
 
 // Match both page routes and protected API routes
@@ -63,5 +125,8 @@ export const config = {
     // Explicitly protect these API paths
     "/api/summarize/:path*",
     "/api/documents/:path*",
+    "/api/account/:path*",
+    "/api/payment/:path*",
+    "/api/api-keys/:path*",
   ],
 };

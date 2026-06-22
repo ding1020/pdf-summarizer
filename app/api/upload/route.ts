@@ -3,35 +3,39 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
+import { detectFileType, extractText, SUPPORTED_EXTENSIONS } from "@/lib/file-processor";
+import { MAX_FILE_SIZE } from "@/lib/constants";
+import { getClientIP } from "@/lib/api-utils";
 
-// pdf-parse is a CommonJS module, must be dynamically imported
-async function parsePDF(buffer: Buffer) {
-  const pdfParse = await import("pdf-parse");
-  const parser = pdfParse.default || pdfParse;
-  return parser(buffer);
-}
-
+/**
+ * POST /api/upload — Unified upload handler
+ *
+ * Guest users:
+ *   - PDF only, no DB storage, returns content for client-side summarization
+ *
+ * Signed-in users:
+ *   - Multi-format (PDF, DOCX, TXT), stored in DB
+ *   - Returns documentId only (content loaded server-side during summarize)
+ */
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
-  
-  // ==================== Auth (safe wrapper) ====================
+
+  // ── Auth ──
   const userId = await getAuthUserId();
   const isGuest = !userId;
 
-  // ==================== Rate Limiting ====================
+  // ── Rate Limiting ──
   try {
-    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-      || req.headers.get("x-real-ip")
-      || "anonymous";
+    const clientIp = getClientIP(req);
     const identifier = isGuest
       ? getClientIdentifier(null, clientIp)
       : getClientIdentifier(userId, clientIp);
     const rateLimitConfig = isGuest ? RATE_LIMITS.guest : RATE_LIMITS.free;
     const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
-    
+
     if (!rateLimitResult.success) {
       return NextResponse.json(
-        { 
+        {
           error: isGuest
             ? "Free trial limit reached. Sign up for 5 summaries/day."
             : "Upload rate limit exceeded. Please wait a moment.",
@@ -40,158 +44,118 @@ export async function POST(req: NextRequest) {
         { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
       );
     }
-  } catch (rateLimitError) {
-    logger.warn("Rate limiting failed", {
-      error: rateLimitError instanceof Error ? rateLimitError.message : String(rateLimitError),
-    });
-    // Continue anyway — don't block upload because rate limiter failed
+  } catch {
+    // fail open
   }
 
-  // ==================== File Processing ====================
-  let file: File | null = null;
+  // ── Parse form data ──
+  let formData: FormData;
   try {
-    const formData = await req.formData();
-    file = formData.get("file") as File;
-  } catch (formError) {
-    return NextResponse.json(
-      { error: "Invalid form data. Please select a PDF file." },
-      { status: 400 }
-    );
+    formData = await req.formData();
+  } catch {
+    return NextResponse.json({ error: "Invalid form data. Please select a file." }, { status: 400 });
   }
 
+  const file = formData.get("file") as File | null;
   if (!file) {
-    return NextResponse.json(
-      { error: "No file uploaded. Please select a PDF file." },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "No file uploaded. Please select a file." }, { status: 400 });
   }
 
-  if (file.type !== "application/pdf" && !file.name.toLowerCase().endsWith(".pdf")) {
+  // ── Validate size ──
+  if (file.size > MAX_FILE_SIZE) {
     return NextResponse.json(
-      { error: "Only PDF files are supported." },
-      { status: 400 }
-    );
-  }
-
-  const maxSize = 20 * 1024 * 1024; // 20MB
-  if (file.size > maxSize) {
-    return NextResponse.json(
-      { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is 20MB.` },
-      { status: 400 }
+      { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.` },
+      { status: 413 }
     );
   }
 
   if (file.size === 0) {
+    return NextResponse.json({ error: "The uploaded file is empty." }, { status: 400 });
+  }
+
+  // ── Detect file type ──
+  const fileType = detectFileType(file.name, file.type);
+
+  // Guest users: PDF only
+  if (isGuest) {
+    if (!fileType) {
+      return NextResponse.json(
+        { error: "Only PDF files are supported. Sign up for Word & TXT support." },
+        { status: 415 }
+      );
+    }
+    if (fileType !== ".pdf") {
+      return NextResponse.json(
+        { error: "Only PDF files are supported for guest users. Sign up for full format support." },
+        { status: 415 }
+      );
+    }
+  }
+
+  // Signed-in users: must have a supported format
+  if (!isGuest && !fileType) {
     return NextResponse.json(
-      { error: "The uploaded file is empty." },
-      { status: 400 }
+      { error: `Unsupported file format. Supported: ${SUPPORTED_EXTENSIONS.join(", ")}` },
+      { status: 415 }
     );
   }
 
-  // ==================== Parse PDF ====================
-  let pdfData: { text: string; numpages: number; numPages?: number };
+  // ── Read buffer ──
+  const buffer = Buffer.from(await file.arrayBuffer());
+
+  if (buffer.length === 0) {
+    return NextResponse.json({ error: "Uploaded file is empty or corrupted." }, { status: 400 });
+  }
+
+  // ── Extract text ──
+  let extractedText: string;
+  let pageCount = 0;
+
   try {
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
+    const result = await extractText(buffer, fileType!, file.name);
+    extractedText = result.text;
+    pageCount = result.pageCount || 1;
 
-    if (buffer.length === 0) {
+    if (!extractedText || extractedText.trim().length === 0) {
       return NextResponse.json(
-        { error: "Uploaded file is empty or corrupted." },
-        { status: 400 }
-      );
-    }
-
-    pdfData = await parsePDF(buffer);
-
-    if (!pdfData.text || pdfData.text.trim().length === 0) {
-      return NextResponse.json(
-        { error: "Could not extract text from this PDF. The file may be scanned (image-based) or password-protected." },
+        { error: "Could not extract text from this document. The file may be scanned (image-based) or password-protected." },
         { status: 422 }
       );
     }
-  } catch (parseError) {
-    const errMsg = parseError instanceof Error ? parseError.message : String(parseError);
-    logger.error("PDF parsing failed", new Error(errMsg), {
+  } catch (extractError) {
+    const errMsg = extractError instanceof Error ? extractError.message : String(extractError);
+    logger.error("File extraction failed", new Error(errMsg), {
       filename: file.name,
       fileSize: file.size,
+      fileType,
     });
 
-    // Provide actionable error messages
     if (errMsg.includes("password") || errMsg.includes("encrypted")) {
       return NextResponse.json(
-        { error: "This PDF is password-protected. Please remove the password and try again." },
+        { error: "This document is password-protected. Please remove the password and try again." },
         { status: 422 }
       );
     }
 
-    if (errMsg.includes("Invalid PDF") || errMsg.includes("not a pdf")) {
-      return NextResponse.json(
-        { error: "Invalid PDF file. The file may be corrupted." },
-        { status: 422 }
-      );
-    }
-
-    if (errMsg.includes("ENOENT") || errMsg.includes("module not found")) {
-      return NextResponse.json(
-        { error: "Server configuration error (PDF parser missing). Please contact support." },
-        { status: 500 }
-      );
-    }
-
-    // Generic parsing error
-    return NextResponse.json(
-      { error: `Failed to read PDF: ${errMsg}` },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to extract text from the document." }, { status: 422 });
   }
 
-  // ==================== Save / Return ====================
-  const pageCount = pdfData.numpages ?? pdfData.numPages ?? 0;
-  // Truncate stored content for compliance (GDPR data minimization)
+  // ── Truncate stored content (GDPR data minimization) ──
   const MAX_STORED_CONTENT_LENGTH = 100_000;
-  const storedContent = pdfData.text.length > MAX_STORED_CONTENT_LENGTH
-    ? pdfData.text.substring(0, MAX_STORED_CONTENT_LENGTH) + "\n\n[Content truncated for storage. Full text processed for summarization.]"
-    : pdfData.text;
+  const storedContent = extractedText.length > MAX_STORED_CONTENT_LENGTH
+    ? extractedText.substring(0, MAX_STORED_CONTENT_LENGTH) + "\n\n[Content truncated for storage. Full text processed for summarization.]"
+    : extractedText;
 
-  try {
-    let documentId: string;
+  // ── Guest: return content directly (no DB storage) ──
+  if (isGuest) {
+    const documentId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 
-    if (isGuest || !userId) {
-      documentId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      
-      logger.info("PDF uploaded by guest", {
-        filename: file.name,
-        pageCount,
-        fileSize: file.size,
-        duration: `${Date.now() - startTime}ms`,
-      });
-    } else {
-      const dbUser = await prisma.user.findUnique({ where: { id: userId } });
-      if (!dbUser) {
-        return NextResponse.json({ error: "User not found" }, { status: 404 });
-      }
-
-      const document = await prisma.document.create({
-        data: {
-          userId: dbUser.id,
-          filename: file.name,
-          fileSize: file.size,
-          pageCount,
-          content: storedContent,
-          status: "completed",
-        },
-      });
-
-      documentId = document.id;
-
-      logger.info("PDF uploaded successfully", {
-        documentId: document.id,
-        filename: file.name,
-        pageCount,
-        fileSize: file.size,
-        duration: `${Date.now() - startTime}ms`,
-      });
-    }
+    logger.info("PDF uploaded by guest", {
+      filename: file.name,
+      pageCount,
+      fileSize: file.size,
+      duration: `${Date.now() - startTime}ms`,
+    });
 
     return NextResponse.json({
       success: true,
@@ -199,27 +163,51 @@ export async function POST(req: NextRequest) {
       filename: file.name,
       fileSize: file.size,
       pageCount,
-      content: pdfData.text,
-      isGuest,
+      content: extractedText, // Guests need content for client-side summarize
+      isGuest: true,
+    });
+  }
+
+  // ── Signed-in: store in DB, return documentId ──
+  try {
+    const dbUser = await prisma.user.findUnique({ where: { id: userId! } });
+    if (!dbUser) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    const document = await prisma.document.create({
+      data: {
+        userId: dbUser.id,
+        filename: file.name,
+        fileSize: file.size,
+        pageCount,
+        content: storedContent,
+        status: "completed",
+      },
+    });
+
+    logger.info("Document uploaded successfully", {
+      documentId: document.id,
+      filename: file.name,
+      fileType,
+      pageCount,
+      fileSize: file.size,
+      duration: `${Date.now() - startTime}ms`,
+    });
+
+    return NextResponse.json({
+      success: true,
+      documentId: document.id,
+      filename: file.name,
+      fileSize: file.size,
+      pageCount,
+      fileType,
+      // Content NOT returned — summarize API loads from DB server-side
+      isGuest: false,
     });
   } catch (dbError) {
     const errMsg = dbError instanceof Error ? dbError.message : String(dbError);
     logger.error("Database operation failed", new Error(errMsg));
-
-    // If DB fails but we already parsed the PDF, still return results to guest
-    if (isGuest) {
-      const fallbackId = `guest_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
-      return NextResponse.json({
-        success: true,
-        documentId: fallbackId,
-        filename: file.name,
-        fileSize: file.size,
-        pageCount,
-        content: pdfData.text,
-        isGuest: true,
-        warning: "Summary generated but not saved (database unavailable)",
-      });
-    }
 
     return NextResponse.json(
       { error: "Failed to save document. Please try again." },

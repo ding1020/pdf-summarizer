@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
@@ -13,6 +14,9 @@ import AuthProvider from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PwaRegister } from "@/components/PwaRegister";
+import { ToastProvider } from "@/hooks/useToast";
+import { ConfirmProvider } from "@/hooks/useConfirm";
+import { ToastContainer } from "@/components/Toast";
 import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -115,6 +119,10 @@ export default async function LocaleLayout({
   const { locale } = await params;
   setRequestLocale(locale);
   const messages = await getMessages({ locale });
+
+  // Read CSP nonce from middleware (via short-lived cookie)
+  const cookieStore = await cookies();
+  const nonce = cookieStore.get("__csp_nonce")?.value;
   const em = {
     title: messages.error?.title || "Error",
     description: "Something went wrong",
@@ -179,12 +187,15 @@ export default async function LocaleLayout({
         <meta name="baidu-site-verification" content="codeva-xIqxE0gVLC" />
         <script
           type="application/ld+json"
+          nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       </head>
       <body className={inter.className}>
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
+          <ToastProvider>
+          <ConfirmProvider>
           <ErrorBoundary messages={em}>
             <AuthProvider>
               <div className="min-h-screen bg-white dark:bg-gray-950 transition-colors">
@@ -203,8 +214,11 @@ export default async function LocaleLayout({
                 <Navigation />
                 <main id="main-content">{children}</main>
               </div>
+              <ToastContainer />
             </AuthProvider>
           </ErrorBoundary>
+          </ConfirmProvider>
+          </ToastProvider>
           <ClientCookieConsent />
           {process.env.NEXT_PUBLIC_GA_ID && (
             <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
@@ -213,6 +227,7 @@ export default async function LocaleLayout({
             <Script
               id="clarity-analytics"
               strategy="afterInteractive"
+              nonce={nonce}
               dangerouslySetInnerHTML={{
                 __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${process.env.NEXT_PUBLIC_CLARITY_ID}");`,
               }}
@@ -222,6 +237,7 @@ export default async function LocaleLayout({
           <Script
             id="baidu-push"
             strategy="afterInteractive"
+            nonce={nonce}
             dangerouslySetInnerHTML={{
               __html: `(function(){var bp=document.createElement('script');var curProtocol=window.location.protocol.split(':')[0];if(curProtocol==='https'){bp.src='https://zz.bdstatic.com/linksubmit/push.js';}else{bp.src='http://push.zhanzhang.baidu.com/push.js';}var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(bp,s);})();`,
             }}

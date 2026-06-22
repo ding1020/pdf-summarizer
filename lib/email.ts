@@ -100,6 +100,32 @@ export function paymentFailedEmail(
   };
 }
 
+export function verifyEmailEmail(
+  name: string,
+  verifyUrl: string,
+): { subject: string; html: string } {
+  return {
+    subject: "Verify your PDFSum account",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+        <h1 style="color:#2563eb">Verify Your Email</h1>
+        <p>Hi ${name},</p>
+        <p>Thanks for signing up for PDFSum! Please verify your email address by clicking the button below.</p>
+        <p style="margin:24px 0">
+          <a href="${verifyUrl}" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;border-radius:8px;text-decoration:none">
+            Verify Email
+          </a>
+        </p>
+        <p style="color:#6b7280">This link expires in 24 hours. If you didn't create an account, you can safely ignore this email.</p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
+        <p style="color:#9ca3af;font-size:12px">
+          PDFSum · ding10201020@hotmail.com
+        </p>
+      </div>
+    `,
+  };
+}
+
 export function passwordResetEmail(
   name: string,
   resetUrl: string,

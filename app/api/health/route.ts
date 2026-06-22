@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { getClientIP } from "@/lib/api-utils";
 
 // Health check — confirms Vercel App is alive and DB is reachable
 export async function GET(req: Request) {
   // Light rate limiting to prevent abuse
-  const clientIp = req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "anonymous";
+  const clientIp = getClientIP(req as unknown as import("next/server").NextRequest);
   const identifier = getClientIdentifier(null, clientIp);
   const rateLimitResult = await rateLimitAsync(identifier, RATE_LIMITS.checkout);
 
