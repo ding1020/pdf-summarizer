@@ -1,7 +1,9 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 
-// These tests are placeholders since jsdom environment setup is complex
-// In a real scenario, you would need to properly configure the test environment
+// Mock @/navigation to avoid next-intl routing issues in vitest
+vi.mock('@/navigation', () => ({
+  Link: ({ children, className }: Record<string, unknown>) => null,
+}));
 
 describe('ErrorBoundary Component', () => {
   it('should be importable', async () => {
@@ -11,7 +13,7 @@ describe('ErrorBoundary Component', () => {
 
   it('should be a valid React component class', async () => {
     const { default: ErrorBoundary } = await import('../components/ErrorBoundary');
-    // Basic check that it's a function/component
+    // React class component extends Component, so it's a function
     expect(typeof ErrorBoundary).toBe('function');
   });
 });

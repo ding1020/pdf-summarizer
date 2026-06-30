@@ -77,8 +77,9 @@ export default function SubscriptionPage() {
     return null;
   }
 
-  const isPro = subscription?.subscriptionStatus === "pro";
-  const supportEmail = "ding10201020@hotmail.com";
+  const isPro = subscription?.subscriptionStatus === "pro" || subscription?.subscriptionStatus === "pro_trial";
+  const isTrial = subscription?.subscriptionStatus === "pro_trial";
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
 
   return (
     <main className="min-h-[80vh] py-12 px-4" id="main-content">
@@ -97,33 +98,42 @@ export default function SubscriptionPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-gray-900">
-                      {isPro ? t("planPro") : t("planFree")}
+                      {isTrial ? t("planTrial") || "Pro Trial" : isPro ? t("planPro") : t("planFree")}
                     </p>
                     <p className="text-gray-500 text-sm mt-1">
-                      {isPro
+                      {isTrial
+                        ? t("trialDesc") || "3-day unlimited access"
+                        : isPro
                         ? subscription?.billingCycle === "yearly"
                           ? t("billedAnnually")
                           : t("billedMonthly")
                         : t("freeLimit")
                       }
                     </p>
-                    {isPro && subscription?.subscriptionEndDate && (
+                    {isTrial && subscription?.subscriptionEndDate && (
+                      <p className="text-purple-600 text-xs mt-1 font-medium">
+                        {t("trialEnds") || "Trial ends"}: {new Date(subscription.subscriptionEndDate).toLocaleDateString()}
+                      </p>
+                    )}
+                    {isPro && !isTrial && subscription?.subscriptionEndDate && (
                       <p className="text-gray-500 text-xs mt-1">
                         {t("renews")}: {new Date(subscription.subscriptionEndDate).toLocaleDateString()}
                       </p>
                     )}
                   </div>
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    isPro
+                    isTrial
+                      ? "bg-purple-100 text-purple-700"
+                      : isPro
                       ? "bg-blue-100 text-blue-700"
                       : "bg-green-100 text-green-700"
                   }`}>
-                    {t("statusActive")}
+                    {isTrial ? (t("statusTrial") || "Trial") : t("statusActive")}
                   </span>
                 </div>
               </div>
 
-              {/* Upgrade Option */}
+              {/* Upgrade Option (not shown for pro or trial) */}
               {!isPro && (
                 <div className="border-2 border-blue-200 rounded-xl p-6 bg-blue-50">
                   <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("upgradeTitle")}</h2>
@@ -133,6 +143,20 @@ export default function SubscriptionPage() {
                     className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                   >
                     {t("upgradeButton")}
+                  </button>
+                </div>
+              )}
+
+              {/* Upgrade button for trial users */}
+              {isTrial && (
+                <div className="border-2 border-purple-200 rounded-xl p-6 bg-purple-50">
+                  <h2 className="text-lg font-semibold text-gray-900 mb-2">{t("trialUpgradeTitle") || "Enjoying the trial?"}</h2>
+                  <p className="text-gray-600 mb-4">{t("trialUpgradeDesc") || "Upgrade now to keep unlimited access after your trial ends."}</p>
+                  <button
+                    onClick={handleUpgrade}
+                    className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                  >
+                    {t("upgradeButton") || "Upgrade to Pro"}
                   </button>
                 </div>
               )}

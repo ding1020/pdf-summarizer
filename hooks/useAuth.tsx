@@ -46,9 +46,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signIn = useCallback(async (email: string, password: string) => {
     try {
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("__csrf_token="))
+        ?.split("=")[1];
       const res = await fetch("/api/auth/sign-in", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
         body: JSON.stringify({ email, password }),
       });
       const data = await res.json();
@@ -64,9 +71,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = useCallback(async (email: string, password: string, firstName?: string, lastName?: string) => {
     try {
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("__csrf_token="))
+        ?.split("=")[1];
       const res = await fetch("/api/auth/sign-up", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
         body: JSON.stringify({ email, password, firstName, lastName }),
       });
       const data = await res.json();

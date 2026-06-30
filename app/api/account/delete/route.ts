@@ -3,6 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { recordAudit } from "@/lib/audit";
 
 /**
  * DELETE /api/account/delete
@@ -41,6 +42,15 @@ export async function DELETE(req: Request) {
     ]);
 
     logger.info("User account and data deleted", { userId });
+
+    // Audit (record BEFORE wipe so we have the email)
+    await recordAudit({
+      userId: user.id,
+      action: "account_deleted",
+      resource: "User",
+      resourceId: user.id,
+      details: { email: user.email },
+    });
 
     return NextResponse.json({
       success: true,

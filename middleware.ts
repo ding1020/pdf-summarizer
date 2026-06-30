@@ -1,6 +1,8 @@
 import createIntlMiddleware from "next-intl/middleware";
 import { routing } from "./navigation";
 import { verifyTokenEdge } from "./lib/auth-token-edge";
+import { setLoggerRequestId, logger } from "@/lib/logger";
+import { generateCsrfToken } from "@/lib/csrf";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -26,12 +28,12 @@ function buildCsp(nonce: string): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
-    `script-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
+    `script-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms https://zz.bdstatic.com http://push.zhanzhang.baidu.com`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.creem.io https://api.resend.com https://www.google-analytics.com https://region1.google-analytics.com",
-    "frame-src 'self' https://checkout.creem.io",
+    "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.creem.io https://api.resend.com https://api.stripe.com https://www.google-analytics.com https://region1.google-analytics.com https://*.sentry.io",
+    "frame-src 'self' https://checkout.creem.io https://checkout.stripe.com",
     "frame-ancestors 'none'",
     "media-src 'none'",
     "object-src 'none'",
@@ -52,7 +54,11 @@ function buildCsp(nonce: string): string {
  *    → Token present → passes through (API layer does full verification)
  */
 export default async function middleware(request: NextRequest): Promise<NextResponse | Response> {
-  const pathname = request.nextUrl.pathname;
+  try {
+    // Generate request ID for end-to-end tracing
+    const requestId = crypto.randomUUID();
+    setLoggerRequestId(requestId);
+    const pathname = request.nextUrl.pathname;
 
   // ── 0. CSP nonce (reserved for future strict-dynamic support) ──
   // NOTE: strict-dynamic requires Next.js native nonce injection (not yet implemented).
@@ -67,8 +73,22 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     const token = request.cookies.get("__auth_token")?.value;
     if (!token || !(await verifyTokenEdge(token))) {
       const signInUrl = new URL(`/${routing.defaultLocale}/sign-in`, request.url);
-      return NextResponse.redirect(signInUrl);
+      signInUrl.searchParams.set("redirect", pathname);
+      const redirectResponse = NextResponse.redirect(signInUrl);
+      redirectResponse.headers.set("X-Request-Id", requestId);
+      return redirectResponse;
     }
+
+    // Fire-and-forget activity tracking (update lastActiveAt for win-back)
+    // Never block the response — errors are silently ignored.
+    const trackUrl = new URL("/api/track/activity", request.url);
+    fetch(trackUrl.toString(), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: request.headers.get("cookie") || "",
+      },
+    }).catch(() => {});
   }
 
   // ── 2. Protect write-sensitive API routes ──
@@ -78,6 +98,7 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     "/api/account",
     "/api/payment",
     "/api/api-keys",
+    "/api/admin",
   ];
 
   if (
@@ -88,18 +109,21 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     if (!token || !(await verifyTokenEdge(token))) {
       return new Response(
         JSON.stringify({ error: "Unauthorized. Please sign in." }),
-        { status: 401, headers: { "Content-Type": "application/json" } },
+        { status: 401, headers: { "Content-Type": "application/json", "X-Request-Id": requestId } },
       );
     }
   }
 
   // ── API routes: skip i18n, let the route handler respond directly ──
   if (pathname.startsWith("/api/")) {
-    return NextResponse.next();
+    const apiResponse = NextResponse.next();
+    apiResponse.headers.set("X-Request-Id", requestId);
+    return apiResponse;
   }
 
   // ── 3. Page routes: apply CSP nonce and security headers ──
   const response = await handleI18n(request);
+  response.headers.set("X-Request-Id", requestId);
   response.headers.set("Content-Security-Policy", buildCsp(nonce));
 
   // Pass nonce to layout via short-lived httpOnly cookie
@@ -111,6 +135,21 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     secure: process.env.NODE_ENV === "production",
   });
 
+  // CSRF protection: set a readable cookie on auth page GETs for cookie-to-header validation.
+  // The client reads this cookie and sends its value as X-CSRF-Token header on POST.
+  const AUTH_PAGES = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password"];
+  const isAuthPage = AUTH_PAGES.some((p) => pathname.endsWith(p));
+  if (isAuthPage && request.method === "GET") {
+    const csrfToken = request.cookies.get("__csrf_token")?.value || generateCsrfToken();
+    response.cookies.set("__csrf_token", csrfToken, {
+      httpOnly: false, // Must be readable by client JS
+      sameSite: "strict",
+      maxAge: 86400, // 24h
+      path: "/",
+      secure: process.env.NODE_ENV === "production",
+    });
+  }
+
   // These are also set in next.config.mjs static headers; middleware takes precedence
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -119,6 +158,16 @@ export default async function middleware(request: NextRequest): Promise<NextResp
   response.headers.set("Permissions-Policy", "camera=(), microphone=(), geolocation=()");
 
   return response;
+  } catch (error) {
+    logger.error(
+      "[Middleware] Unhandled error",
+      error instanceof Error ? error : new Error(String(error)),
+    );
+    return new Response(
+      JSON.stringify({ error: "Internal server error" }),
+      { status: 500, headers: { "Content-Type": "application/json" } },
+    );
+  }
 }
 
 // Match both page routes and protected API routes
@@ -132,5 +181,6 @@ export const config = {
     "/api/account/:path*",
     "/api/payment/:path*",
     "/api/api-keys/:path*",
+    "/api/admin/:path*",
   ],
 };

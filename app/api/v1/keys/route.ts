@@ -8,6 +8,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
+import { rateLimitAsync, getClientIdentifier } from "@/lib/rate-limit";
 import { randomBytes, createHash } from "crypto";
 
 function hashKey(rawKey: string): string {
@@ -19,6 +20,13 @@ export async function GET(req: NextRequest) {
   const userId = await getAuthUserId();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Rate limiting
+  const identifier = getClientIdentifier(userId);
+  const rateResult = await rateLimitAsync(identifier, { windowMs: 60_000, maxRequests: 30 });
+  if (!rateResult.success) {
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
   }
 
   const keys = await prisma.apiKey.findMany({
@@ -41,6 +49,13 @@ export async function POST(req: NextRequest) {
   const userId = await getAuthUserId();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Rate limiting — prevent key spam
+  const identifier = getClientIdentifier(userId);
+  const rateResult = await rateLimitAsync(identifier, { windowMs: 300_000, maxRequests: 5 });
+  if (!rateResult.success) {
+    return NextResponse.json({ error: "Too many requests. Please try again later." }, { status: 429 });
   }
 
   let body: { name?: string };

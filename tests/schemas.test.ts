@@ -67,13 +67,14 @@ describe('Summarize Schema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject empty content', () => {
+  it('should accept empty content (content is optional)', () => {
     const input = {
       documentId: '550e8400-e29b-41d4-a716-446655440000',
       content: '',
     };
     const result = summarizeSchema.safeParse(input);
-    expect(result.success).toBe(false);
+    // content is optional — empty string is valid
+    expect(result.success).toBe(true);
   });
 
   it('should reject invalid provider', () => {

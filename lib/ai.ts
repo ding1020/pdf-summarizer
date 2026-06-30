@@ -1,7 +1,8 @@
 import OpenAI from "openai";
 import { prisma } from "./db";
 import { logger } from "./logger";
-import { FREE_DAILY_LIMIT } from "./constants";
+import { FREE_DAILY_LIMIT, TRIAL_TOTAL_LIMIT, MAX_CONTENT_LENGTH } from "./constants";
+import { computeCacheKey, getCachedSummary, setCachedSummary } from "./cache";
 
 export type AIProvider = "deepseek" | "groq" | "siliconflow";
 
@@ -63,7 +64,7 @@ export function getAllProviders(): AIConfig[] {
 
 export const PROVIDER_NAMES = {
   deepseek: "DeepSeek (中文优化)",
-  groq: "Groq (Llama3.3, 免费)",
+  groq: "Groq (Llama3.3)",
   siliconflow: "SiliconFlow (免费额度)",
 };
 
@@ -144,9 +145,12 @@ export interface TokenUsage {
 
 /** Rough token estimation: ~4 chars ≈ 1 token for English/Chinese */
 export function estimateTokens(text: string): number {
+  // Skip whitespace-only input
+  const trimmed = text.trim();
+  if (!trimmed) return 0;
   // Chinese chars ≈ 1.5 tokens each, English ≈ 0.25 tokens per char
-  const chineseChars = (text.match(/[\u4e00-\u9fff]/g) || []).length;
-  const otherChars = text.length - chineseChars;
+  const chineseChars = (trimmed.match(/[\u4e00-\u9fff]/g) || []).length;
+  const otherChars = trimmed.length - chineseChars;
   return Math.ceil(chineseChars * 1.5 + otherChars * 0.25);
 }
 
@@ -211,6 +215,7 @@ export function getProviderFallbackChain(
 /**
  * Summarize text with automatic provider fallback (deepseek → groq → siliconflow).
  * Shared by web UI, streaming, and developer API routes.
+ * Uses content-hash cache to avoid duplicate AI calls.
  */
 export async function summarizeWithFallback(
   options: SummarizeOptions,
@@ -228,10 +233,42 @@ export async function summarizeWithFallback(
       ? content.substring(0, maxContentLength) + "\n\n[Content truncated...]"
       : content;
 
+  // ── Cache check (content-hash based) ──
+  const cacheKey = computeCacheKey({
+    content: truncated,
+    language,
+  });
+
+  try {
+    const cached = await getCachedSummary(cacheKey);
+    if (cached) {
+      logger.info("Summarize cache hit — skipping AI call", {
+        keyPrefix: cacheKey.slice(0, 20),
+        contentLength: truncated.length,
+      });
+      // Return cached result with correct provider attribution
+      return {
+        summary: cached,
+        provider: "deepseek" as AIProvider, // cache hits are attributed to primary provider for display
+        model: "cache",
+        usage: createUsageRecord("deepseek" as AIProvider, "cache", 0, 0),
+      };
+    }
+  } catch (cacheErr) {
+    // Cache miss or error — proceed to AI call
+    logger.debug("Cache miss, proceeding to AI", {
+      error: cacheErr instanceof Error ? cacheErr.message : String(cacheErr),
+    });
+  }
+
   const fallbackChain = getProviderFallbackChain(preferredProvider);
   const errors: string[] = [];
+  const AI_TIMEOUT_MS = parseInt(process.env.AI_TIMEOUT_MS || "30000", 10);
 
   for (const { provider, model } of fallbackChain) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), AI_TIMEOUT_MS);
+
     try {
       const client = getAIProvider(provider);
       const inputTokens = estimateTokens(truncated);
@@ -250,10 +287,17 @@ export async function summarizeWithFallback(
         ],
         temperature: 0.7,
         max_tokens: maxTokens,
-      });
+      },
+      { signal: controller.signal },
+      );
+
+      clearTimeout(timeoutId);
 
       const outputText = completion.choices[0]?.message?.content || "";
       const usage = createUsageRecord(provider, model, inputTokens, estimateTokens(outputText));
+
+      // ── Cache the result ──
+      setCachedSummary(cacheKey, outputText);
 
       logger.info("Summarize completed", {
         provider,
@@ -265,6 +309,7 @@ export async function summarizeWithFallback(
 
       return { summary: outputText, provider, model, usage };
     } catch (err) {
+      clearTimeout(timeoutId);
       const errMsg = err instanceof Error ? err.message : String(err);
       errors.push(`${provider}: ${errMsg}`);
       logger.warn(`Provider fallback: ${provider} failed`, { error: errMsg });
@@ -272,6 +317,140 @@ export async function summarizeWithFallback(
   }
 
   throw new Error(`All AI providers failed: ${errors.join("; ")}`);
+}
+
+// ── Streaming Fallback (shared by stream route) ──
+
+export interface StreamResult {
+  readableStream: ReadableStream<Uint8Array>;
+  provider: AIProvider;
+  model: string;
+  usage: TokenUsage;
+}
+
+/**
+ * Summarize with streaming SSE output and automatic provider fallback.
+ * Returns a ReadableStream that emits SSE `data:` events.
+ * Shared by the /api/summarize/stream route.
+ */
+export async function summarizeStreamWithFallback(
+  options: SummarizeOptions & { signal?: AbortSignal; timeoutMs?: number },
+): Promise<StreamResult> {
+  const {
+    content,
+    language = "multilingual",
+    preferredProvider = "deepseek",
+    maxTokens = 2000,
+    maxContentLength = MAX_CONTENT_LENGTH,
+    signal: externalSignal,
+    timeoutMs = 30_000,
+  } = options;
+
+  const truncated =
+    content.length > maxContentLength
+      ? content.substring(0, maxContentLength) + "\n\n[Content truncated...]"
+      : content;
+
+  const fallbackChain = getProviderFallbackChain(preferredProvider);
+  const errors: string[] = [];
+
+  for (const { provider, model } of fallbackChain) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+    // Link external signal if provided
+    if (externalSignal) {
+      externalSignal.addEventListener("abort", () => controller.abort(), { once: true });
+    }
+
+    try {
+      const client = getAIProvider(provider);
+      const inputTokens = estimateTokens(truncated);
+
+      const stream = await client.chat.completions.create(
+        {
+          model,
+          messages: [
+            {
+              role: "system",
+              content: getSystemPrompt(language as keyof typeof SYSTEM_PROMPTS),
+            },
+            {
+              role: "user",
+              content: `Please summarize the following document:\n\n${truncated}`,
+            },
+          ],
+          temperature: 0.7,
+          max_tokens: maxTokens,
+          stream: true,
+        },
+        { signal: controller.signal },
+      );
+
+      clearTimeout(timeoutId);
+
+      let outputText = "";
+      const encoder = new TextEncoder();
+
+      const readableStream = new ReadableStream<Uint8Array>({
+        async start(streamController) {
+          try {
+            for await (const chunk of stream) {
+              if (controller.signal.aborted) {
+                streamController.close();
+                return;
+              }
+              const chunkContent = chunk.choices[0]?.delta?.content || "";
+              if (chunkContent) {
+                outputText += chunkContent;
+                streamController.enqueue(
+                  encoder.encode(`data: ${JSON.stringify({ content: chunkContent })}\n\n`),
+                );
+              }
+            }
+            // Include usage info in final event
+            const outputTokens = estimateTokens(outputText);
+            streamController.enqueue(
+              encoder.encode(
+                `data: ${JSON.stringify({
+                  _usage: {
+                    provider,
+                    model,
+                    inputTokens,
+                    outputTokens,
+                    totalTokens: inputTokens + outputTokens,
+                  },
+                })}\n\n`,
+              ),
+            );
+            streamController.enqueue(encoder.encode("data: [DONE]\n\n"));
+            streamController.close();
+          } catch (err) {
+            if (controller.signal.aborted) {
+              streamController.close();
+            } else {
+              streamController.error(err);
+            }
+          }
+        },
+      });
+
+      // NOTE: outputTokens= -1 is a sentinel meaning "deferred to SSE stream".
+      // Real usage (input + output) is reported inside the stream's _usage SSE event
+      // because outputTokens are only known after the stream completes.
+      // Consumers should read usage from the final SSE _usage payload, not from here.
+      const bestEffortUsage = createUsageRecord(provider, model, inputTokens, -1);
+
+      return { readableStream, provider, model, usage: bestEffortUsage };
+    } catch (err) {
+      clearTimeout(timeoutId);
+      const errMsg = err instanceof Error ? err.message : String(err);
+      errors.push(`${provider}: ${errMsg}`);
+      logger.warn(`Stream provider ${provider} failed, trying next`, { error: errMsg });
+    }
+  }
+
+  throw new Error(`All AI providers failed for streaming: ${errors.join("; ")}`);
 }
 
 // ── Usage Limit (atomic, bypass-proof) ──
@@ -287,40 +466,86 @@ export async function checkAndIncrementDailyUsage(
   userId: string,
   dailyLimit: number = FREE_DAILY_LIMIT,
 ): Promise<{ allowed: boolean; count: number }> {
-  const user = await prisma.user.findUnique({
-    where: { id: userId },
-    select: {
-      id: true,
-      usageCount: true,
-      usageResetAt: true,
-      subscriptionStatus: true,
-    },
-  });
-
-  if (!user) return { allowed: false, count: 0 };
-  if (user.subscriptionStatus === "pro") return { allowed: true, count: -1 };
-
   const now = new Date();
   const startOfToday = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-  // New day — reset counter
-  if (user.usageResetAt.getTime() < startOfToday.getTime()) {
-    await prisma.user.update({
+  // Optimistic concurrency control — compatible with Supabase PgBouncer transaction mode.
+  // Serializable isolation is NOT supported under PgBouncer's transaction pooling.
+  //
+  // Instead: read current state, then atomically update with a WHERE guard.
+  // If concurrent requests race, only one succeeds and the other gets a clean count.
+  // Max 3 retries to resolve contention.
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const user = await prisma.user.findUnique({
       where: { id: userId },
-      data: { usageCount: 1, usageResetAt: now },
+      select: {
+        id: true,
+        usageCount: true,
+        usageResetAt: true,
+        subscriptionStatus: true,
+        trialUsageTotal: true,
+      },
     });
-    return { allowed: true, count: 1 };
+
+    if (!user) return { allowed: false, count: 0 };
+
+    // ── Paid Pro: unlimited ──
+    if (user.subscriptionStatus === "pro") return { allowed: true, count: -1 };
+
+    // ── Trial: total 20 summaries across entire trial period ──
+    if (user.subscriptionStatus === "pro_trial") {
+      const trialCount = user.trialUsageTotal ?? 0;
+      if (trialCount >= TRIAL_TOTAL_LIMIT) {
+        return { allowed: false, count: trialCount };
+      }
+      // Atomic increment — optimistic concurrency with guard
+      const trialUpdated = await prisma.user.updateMany({
+        where: { id: userId, trialUsageTotal: trialCount },
+        data: { trialUsageTotal: { increment: 1 } },
+      });
+      if (trialUpdated.count > 0) {
+        return { allowed: true, count: trialCount + 1 };
+      }
+      // Race lost — retry in the outer loop
+      continue;
+    }
+
+    const needsReset = user.usageResetAt.getTime() < startOfToday.getTime();
+
+    if (needsReset) {
+      // Reset with guard: only reset if usageResetAt is still stale
+      const reset = await prisma.user.updateMany({
+        where: { id: userId, usageResetAt: user.usageResetAt },
+        data: { usageCount: 1, usageResetAt: now },
+      });
+      if (reset.count > 0) return { allowed: true, count: 1 };
+      // Reset failed due to race — retry
+      continue;
+    }
+
+    if (user.usageCount >= dailyLimit) {
+      return { allowed: false, count: user.usageCount };
+    }
+
+    // Atomic increment with guard: only succeed if count hasn't changed
+    const updated = await prisma.user.updateMany({
+      where: { id: userId, usageCount: user.usageCount },
+      data: { usageCount: { increment: 1 } },
+    });
+
+    if (updated.count > 0) {
+      return { allowed: true, count: user.usageCount + 1 };
+    }
+    // Update failed — another request won the race, retry
   }
 
-  if (user.usageCount >= dailyLimit) {
-    return { allowed: false, count: user.usageCount };
-  }
-
-  // Atomic increment
-  await prisma.user.update({
+  // After 3 retries, do a final read to return current state
+  const finalUser = await prisma.user.findUnique({
     where: { id: userId },
-    data: { usageCount: { increment: 1 } },
+    select: { usageCount: true, usageResetAt: true },
   });
-
-  return { allowed: true, count: user.usageCount + 1 };
+  if (!finalUser) return { allowed: false, count: 0 };
+  const finalNeedsReset = finalUser.usageResetAt.getTime() < startOfToday.getTime();
+  if (finalNeedsReset) return { allowed: true, count: 0 };
+  return { allowed: finalUser.usageCount < dailyLimit, count: finalUser.usageCount };
 }

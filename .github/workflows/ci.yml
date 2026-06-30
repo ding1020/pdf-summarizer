@@ -33,6 +33,30 @@ jobs:
       - name: Run TypeScript type checking
         run: npx tsc --noEmit
 
+      - name: Check formatting (Prettier)
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" --ignore-path .gitignore || true
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run npm audit (no auto-fix)
+        run: npm audit --audit-level=high
+        continue-on-error: true
+
   test:
     name: Unit Tests
     runs-on: ubuntu-latest

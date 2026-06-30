@@ -7,6 +7,7 @@ const withNextIntl = createNextIntlPlugin("./i18n.ts");
 const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  compress: true,
 
   // TypeScript & ESLint: use strict mode for production safety
   // If build fails due to type errors, fix them rather than ignoring
@@ -44,6 +45,9 @@ const nextConfig = {
   images: {
     formats: ["image/avif", "image/webp"],
     minimumCacheTTL: 86400, // 1 day
+    remotePatterns: [
+      { protocol: "https", hostname: "img.clerk.com" },
+    ],
   },
 
   // 📦 Transpile external packages — handled by next-intl plugin via createNextIntlPlugin

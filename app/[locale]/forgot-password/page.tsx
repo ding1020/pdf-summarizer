@@ -17,9 +17,16 @@ export default function ForgotPasswordPage() {
     setLoading(true);
 
     try {
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("__csrf_token="))
+        ?.split("=")[1];
       const res = await fetch("/api/auth/forgot-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
         body: JSON.stringify({ email: email.trim() }),
       });
       await res.json();

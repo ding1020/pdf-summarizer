@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { sendEmail, passwordResetEmail } from "@/lib/email";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
+import { validateCsrf } from "@/lib/csrf";
 
 /**
  * POST /api/auth/forgot-password
@@ -16,6 +17,12 @@ import { getClientIP } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      // Always return ok to prevent enumeration
+      return NextResponse.json({ ok: true });
+    }
+
     // Rate limiting: prevent email spam
     const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:forgot:${clientIp}`, RATE_LIMITS.auth);

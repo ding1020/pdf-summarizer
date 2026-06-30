@@ -6,7 +6,7 @@ import FeedbackForm from "@/components/FeedbackForm";
 
 export default function HelpPage() {
   const t = useTranslations("help");
-  const supportEmail = "ding10201020@hotmail.com";
+  const supportEmail = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
 
   const faqs = [
     { q: t("faq1q"), a: t("faq1a") },

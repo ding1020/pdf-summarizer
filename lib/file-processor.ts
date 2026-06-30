@@ -103,17 +103,76 @@ async function extractTxt(buffer: Buffer): Promise<ExtractResult> {
 
 /**
  * Fetch text content from a URL (for URL-based summarization).
+ * Includes SSRF protection: only http/https, blocks internal IPs.
  */
-export async function fetchUrlText(url: string): Promise<ExtractResult> {
+export async function fetchUrlText(inputUrl: string): Promise<ExtractResult> {
+  // ── SSRF Protection ──
+  let parsedUrl: URL;
+  try {
+    parsedUrl = new URL(inputUrl);
+  } catch {
+    throw new Error("Invalid URL format");
+  }
+
+  // Protocol whitelist
+  if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+    throw new Error(`Unsupported protocol: ${parsedUrl.protocol}. Only HTTP(S) is allowed.`);
+  }
+
+  // Block internal/private network addresses
+  const hostname = parsedUrl.hostname.toLowerCase();
+  const blockedHostnames = [
+    "localhost",
+    "127.0.0.1",
+    "0.0.0.0",
+    "[::1]",
+    "[::]",
+    "0",
+  ];
+  if (blockedHostnames.includes(hostname)) {
+    throw new Error("Internal network URLs are not allowed");
+  }
+  if (
+    hostname.startsWith("192.168.") ||
+    hostname.startsWith("10.") ||
+    hostname.startsWith("172.16.") ||
+    hostname.startsWith("172.17.") ||
+    hostname.startsWith("172.18.") ||
+    hostname.startsWith("172.19.") ||
+    hostname.startsWith("172.20.") ||
+    hostname.startsWith("172.21.") ||
+    hostname.startsWith("172.22.") ||
+    hostname.startsWith("172.23.") ||
+    hostname.startsWith("172.24.") ||
+    hostname.startsWith("172.25.") ||
+    hostname.startsWith("172.26.") ||
+    hostname.startsWith("172.27.") ||
+    hostname.startsWith("172.28.") ||
+    hostname.startsWith("172.29.") ||
+    hostname.startsWith("172.30.") ||
+    hostname.startsWith("172.31.") ||
+    hostname.startsWith("169.254.") ||
+    hostname === "metadata.google.internal"
+  ) {
+    throw new Error("Internal network URLs are not allowed");
+  }
+
+  // Block attempts to use @-notation to override host (e.g., http://safe.com@evil.com)
+  if (parsedUrl.username || parsedUrl.password) {
+    throw new Error("URL credentials are not allowed");
+  }
+
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
   try {
-    const response = await fetch(url, {
+    const response = await fetch(inputUrl, {
       signal: controller.signal,
       headers: {
         "User-Agent": "PDFSummaryAI/1.0 (https://www.pdfsum.com)",
       },
+      // Prevent automatic redirect following to internal hosts
+      redirect: "manual",
     });
 
     if (!response.ok) {

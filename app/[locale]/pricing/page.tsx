@@ -67,6 +67,15 @@ export default function PricingPage() {
     setShowModal(true);
   };
 
+  const handleFreeClick = () => {
+    if (!isSignedIn) {
+      router.push("/sign-up");
+      return;
+    }
+    // Signed-in free user: already on this plan, no action needed
+    // (Pro users won't see the free card at all)
+  };
+
   const priceAmount = selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice;
   const planType = selectedBilling === "yearly" ? "pro_yearly" : "pro_monthly";
 
@@ -186,10 +195,10 @@ export default function PricingPage() {
                 </ul>
 
                 <button
-                  disabled
-                  className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg opacity-50 cursor-not-allowed"
+                  onClick={handleFreeClick}
+                  className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  {isSignedIn ? plan.buttonText : t("free.button")}
+                  {!isSignedIn ? t("common.getStarted") : plan.buttonText}
                 </button>
               </div>
             </div>
@@ -278,7 +287,7 @@ export default function PricingPage() {
         {/* Contact */}
         <div className="mt-12 text-center text-gray-500">
           <p>
-            {t("questions")} <a href={`mailto:${'ding10201020@hotmail.com'}`} className="text-blue-600 hover:underline">{t("contactUs")}</a>
+            {t("questions")} <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com"}`} className="text-blue-600 hover:underline">{t("contactUs")}</a>
           </p>
         </div>
 

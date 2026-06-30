@@ -129,6 +129,9 @@
       "pricePerMonth": "相当于每月约¥48"
     },
     "bestValue": "最超值",
+    "payWithCard": "使用信用卡支付",
+    "genericError": "出错了，请稍后再试",
+    "loading": "加载中...",
     "errors": {
       "generic": "出了点问题，请重试。"
     },
@@ -154,7 +157,8 @@
       "notice": "提交后我们将在1小时内核对并为您开通",
       "successTitle": "付款凭证已提交！",
       "successDesc": "我们将在核对后为您开通专业版，通常1小时内完成。如有问题请邮件联系。",
-      "gotIt": "知道了"
+      "gotIt": "知道了",
+      "payNow": "支付"
     },
     "socialProof": {
       "line1": "全球专业人士信赖之选",

@@ -69,6 +69,21 @@
     "subtitle": "Start extracting key insights from your PDFs in seconds with AI-powered summaries.",
     "button": "Get Started Free"
   },
+  "stats": {
+    "documents": "Documents processed",
+    "uptime": "Uptime",
+    "languages": "Languages",
+    "speed": "Avg. summary time"
+  },
+  "testimonial1": "This tool saved me hours each week. The summaries are incredibly accurate and well-structured.",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "Research Analyst",
+  "testimonial2": "I use it for contract reviews. The AI catches details I would have missed. Game changer.",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "Legal Consultant",
+  "testimonial3": "Best PDF summarizer I've tried. Fast, accurate, and the multi-language support is fantastic.",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "Project Manager",
   "pricing": {
     "title": "Simple, Transparent Pricing",
     "subtitle": "Choose the plan that fits your needs. Upgrade anytime.",
@@ -129,6 +144,9 @@
       "pricePerMonth": "Equivalent to $6.58/month"
     },
     "bestValue": "Best Value",
+    "payWithCard": "Pay with Credit Card",
+    "genericError": "Something went wrong. Please try again.",
+    "loading": "Loading...",
     "errors": {
       "generic": "Something went wrong. Please try again."
     },
@@ -154,7 +172,8 @@
       "notice": "We'll verify and activate within 1 hour",
       "successTitle": "Payment Proof Submitted!",
       "successDesc": "We'll activate your Pro account after verification, usually within 1 hour. Contact us if any issues.",
-      "gotIt": "Got It"
+      "gotIt": "Got It",
+      "payNow": "Pay"
     },
     "socialProof": {
       "line1": "Trusted by professionals worldwide",
@@ -476,6 +495,13 @@
     "currentPlan": "Current Plan",
     "planFree": "Free",
     "planPro": "Pro",
+    "planTrial": "Pro Trial",
+    "trialDesc": "3-day unlimited access",
+    "trialEnds": "Trial ends",
+    "statusTrial": "Trial",
+    "trialMessage": "You have full Pro access during the trial. Upgrade to keep it!",
+    "trialUpgradeTitle": "Enjoying the trial?",
+    "trialUpgradeDesc": "Upgrade now to keep unlimited access after your trial ends.",
     "billedAnnually": "Billed annually",
     "billedMonthly": "Billed monthly",
     "freeLimit": "5 summaries per day",
@@ -497,6 +523,17 @@
     "errorGeneric": "Something went wrong. Please try again.",
     "errorPortal": "Failed to access customer portal",
     "errorPaymentConfig": "Payment system is being configured. Please contact support."
+  },
+  "onboarding": {
+    "step1Title": "Upload Your PDF",
+    "step1Desc": "Drag & drop any PDF document — reports, contracts, research papers. We support files up to 50MB.",
+    "step2Title": "AI Analysis",
+    "step2Desc": "Our AI reads and understands your document. It extracts key points, generates summaries, and identifies important insights automatically.",
+    "step3Title": "Get Your Summary",
+    "step3Desc": "Download your summary as PDF or Word. Export charts, share via link, or copy to clipboard. All in one click.",
+    "back": "Back",
+    "next": "Next",
+    "gotIt": "Got It!"
   },
   "seo": {
     "homeTitle": "PDF Summarizer AI - Get Insights in Seconds",

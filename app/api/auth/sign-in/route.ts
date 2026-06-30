@@ -5,9 +5,18 @@ import { createToken } from "@/lib/auth-token";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
 import { getClientIP } from "@/lib/api-utils";
 import { logger } from "@/lib/logger";
+import { recordAudit } from "@/lib/audit";
+import { validateCsrf } from "@/lib/csrf";
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      return NextResponse.json(
+        { error: "Invalid security token. Please refresh the page and try again." },
+        { status: 403 },
+      );
+    }
     // Rate limiting: prevent brute-force
     const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:signin:${clientIp}`, RATE_LIMITS.auth);
@@ -24,9 +33,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
-    // Find user by email
+    // Rate limiting: per-email brute-force protection
+    const normalizedEmail = email.trim().toLowerCase();
+    const emailKey = `auth:signin:email:${normalizedEmail}`;
+    const emailRateResult = await rateLimitAsync(emailKey, {
+      windowMs: 15 * 60_000, // 15 minutes
+      maxRequests: 5,
+    });
+    if (!emailRateResult.success) {
+      return NextResponse.json(
+        { error: "Too many attempts for this account. Please try again later." },
+        { status: 429, headers: getRateLimitHeaders(emailRateResult) },
+      );
+    }
+
+    // Find user by normalized email (must match sign-up → trim + lowercase)
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: normalizedEmail },
     });
 
     if (!user?.passwordHash) {
@@ -62,8 +85,17 @@ export async function POST(req: NextRequest) {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    // Audit
+    await recordAudit({
+      userId: user.id,
+      action: "sign_in",
+      resource: "User",
+      resourceId: user.id,
+      ip: clientIp,
     });
 
     return response;

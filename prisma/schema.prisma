@@ -11,7 +11,7 @@ datasource db {
 
 model User {
   id                   String    @id @default(uuid())
-  clerkId              String?   @unique  // Legacy Clerk ID (optional now)
+  internalId            String?   @unique  @map("clerkId")  // Internal provider-agnostic ID
   email                String    @unique
   passwordHash         String?   // Native auth password hash
   firstName            String?
@@ -21,7 +21,7 @@ model User {
   verifyToken          String?   @unique
   verifyExpires        DateTime?
   // ── Active subscription fields ──
-  subscriptionStatus   String    @default("free") // free | pro | past_due | canceled
+  subscriptionStatus   String    @default("free") // free | pro | pro_trial | past_due | canceled
   subscriptionId       String?
   billingCycle         String?               // monthly, yearly
   subscriptionEndDate  DateTime?
@@ -35,6 +35,10 @@ model User {
   // ── Usage tracking ──
   usageCount           Int       @default(0)
   usageResetAt         DateTime  @default(now())
+  trialUsageTotal      Int       @default(0) // Total summaries during trial (cap enforced)
+  // ── Engagement tracking ──
+  lastActiveAt         DateTime? // Updated on each authenticated page visit
+  lastWinBackSentAt    DateTime? // Prevents duplicate win-back emails
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
   documents            Document[]
@@ -43,6 +47,10 @@ model User {
   apiKeys              ApiKey[]
 
   @@index([subscriptionStatus])
+
+  // ── Data integrity constraints (enforced via SQL migration) ──
+  // CHECK (subscriptionStatus IN ('free', 'pro', 'past_due', 'canceled'))
+  // CHECK (billingCycle IS NULL OR billingCycle IN ('monthly', 'yearly'))
 }
 
 model Document {
@@ -62,6 +70,9 @@ model Document {
 
   @@index([userId, createdAt])
   @@index([userId, status])
+
+  // ── Data integrity constraints ──
+  // CHECK (status IN ('processing', 'completed', 'failed'))
 }
 
 model Feedback {
@@ -79,6 +90,10 @@ model Feedback {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+
+  // ── Data integrity constraints ──
+  // CHECK (status IN ('open', 'in_progress', 'resolved', 'closed'))
+  // CHECK (category IN ('general', 'bug', 'feature', 'billing'))
 }
 
 model PaymentRequest {
@@ -96,6 +111,10 @@ model PaymentRequest {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+
+  // ── Data integrity constraints ──
+  // CHECK (status IN ('pending', 'approved', 'rejected'))
+  // CHECK (plan IN ('pro_monthly', 'pro_yearly'))
 }
 
 model ApiKey {
@@ -111,4 +130,27 @@ model ApiKey {
 
   @@index([userId])
   @@index([keyHash])
+}
+
+model ProcessedWebhook {
+  id          String   @id
+  eventType   String   // the Creem event type (subscription.paid, etc.)
+  processedAt DateTime @default(now())
+
+  @@index([processedAt])
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String   // auth, payment, admin, etc.
+  resource   String?  // e.g. "User", "PaymentRequest"
+  resourceId String?
+  details    String?  // JSON-encoded extra data
+  ip         String?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
 }

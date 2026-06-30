@@ -5,7 +5,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 import DocumentHistory from "@/components/DocumentHistory";
-import OnboardingGuide from "@/components/OnboardingGuide";
 
 interface UsageData {
   used: number;
@@ -100,8 +99,6 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
   // === Signed-in ===
   return (
     <>
-      <OnboardingGuide />
-
       <div className="bg-white border-b">
         <div className="max-w-6xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

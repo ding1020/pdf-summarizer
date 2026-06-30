@@ -9,10 +9,11 @@ import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
 import { getClientIP, resolveRateLimit } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
+  let userId: string | null = null;
   try {
     // ==================== Rate Limiting ====================
     const clientIp = getClientIP(req);
-    const userId = await getAuthUserId();
+    userId = await getAuthUserId();
     const isGuest = !userId;
     const identifier = getClientIdentifier(userId, clientIp);
 
@@ -78,7 +79,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ==================== Daily Usage Limit (bypass-proof: atomic counter) ====================
+    // ==================== If stream already generated summary, skip checks & AI ====================
+    if (streamSummary) {
+      logger.info("Summary provided from stream — skipping AI re-generation", { documentId });
+      
+      // Still save to DB if signed-in
+      if (!isGuest && documentId) {
+        try {
+          await prisma.document.update({
+            where: { id: documentId },
+            data: { summary: streamSummary, status: "completed" },
+          });
+        } catch (dbError) {
+          logger.warn("Failed to save stream summary to DB", { documentId });
+        }
+      }
+
+      return NextResponse.json(
+        { success: true, summary: streamSummary, documentId, provider: "stream" },
+        { headers: getRateLimitHeaders(rateLimitResult) }
+      );
+    }
+
+    // ==================== Daily Usage Limit (only for actual AI calls, not stream-pass-through) ====================
     if (!isGuest) {
       try {
         const usageCheck = await checkAndIncrementDailyUsage(userId!, FREE_DAILY_LIMIT);
@@ -117,28 +140,6 @@ export async function POST(req: NextRequest) {
           { status: 402, headers: { "Content-Type": "application/json" } },
         );
       }
-    }
-
-    // If a stream-generated summary was already provided, skip AI re-call
-    if (streamSummary) {
-      logger.info("Summary provided from stream — skipping AI re-generation", { documentId });
-      
-      // Still save to DB if signed-in
-      if (!isGuest && documentId) {
-        try {
-          await prisma.document.update({
-            where: { id: documentId },
-            data: { summary: streamSummary, status: "completed" },
-          });
-        } catch (dbError) {
-          logger.warn("Failed to save stream summary to DB", { documentId });
-        }
-      }
-
-      return NextResponse.json(
-        { success: true, summary: streamSummary, documentId, provider: "stream" },
-        { headers: getRateLimitHeaders(rateLimitResult) }
-      );
     }
 
     if (!resolvedContent) {
@@ -195,6 +196,24 @@ export async function POST(req: NextRequest) {
     );
   } catch (error) {
     logger.error("Summarize error:", error instanceof Error ? error : new Error(String(error)));
+
+    // Refund the daily usage quota — AI failure shouldn't consume user's allowance
+    try {
+      if (userId) {
+        const user = await prisma.user.findUnique({ where: { id: userId }, select: { subscriptionStatus: true } });
+        if (user && user.subscriptionStatus !== "pro" && user.subscriptionStatus !== "pro_trial") {
+          await prisma.user.updateMany({
+            where: { id: userId, usageCount: { gt: 0 } },
+            data: { usageCount: { decrement: 1 } },
+          });
+        }
+      }
+    } catch (refundErr) {
+      logger.warn("Failed to refund usage quota after AI failure", {
+        error: refundErr instanceof Error ? refundErr.message : String(refundErr),
+      });
+    }
+
     return NextResponse.json(
       { error: "Failed to generate summary" },
       { status: 500, headers: { "Content-Type": "application/json" } }

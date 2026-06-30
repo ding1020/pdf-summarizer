@@ -18,6 +18,24 @@ export default function SubscriptionWidget() {
   const t = useTranslations("subscription");
   const [data, setData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [portalLoading, setPortalLoading] = useState(false);
+
+  const openBillingPortal = async () => {
+    setPortalLoading(true);
+    try {
+      const res = await fetch("/api/customer-portal");
+      const body = await res.json();
+      if (body.url) {
+        window.open(body.url, "_blank");
+      } else {
+        alert(body.error || "Unable to open billing portal. Please try again.");
+      }
+    } catch {
+      alert("Network error. Please try again.");
+    } finally {
+      setPortalLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!isSignedIn) {
@@ -39,7 +57,7 @@ export default function SubscriptionWidget() {
           subscriptionEndDate: sub?.subscriptionEndDate || null,
           billingCycle: sub?.billingCycle || null,
           usageCount: usage?.used || 0,
-          usageLimit: sub?.subscriptionStatus === "pro" ? Infinity : 5,
+          usageLimit: sub?.subscriptionStatus === "pro" || sub?.subscriptionStatus === "pro_trial" ? -1 : (usage?.limit || 5),
         });
       } catch {
         // silent
@@ -54,15 +72,20 @@ export default function SubscriptionWidget() {
   if (!isSignedIn || loading) return null;
   if (!data) return null;
 
-  const isPro = data.subscriptionStatus === "pro";
-  const usagePercent = isPro ? 0 : Math.min((data.usageCount / data.usageLimit) * 100, 100);
+  const isPro = data.subscriptionStatus === "pro" || data.subscriptionStatus === "pro_trial";
+  const isTrial = data.subscriptionStatus === "pro_trial";
+  const usagePercent = isPro || data.usageLimit <= 0 ? 0 : Math.min((data.usageCount / data.usageLimit) * 100, 100);
   const endDate = data.subscriptionEndDate
     ? new Date(data.subscriptionEndDate).toLocaleDateString()
     : null;
-  const planLabel = isPro
+  const planLabel = isTrial
+    ? "🕒 Pro Trial"
+    : isPro
     ? `Pro ${data.billingCycle === "yearly" ? "Yearly" : "Monthly"}`
     : "Free";
-  const statusColor = isPro
+  const statusColor = isTrial
+    ? "bg-purple-100 text-purple-700 border-purple-200"
+    : isPro
     ? "bg-green-100 text-green-700 border-green-200"
     : "bg-gray-100 text-gray-700 border-gray-200";
 
@@ -101,8 +124,21 @@ export default function SubscriptionWidget() {
         </div>
       )}
 
+      {/* Trial info */}
+      {isTrial && (
+        <div className="mb-4 p-3 bg-purple-50 border border-purple-100 rounded-lg">
+          <div className="flex justify-between text-sm mb-1">
+            <span className="text-purple-700 font-medium">🕒 Trial ends</span>
+            <span className="text-purple-700">{endDate}</span>
+          </div>
+          <div className="text-xs text-purple-600">
+            {t("trialMessage") || "You have full Pro access during the trial. Upgrade to keep it!"}
+          </div>
+        </div>
+      )}
+
       {/* Pro info */}
-      {isPro && (
+      {isPro && !isTrial && (
         <div className="space-y-2 mb-4">
           {endDate && (
             <div className="flex justify-between text-sm">
@@ -127,12 +163,21 @@ export default function SubscriptionWidget() {
             {t("upgrade") || "Upgrade to Pro"}
           </Link>
         ) : (
-          <Link
-            href="/dashboard/subscription"
-            className="flex-1 text-center px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition"
-          >
-            {t("manageSub") || "Manage Subscription"}
-          </Link>
+          <>
+            <Link
+              href="/dashboard/subscription"
+              className="flex-1 text-center px-3 py-2 border border-gray-300 text-gray-700 text-sm font-medium rounded-lg hover:bg-gray-50 transition"
+            >
+              {t("manageSub") || "Manage Subscription"}
+            </Link>
+            <button
+              onClick={openBillingPortal}
+              disabled={portalLoading}
+              className="flex-1 text-center px-3 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition disabled:opacity-50"
+            >
+              {portalLoading ? "..." : t("billingButton") || "Billing Portal"}
+            </button>
+          </>
         )}
       </div>
     </div>

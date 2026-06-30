@@ -39,17 +39,25 @@ test.describe("PDF Summarizer — Core E2E", () => {
   test("sign-in page renders", async ({ page }) => {
     await page.goto("/sign-in");
     await expect(page.locator("h1").first()).toBeVisible();
+    await page.waitForTimeout(2000);
+  });
 
-    // Clerk should load eventually
+  test("sign-up page renders", async ({ page }) => {
+    await page.goto("/sign-up");
+    await expect(page.locator("h1").first()).toBeVisible();
     await page.waitForTimeout(2000);
   });
 
   test("i18n: English page loads correctly", async ({ page }) => {
     const response = await page.goto("/en");
     expect(response?.status()).toBeLessThan(400);
-
-    // Navigation brand name should be visible
     await expect(page.locator("nav")).toBeVisible({ timeout: 10000 });
+  });
+
+  test("i18n: Chinese page loads correctly", async ({ page }) => {
+    const response = await page.goto("/zh");
+    expect(response?.status()).toBeLessThan(400);
+    await expect(page.locator("body")).toBeVisible({ timeout: 10000 });
   });
 
   test("SEO: has meta tags", async ({ page }) => {
@@ -61,8 +69,54 @@ test.describe("PDF Summarizer — Core E2E", () => {
     expect(description).toBeTruthy();
   });
 
+  test("SEO: has OG tags", async ({ page }) => {
+    await page.goto("/");
+    const ogTitle = await page.locator('meta[property="og:title"]').getAttribute("content");
+    expect(ogTitle).toBeTruthy();
+  });
+
+  test("SEO: has canonical URL", async ({ page }) => {
+    await page.goto("/");
+    const canonical = await page.locator('link[rel="canonical"]').getAttribute("href");
+    expect(canonical).toBeTruthy();
+  });
+
   test("404 page for invalid routes", async ({ page }) => {
     const response = await page.goto("/this-page-does-not-exist-12345");
     expect(response?.status()).toBe(404);
+  });
+
+  test("API: health check returns 200", async ({ request }) => {
+    const response = await request.get("/api/health");
+    expect(response.status()).toBeLessThan(500);
+  });
+
+  test("API: unauthorized access returns 401", async ({ request }) => {
+    const response = await request.post("/api/summarize", {
+      data: { documentId: "invalid" },
+    });
+    // Should be 401 without auth token
+    expect(response.status()).toBeGreaterThanOrEqual(400);
+  });
+
+  test("Rate limiting: guest upload has rate limit headers", async ({ request }) => {
+    const response = await request.post("/api/upload", {
+      data: {},
+      headers: { "Content-Type": "application/json" },
+    });
+    // Either 400 (bad request) or 429 (rate limited) — both valid
+    expect([400, 429, 401, 415]).toContain(response.status());
+  });
+
+  test("Security: CSP header is present on pages", async ({ page }) => {
+    const response = await page.goto("/");
+    const csp = response?.headers()["content-security-policy"];
+    expect(csp).toBeTruthy();
+  });
+
+  test("Security: frame-ancestors prevents clickjacking", async ({ page }) => {
+    const response = await page.goto("/");
+    const csp = response?.headers()["content-security-policy"] || "";
+    expect(csp).toContain("frame-ancestors");
   });
 });

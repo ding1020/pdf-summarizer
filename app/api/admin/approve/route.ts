@@ -3,6 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { sendEmail, paymentSuccessEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
   try {
@@ -41,42 +42,44 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Missing paymentId" }, { status: 400 });
     }
 
-    const payment = await prisma.paymentRequest.findUnique({
-      where: { id: paymentId },
-      include: { user: { select: { id: true, email: true } } },
+    // ── Atomic approve: check status INSIDE transaction to prevent TOCTOU race ──
+    // Two concurrent admin approvals must not both succeed.
+    const payment = await prisma.$transaction(async (tx) => {
+      const record = await tx.paymentRequest.findUnique({
+        where: { id: paymentId },
+        include: { user: { select: { id: true, email: true } } },
+      });
+
+      if (!record) throw new Error("NOT_FOUND");
+      if (record.status !== "pending") return null; // already processed
+
+      // Determine subscription end date
+      const durationDays = record.plan === "pro_monthly" ? 30 : 365;
+      const subscriptionEndDate = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
+
+      // Approve payment
+      await tx.paymentRequest.update({
+        where: { id: paymentId },
+        data: { status: "approved", reviewedAt: new Date() },
+      });
+
+      // Upgrade user
+      await tx.user.update({
+        where: { id: record.userId },
+        data: {
+          subscriptionStatus: "pro",
+          billingCycle: record.plan === "pro_monthly" ? "monthly" : "yearly",
+          subscriptionEndDate,
+        },
+      });
+
+      return record;
     });
 
     if (!payment) {
-      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
-    }
-
-    if (payment.status !== "pending") {
+      // Payment was already processed (not pending)
       return NextResponse.json({ error: "Payment already processed" }, { status: 400 });
     }
-
-    // Determine subscription end date
-    let subscriptionEndDate: Date;
-    if (payment.plan === "pro_monthly") {
-      subscriptionEndDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-    } else {
-      subscriptionEndDate = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
-    }
-
-    // Approve payment and upgrade user in a transaction
-    await prisma.$transaction([
-      prisma.paymentRequest.update({
-        where: { id: paymentId },
-        data: { status: "approved", reviewedAt: new Date() },
-      }),
-      prisma.user.update({
-        where: { id: payment.userId },
-        data: {
-          subscriptionStatus: "pro",
-          billingCycle: payment.plan === "pro_monthly" ? "monthly" : "yearly",
-          subscriptionEndDate,
-        },
-      }),
-    ]);
 
     logger.info("[Admin] Payment approved", {
       paymentId,
@@ -84,8 +87,26 @@ export async function POST(req: NextRequest) {
       plan: payment.plan,
     });
 
+    // ── Notify user of successful activation ──
+    const planCycle = payment.plan === "pro_monthly" ? "monthly" : "yearly";
+    const endDateStr = new Date(Date.now() + (payment.plan === "pro_monthly" ? 30 : 365) * 24 * 60 * 60 * 1000)
+      .toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    try {
+      const template = paymentSuccessEmail(
+        payment.user.email.split("@")[0] || "there",
+        planCycle as "monthly" | "yearly",
+        endDateStr,
+      );
+      await sendEmail({ to: payment.user.email, ...template });
+    } catch (emailErr) {
+      logger.warn("[Admin] Failed to send payment success email", { error: String(emailErr) });
+    }
+
     return NextResponse.json({ success: true, message: "已批准并升级" });
   } catch (error) {
+    if (error instanceof Error && error.message === "NOT_FOUND") {
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+    }
     logger.error("[Admin] Approve error", error instanceof Error ? error : new Error(String(error)));
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }

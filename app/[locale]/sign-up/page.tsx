@@ -14,6 +14,7 @@ export default function SignUpPage() {
   const [name, setName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
@@ -24,18 +25,21 @@ export default function SignUpPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess(false);
 
     if (password.length < 8) {
       setError("Password must be at least 8 characters");
+      return;
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError("Password must include at least one uppercase letter, one lowercase letter, and one number");
       return;
     }
 
     setLoading(true);
     const result = await signUp(email, password, name || undefined);
     if (result.success) {
-      router.refresh();
-      // Small delay to let cookies settle
-      setTimeout(() => router.push("/dashboard"), 300);
+      setSuccess(true);
     } else {
       setError(result.error || "Sign up failed");
     }
@@ -67,6 +71,11 @@ export default function SignUpPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {success && (
+              <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm">
+                Account created! Please check your email to verify your account, then sign in.
+              </div>
+            )}
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}

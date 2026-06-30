@@ -1,0 +1,3 @@
+.next/types/app/api/webhooks/creem/route.ts(12,13): error TS2344: Type 'OmitWithTag<typeof import("D:/VS/pdf-summarizer/app/api/webhooks/creem/route"), "GET" | "config" | "POST" | "DELETE" | "generateStaticParams" | "revalidate" | "dynamic" | "dynamicParams" | ... 7 more ... | "PATCH", "">' does not satisfy the constraint '{ [x: string]: never; }'.
+  Property 'EVENT_HANDLERS' is incompatible with index signature.
+    Type 'Record<string, (data: Record<string, unknown>) => Promise<void>>' is not assignable to type 'never'.
