@@ -32,16 +32,18 @@ export function getClientIP(req: NextRequest): string {
 
 // ── Subscription tier ──
 
+import { isProStatus } from "./subscription";
+
 export type UserTier = "pro" | "free";
 
-/** Look up a user's subscription tier. Falls back to "free" on any error. */
+/** Look up a user's subscription tier (includes trial). Falls back to "free" on any error. */
 export async function getUserTier(userId: string): Promise<UserTier> {
   try {
     const user = await prisma.user.findUnique({
       where: { id: userId },
       select: { subscriptionStatus: true },
     });
-    return user?.subscriptionStatus === "pro" ? "pro" : "free";
+    return isProStatus(user?.subscriptionStatus) ? "pro" : "free";
   } catch {
     return "free";
   }

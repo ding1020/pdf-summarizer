@@ -6,6 +6,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/navigation";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { Analytics } from "@vercel/analytics/react";
 import Navigation from "@/components/Navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -17,6 +18,7 @@ import { PwaRegister } from "@/components/PwaRegister";
 import { ToastProvider } from "@/hooks/useToast";
 import { ConfirmProvider } from "@/hooks/useConfirm";
 import { ToastContainer } from "@/components/Toast";
+import { PLAN_AMOUNTS } from "@/lib/constants";
 import "@/app/globals.css";
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
@@ -151,13 +153,13 @@ export default async function LocaleLayout({
       {
         "@type": "Offer",
         name: "Pro Monthly",
-        price: "9.99",
+        price: ((PLAN_AMOUNTS.pro_monthly || 799) / 100).toFixed(2),
         priceCurrency: "USD",
       },
       {
         "@type": "Offer",
         name: "Pro Yearly",
-        price: "79.99",
+        price: ((PLAN_AMOUNTS.pro_yearly || 6900) / 100).toFixed(2),
         priceCurrency: "USD",
       },
     ],
@@ -220,6 +222,7 @@ export default async function LocaleLayout({
           </ConfirmProvider>
           </ToastProvider>
           <ClientCookieConsent />
+          <Analytics />
           {process.env.NEXT_PUBLIC_GA_ID && (
             <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
           )}

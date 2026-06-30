@@ -1,99 +1,15 @@
 import { NextRequest } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import {
-  getAIProvider,
-  getSystemPrompt,
-  estimateTokens,
-  createUsageRecord,
-  getProviderFallbackChain,
+  summarizeStreamWithFallback,
   checkAndIncrementDailyUsage,
   type AIProvider,
-  type TokenUsage,
 } from "@/lib/ai";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
 import { getClientIP, getUserTier } from "@/lib/api-utils";
-
-// ── Request timeout (30s for the whole streaming operation) ──
-const STREAM_TIMEOUT_MS = 30_000;
-
-async function tryStreamWithProvider(
-  provider: AIProvider,
-  model: string,
-  truncatedContent: string,
-  language: string,
-  signal: AbortSignal,
-): Promise<{ response: Response; usage: TokenUsage }> {
-  const inputTokens = estimateTokens(truncatedContent);
-  const openai = getAIProvider(provider);
-
-  const stream = await openai.chat.completions.create(
-    {
-      model,
-      messages: [
-        { role: "system", content: getSystemPrompt(language as "zh" | "en" | "multilingual" | "technical" | "business") },
-        { role: "user", content: `Please summarize the following document:\n\n${truncatedContent}` },
-      ],
-      temperature: 0.7,
-      max_tokens: 2000,
-      stream: true,
-    },
-    { signal },
-  );
-
-  let outputText = "";
-
-  const encoder = new TextEncoder();
-  const readableStream = new ReadableStream({
-    async start(controller) {
-      try {
-        for await (const chunk of stream) {
-          if (signal.aborted) {
-            controller.close();
-            return;
-          }
-          const content = chunk.choices[0]?.delta?.content || "";
-          if (content) {
-            outputText += content;
-            controller.enqueue(encoder.encode(`data: ${JSON.stringify({ content })}\n\n`));
-          }
-        }
-        // Include usage info in the final event
-        const outputTokens = estimateTokens(outputText);
-        controller.enqueue(
-          encoder.encode(
-            `data: ${JSON.stringify({
-              _usage: { provider, model, inputTokens, outputTokens, totalTokens: inputTokens + outputTokens },
-            })}\n\n`,
-          ),
-        );
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-        controller.close();
-      } catch (error) {
-        if (signal.aborted) {
-          controller.close();
-        } else {
-          controller.error(error);
-        }
-      }
-    },
-  });
-
-  const response = new Response(readableStream, {
-    headers: {
-      "Content-Type": "text/event-stream",
-      "Cache-Control": "no-cache",
-      "Connection": "keep-alive",
-      "X-Accel-Buffering": "no",
-    },
-  });
-
-  const usage = createUsageRecord(provider, model, inputTokens, estimateTokens(outputText));
-
-  return { response, usage };
-}
 
 export async function POST(req: NextRequest) {
   // ── Auth (required) ──
@@ -107,26 +23,31 @@ export async function POST(req: NextRequest) {
   }
 
   // ── Rate Limiting (per-minute, differentiated: Pro > Free) ──
+  let rateLimitResult: { remaining: number; resetTime: number } | null = null;
   try {
     const clientIp = getClientIP(req);
     const identifier = getClientIdentifier(userId, clientIp);
 
     const tier = await getUserTier(userId);
-    const rateLimitConfig = tier === "pro" ? { windowMs: 60_000, maxRequests: 60 } : { windowMs: 60_000, maxRequests: 20 };
+    const rateLimitConfig =
+      tier === "pro"
+        ? { windowMs: 60_000, maxRequests: 60 }
+        : { windowMs: 60_000, maxRequests: 20 };
 
-    const rateLimitResult = await rateLimitAsync(identifier, rateLimitConfig);
+    const result = await rateLimitAsync(identifier, rateLimitConfig);
+    rateLimitResult = { remaining: result.remaining, resetTime: result.resetTime };
 
-    if (!rateLimitResult.success) {
+    if (!result.success) {
       return new Response(
         JSON.stringify({
           error: "Too many requests. Please try again later.",
-          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
+          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000),
         }),
         {
           status: 429,
           headers: {
             "Content-Type": "application/json",
-            ...getRateLimitHeaders(rateLimitResult),
+            ...getRateLimitHeaders(result),
           },
         },
       );
@@ -153,7 +74,6 @@ export async function POST(req: NextRequest) {
   // ── Resolve content: direct or from DB ──
   if (!content || typeof content !== "string" || content.trim().length === 0) {
     if (documentId) {
-      // Load content from DB (for signed-in users where upload returns only documentId)
       try {
         const document = await prisma.document.findUnique({
           where: { id: documentId },
@@ -165,7 +85,6 @@ export async function POST(req: NextRequest) {
             { status: 404, headers: { "Content-Type": "application/json" } },
           );
         }
-        // Verify ownership
         if (document.userId !== userId) {
           return new Response(
             JSON.stringify({ error: "Access denied." }),
@@ -201,12 +120,6 @@ export async function POST(req: NextRequest) {
     // Fallback to free limit
   }
 
-  // Truncate content if too long
-  const truncatedContent =
-    content.length > maxLength
-      ? content.substring(0, maxLength) + "\n\n[Content truncated...]"
-      : content;
-
   // ── Daily Usage Limit (bypass-proof: atomic counter) ──
   try {
     const usageCheck = await checkAndIncrementDailyUsage(userId, FREE_DAILY_LIMIT);
@@ -227,61 +140,60 @@ export async function POST(req: NextRequest) {
     // Fail open
   }
 
-  // ── Try providers in fallback order ──
-  const orderedProviders = getProviderFallbackChain(provider);
-
-  const errors: string[] = [];
-  let totalTokensUsed = 0;
-
-  for (const { provider: p, model } of orderedProviders) {
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), STREAM_TIMEOUT_MS);
-
-    try {
-      const { response, usage } = await tryStreamWithProvider(
-        p,
-        model,
-        truncatedContent,
+  // ── Summarize with automatic provider fallback (shared service) ──
+  try {
+    const { readableStream, provider: usedProvider, model: usedModel, usage } =
+      await summarizeStreamWithFallback({
+        content,
         language,
-        controller.signal,
-      );
-
-      clearTimeout(timeoutId);
-
-      totalTokensUsed = usage.totalTokens;
-
-      logger.info("AI stream completed", {
-        provider: p,
-        model,
-        inputTokens: usage.inputTokens,
-        outputTokens: usage.outputTokens,
-        costUSD: usage.costUSD.toFixed(6),
+        preferredProvider: provider as AIProvider,
+        maxContentLength: maxLength,
       });
 
-      const headers = new Headers(response.headers);
-      headers.set("X-Provider", p);
-      headers.set("X-Tokens-Used", String(totalTokensUsed));
+    const headers = new Headers({
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      "Connection": "keep-alive",
+      "X-Accel-Buffering": "no",
+      "X-Provider": usedProvider,
+      "X-Model": usedModel,
+      "X-Tokens-Used": String(usage.totalTokens),
+    });
 
-      return new Response(response.body, {
-        status: response.status,
-        statusText: response.statusText,
-        headers,
+    // Attach rate-limit headers
+    if (rateLimitResult) {
+      Object.entries(getRateLimitHeaders(rateLimitResult)).forEach(([k, v]) => {
+        headers.set(k, v);
       });
-    } catch (err) {
-      clearTimeout(timeoutId);
-      const errMsg = err instanceof Error ? err.message : String(err);
-      errors.push(`${p}: ${errMsg}`);
-      logger.warn(`Stream provider ${p} failed, trying next`, { error: errMsg });
     }
+
+    return new Response(readableStream, { headers });
+  } catch (err) {
+    const errMsg = err instanceof Error ? err.message : String(err);
+    logger.error("All AI providers failed for streaming", new Error(errMsg));
+
+    // Refund the daily usage quota — AI failure shouldn't consume user's allowance
+    try {
+      const tier = await getUserTier(userId);
+      if (tier !== "pro") {
+        await prisma.user.updateMany({
+          where: { id: userId, usageCount: { gt: 0 } },
+          data: { usageCount: { decrement: 1 } },
+        });
+        logger.info("Refunded usage quota after AI failure (stream)", { userId });
+      }
+    } catch (refundErr) {
+      logger.warn("Failed to refund usage quota after AI failure (stream)", {
+        error: refundErr instanceof Error ? refundErr.message : String(refundErr),
+      });
+    }
+
+    return new Response(
+      JSON.stringify({
+        error: "AI service is temporarily unavailable. Please try again in a moment.",
+        details: process.env.NODE_ENV === "development" ? errMsg : undefined,
+      }),
+      { status: 503, headers: { "Content-Type": "application/json" } },
+    );
   }
-
-  logger.error("All AI providers failed", undefined, { errors, tokensAttempted: totalTokensUsed });
-
-  return new Response(
-    JSON.stringify({
-      error: "AI service is temporarily unavailable. Please try again in a moment.",
-      details: process.env.NODE_ENV === "development" ? errors : undefined,
-    }),
-    { status: 503, headers: { "Content-Type": "application/json" } },
-  );
 }

@@ -3,6 +3,19 @@
  * Provides consistent, structured logging format for easier debugging and log aggregation
  */
 
+import { AsyncLocalStorage } from "async_hooks";
+
+// ── Request ID tracing support (per-request isolation via AsyncLocalStorage) ──
+const requestIdStore = new AsyncLocalStorage<string>();
+
+export function setLoggerRequestId(id: string): void {
+  requestIdStore.enterWith(id);
+}
+
+export function getLoggerRequestId(): string | undefined {
+  return requestIdStore.getStore();
+}
+
 export type LogLevel = "debug" | "info" | "warn" | "error";
 
 export interface LogContext {
@@ -13,6 +26,7 @@ export interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
+  requestId?: string;
   context?: LogContext;
   error?: {
     name: string;
@@ -72,7 +86,7 @@ function createLogEntry(
   context?: LogContext,
   error?: Error
 ): LogEntry {
-  return {
+  const entry: LogEntry = {
     timestamp: new Date().toISOString(),
     level,
     message,
@@ -85,6 +99,11 @@ function createLogEntry(
         }
       : undefined,
   };
+  const requestId = getLoggerRequestId();
+  if (requestId) {
+    entry.requestId = requestId;
+  }
+  return entry;
 }
 
 // Logger object with methods for each log level

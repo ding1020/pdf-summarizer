@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 import { useAuth } from "@/hooks/useAuth";
@@ -44,7 +45,7 @@ export default function AuthButtonsClient() {
       </Link>
       <div className="flex items-center gap-2">
         {user?.imageUrl ? (
-          <img src={user.imageUrl} alt="" className="w-8 h-8 rounded-full" />
+          <Image src={user.imageUrl} alt="" width={32} height={32} className="w-8 h-8 rounded-full" />
         ) : (
           <div className="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center text-white text-sm font-medium">
             {user?.firstName?.charAt(0) || user?.email?.charAt(0)?.toUpperCase() || "?"}

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
+import { validateCsrf } from "@/lib/csrf";
 
 /**
  * POST /api/auth/reset-password
@@ -17,6 +18,13 @@ import { getClientIP } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      return NextResponse.json(
+        { error: "Invalid security token. Please refresh the page and try again." },
+        { status: 403 },
+      );
+    }
     // Rate limiting: prevent token brute-force
     const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:reset:${clientIp}`, RATE_LIMITS.auth);
@@ -39,6 +47,14 @@ export async function POST(req: NextRequest) {
     if (!password || typeof password !== "string" || password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters" },
+        { status: 400 },
+      );
+    }
+
+    // Password complexity: must contain uppercase, lowercase, and a digit
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      return NextResponse.json(
+        { error: "Password must include at least one uppercase letter, one lowercase letter, and one number" },
         { status: 400 },
       );
     }

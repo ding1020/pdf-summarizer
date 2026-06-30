@@ -25,12 +25,25 @@ export default function ResetPasswordPage() {
       return;
     }
 
+    // Client-side complexity check (also enforced server-side)
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError("Password must include at least one uppercase letter, one lowercase letter, and one number");
+      return;
+    }
+
     setLoading(true);
 
     try {
+      const csrfToken = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("__csrf_token="))
+        ?.split("=")[1];
       const res = await fetch("/api/auth/reset-password", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {}),
+        },
         body: JSON.stringify({ token, password }),
       });
       const data = await res.json();

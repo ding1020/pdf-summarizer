@@ -12,8 +12,8 @@
  * When neither is set, the in-memory store is used automatically.
  */
 
-import { Redis } from "@upstash/redis";
 import { logger } from "./logger";
+import { getRedis } from "./redis";
 
 // ── Types ──
 export interface RateLimitConfig {
@@ -25,35 +25,6 @@ export interface RateLimitResult {
   success: boolean;
   remaining: number;
   resetTime: number;
-}
-
-// ── Redis client (lazy singleton) ──
-let _redis: Redis | null = null;
-let _redisInitAttempted = false;
-
-function getRedis(): Redis | null {
-  if (_redisInitAttempted) return _redis;
-  _redisInitAttempted = true;
-
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
-
-  if (!url || !token) {
-    if (process.env.NODE_ENV === "production") {
-      logger.warn(
-        "[rate-limit] UPSTASH_REDIS_* env vars not set — using in-memory store (NOT shared across Vercel instances)",
-      );
-    }
-    return null;
-  }
-
-  try {
-    _redis = new Redis({ url, token });
-    return _redis;
-  } catch (err) {
-    logger.error("[rate-limit] Failed to create Redis client", err instanceof Error ? err : new Error(String(err)));
-    return null;
-  }
 }
 
 // ── Redis-based rate limiting (sliding window via INCR + EXPIRE) ──

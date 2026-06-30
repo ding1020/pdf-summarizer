@@ -29,3 +29,6 @@ Sentry.init({
     return event;
   },
 });
+
+// Instrument router transitions for performance monitoring
+export const onRouterTransitionStart = Sentry.captureRouterTransitionStart;

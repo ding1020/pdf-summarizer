@@ -37,10 +37,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "用户不存在" }, { status: 404 });
     }
 
-    // Already Pro?
+    // Already paid Pro (trial users CAN pay early to convert to permanent Pro)
     if (user.subscriptionStatus === "pro") {
       return NextResponse.json({ error: "您已经是专业版用户" }, { status: 400 });
     }
+
+    // Trial user: allow early payment — treat as conversion, not upgrade
+    const isTrialConversion = user.subscriptionStatus === "pro_trial";
 
     const body = await req.json();
     const parsed = submitSchema.safeParse(body);
@@ -92,6 +95,7 @@ export async function POST(req: NextRequest) {
       plan,
       amount,
       channel,
+      isTrialConversion,
     });
 
     // ── Notify admin via email ──
@@ -107,14 +111,20 @@ export async function POST(req: NextRequest) {
         paymentId: payment.id,
       });
       await sendEmail({ to: ADMIN_EMAIL, ...template }).catch((err) => {
-        logger.warn("Failed to send admin payment alert", { error: String(err) });
+        logger.error("CRITICAL: Failed to send admin payment alert", new Error(String(err)), {
+          paymentId: payment.id,
+          userId,
+          plan,
+        });
       });
     }
 
     return NextResponse.json({
       success: true,
       paymentId: payment.id,
-      message: "付款凭证已提交，我们将在核对后为您开通。通常1小时内完成。",
+      message: isTrialConversion
+        ? "试用转正付款凭证已提交，我们将在核对后为您开通永久专业版。通常1小时内完成。"
+        : "付款凭证已提交，我们将在核对后为您开通。通常1小时内完成。",
     });
   } catch (error) {
     logger.error("[Payment] Submit error", error instanceof Error ? error : new Error(String(error)));

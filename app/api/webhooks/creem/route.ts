@@ -15,7 +15,9 @@ import crypto from "crypto";
 import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { sendEmail, paymentSuccessEmail, paymentFailedEmail, subscriptionCanceledEmail } from "@/lib/email";
+import { sendEmail, paymentSuccessEmail, paymentFailedEmail, subscriptionCanceledEmail, adminPaymentFailureAlert } from "@/lib/email";
+import { rateLimitAsync } from "@/lib/rate-limit";
+import { recordAudit } from "@/lib/audit";
 
 // ── Signature verification (timing-safe) ──
 function verifySignature(payload: string, secret: string, signature: string): boolean {
@@ -131,6 +133,25 @@ const EVENT_HANDLERS: Record<string, (data: Record<string, unknown>) => Promise<
       });
       logger.info(`User by email ${email} marked as past_due`);
       await notifyUser(null, email, "subscription.past_due");
+    }
+
+    // ── Admin alert: notify admin about payment failure ──
+    const adminEmail = process.env.ADMIN_EMAIL;
+    if (adminEmail) {
+      const userName = (customer?.name as string) || email?.split("@")[0] || "Unknown";
+      const product = sub.product as Record<string, unknown> | undefined;
+      const planLabel = product?.name as string || "PDFSum Pro";
+      try {
+        const alert = adminPaymentFailureAlert({
+          userName,
+          userEmail: email || "unknown",
+          planLabel,
+          reason: "Recurring payment failed — card may be expired or insufficient funds",
+        });
+        await sendEmail({ to: adminEmail, subject: alert.subject, html: alert.html });
+      } catch (err) {
+        logger.warn("Admin payment failure alert failed", { error: String(err) });
+      }
     }
   },
 };
@@ -249,6 +270,20 @@ async function updateUserPro(
         },
       });
       logger.info(`✅ PRO granted [${opts.eventType}]`, { userId, sourceId: opts.sourceId });
+
+      await recordAudit({
+        userId,
+        action: "subscription_granted",
+        resource: "User",
+        resourceId: userId,
+        details: {
+          sourceId: opts.sourceId,
+          productId: opts.productId,
+          billingCycle: opts.billingCycle,
+          endDate: opts.endDate?.toISOString(),
+          eventType: opts.eventType,
+        },
+      });
     } else if (email) {
       const updated = await prisma.user.updateMany({
         where: { email },
@@ -279,6 +314,14 @@ async function updateUserFree(userId: string | null, email: string | null, subId
         data: { subscriptionStatus: "free", subscriptionEndDate: new Date(), billingCycle: null },
       });
       logger.info(`❌ PRO revoked (canceled)`, { userId, subId });
+
+      await recordAudit({
+        userId,
+        action: "subscription_revoked",
+        resource: "User",
+        resourceId: userId,
+        details: { subId, reason: "canceled" },
+      });
     } else if (email) {
       await prisma.user.updateMany({
         where: { email },
@@ -303,6 +346,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Webhook not configured" }, { status: 500 });
   }
 
+  // ── Rate limiting: 30 req/min per IP (prevent malicious replay) ──
+  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+  const rateResult = await rateLimitAsync(`webhook:${ip}`, {
+    windowMs: 60_000,
+    maxRequests: 30,
+  });
+  if (!rateResult.success) {
+    logger.warn("Webhook rate limit exceeded", { ip });
+    return NextResponse.json({ error: "Too many requests" }, { status: 429 });
+  }
+
   // Get raw body for signature verification
   const rawBody = await req.text();
   const signature = req.headers.get("creem-signature") || "";
@@ -324,7 +378,33 @@ export async function POST(req: NextRequest) {
   const eventType = payload.eventType;
   const eventId = payload.id;
 
+  if (!eventId) {
+    logger.warn("Webhook received without event ID", { eventType });
+    return NextResponse.json({ error: "Missing event ID" }, { status: 400 });
+  }
+
   logger.info(`📥 Webhook received`, { eventId, eventType });
+
+  // ── Idempotency: atomically insert BEFORE processing (prevents race condition) ──
+  // Strategy: INSERT first as a distributed lock. If INSERT fails with unique
+  // constraint → duplicate, skip. If INSERT succeeds → we own this event.
+  // On handler failure, DELETE the record so Creem can retry.
+  try {
+    await prisma.processedWebhook.create({
+      data: { id: eventId, eventType: eventType || "unknown" },
+    });
+  } catch (dbErr: unknown) {
+    const code = (dbErr as { code?: string })?.code;
+    if (code === "P2002") {
+      // Prisma unique constraint violation → already processed
+      logger.info("Duplicate webhook skipped (idempotent)", { eventId, eventType });
+      return NextResponse.json({ received: true, duplicate: true });
+    }
+    // Other DB error → fail open rather than blocking payments
+    logger.warn("Failed to claim webhook idempotency slot, proceeding anyway", {
+      error: dbErr instanceof Error ? dbErr.message : String(dbErr),
+    });
+  }
 
   // Find handler
   const handler = EVENT_HANDLERS[eventType || ""];
@@ -333,10 +413,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ received: true });
   }
 
-  // Process async but respond immediately
+  // Process
   try {
     await handler(payload);
   } catch (error) {
+    // On failure, delete idempotency record so Creem can retry
+    try {
+      await prisma.processedWebhook.delete({ where: { id: eventId } });
+    } catch (_) {
+      // Best effort cleanup
+    }
     logger.error(`Webhook handler failed for ${eventType}`, error instanceof Error ? error : new Error(String(error)), { eventId });
     return NextResponse.json({ error: "Processing failed" }, { status: 500 });
   }

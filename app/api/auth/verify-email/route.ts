@@ -77,8 +77,8 @@ export async function GET(req: NextRequest) {
       path: "/",
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30, // 30 days
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
     });
 
     return response;

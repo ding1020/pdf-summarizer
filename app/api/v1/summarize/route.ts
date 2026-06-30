@@ -73,7 +73,22 @@ export async function POST(req: NextRequest) {
       );
     }
   } catch {
-    // fail open
+    // Fallback: apply conservative rate limit (20 req/min) to avoid fail-open
+    try {
+      const clientIp = getClientIP(req);
+      const fallbackResult = await rateLimitAsync(
+        getClientIdentifier(userId, clientIp),
+        { windowMs: 60_000, maxRequests: 20 },
+      );
+      if (!fallbackResult.success) {
+        return new Response(
+          JSON.stringify({ error: "Rate limit exceeded. Try again later." }),
+          { status: 429, headers: { "Content-Type": "application/json" } },
+        );
+      }
+    } catch {
+      // Final fallback: allow the request through
+    }
   }
 
   // ── Parse body ──
@@ -143,6 +158,23 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     logger.error("[API v1] All providers failed", err instanceof Error ? err : new Error(errMsg));
+
+    // Refund the daily usage quota — AI failure shouldn't consume user's allowance
+    try {
+      const tier = await getUserTier(userId);
+      if (tier !== "pro") {
+        await prisma.user.updateMany({
+          where: { id: userId, usageCount: { gt: 0 } },
+          data: { usageCount: { decrement: 1 } },
+        });
+        logger.info("Refunded usage quota after AI failure (v1)", { userId });
+      }
+    } catch (refundErr) {
+      logger.warn("Failed to refund usage quota after AI failure (v1)", {
+        error: refundErr instanceof Error ? refundErr.message : String(refundErr),
+      });
+    }
+
     return new Response(
       JSON.stringify({
         error: "AI service temporarily unavailable",

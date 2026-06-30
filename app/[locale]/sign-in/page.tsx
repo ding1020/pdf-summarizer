@@ -3,35 +3,97 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/navigation";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 export default function SignInPage() {
   const t = useTranslations();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { signIn, isSignedIn, isLoaded } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [resendingVerification, setResendingVerification] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
+
+  // Helper: read CSRF cookie and send as header
+  const getCsrfHeader = (): Record<string, string> => {
+    const csrfToken = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("__csrf_token="))
+      ?.split("=")[1];
+    return csrfToken ? { "X-CSRF-Token": csrfToken } : {};
+  };
+
+  // Respect redirect param from middleware (e.g., /pricing → /sign-in?redirect=/pricing)
+  // Safety: only allow internal relative paths (prevent open redirect attacks)
+  const redirectParam = searchParams.get("redirect") || "";
+  const redirectTo = redirectParam.startsWith("/") && !redirectParam.startsWith("//")
+    ? redirectParam
+    : "/dashboard";
 
   useEffect(() => {
     if (isLoaded && isSignedIn) {
-      router.push("/dashboard");
+      router.push(redirectTo);
     }
-  }, [isLoaded, isSignedIn, router]);
+  }, [isLoaded, isSignedIn, router, redirectTo]);
+
+  // Handle URL error params from middleware redirects (e.g., ?error=expired_token)
+  useEffect(() => {
+    const urlError = searchParams.get("error");
+    if (urlError) {
+      const errorMessages: Record<string, string> = {
+        rate_limit: "Too many verification attempts. Please try again later.",
+        invalid_token: "Invalid verification link. Please request a new one.",
+        expired_token: "This verification link has expired. Please sign up again or request a new one.",
+        server_error: "A server error occurred during verification. Please try again.",
+      };
+      setError(errorMessages[urlError] || "Something went wrong. Please try again.");
+    }
+  }, [searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    const result = await signIn(email, password);
+    // Normalize email before sending (matches server-side normalization)
+    const normalizedEmail = email.trim().toLowerCase();
+    const result = await signIn(normalizedEmail, password);
     if (result.success) {
-      router.push("/dashboard");
+      router.push(redirectTo);
     } else {
       setError(result.error || "Sign in failed");
+      // Reset verification sent flag on new sign-in attempt
+      setVerificationSent(false);
     }
     setLoading(false);
+  };
+
+  const handleResendVerification = async () => {
+    setResendingVerification(true);
+    setVerificationSent(false);
+    try {
+      const normalizedEmail = email.trim().toLowerCase();
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", ...getCsrfHeader() },
+        body: JSON.stringify({ email: normalizedEmail }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setVerificationSent(true);
+        setError("");
+      } else {
+        setError(data.error || "Failed to resend verification email.");
+      }
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setResendingVerification(false);
+    }
   };
 
   if (!isLoaded) {
@@ -62,6 +124,21 @@ export default function SignInPage() {
             {error && (
               <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm">
                 {error}
+                {error.includes("verify your email") && !verificationSent && (
+                  <button
+                    type="button"
+                    onClick={handleResendVerification}
+                    disabled={resendingVerification}
+                    className="block mt-2 text-blue-600 hover:text-blue-700 underline font-medium disabled:opacity-50"
+                  >
+                    {resendingVerification ? "Sending..." : "Resend verification email"}
+                  </button>
+                )}
+              </div>
+            )}
+            {verificationSent && (
+              <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm">
+                Verification email sent! Please check your inbox.
               </div>
             )}
 

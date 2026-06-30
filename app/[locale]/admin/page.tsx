@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 
 interface PaymentRow {
   id: string;
@@ -24,23 +24,18 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [authorized, setAuthorized] = useState<boolean | null>(null);
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchPayments();
-    } else if (isLoaded) {
-      router.push("/sign-in");
-    }
-  }, [isSignedIn, isLoaded]);
-
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       const res = await fetch("/api/admin/pending");
       if (res.status === 403) {
+        setAuthorized(false);
         setError(t("forbidden"));
         setLoading(false);
         return;
       }
+      setAuthorized(true);
       const data = await res.json();
       if (data.payments) setPayments(data.payments);
     } catch {
@@ -48,7 +43,22 @@ export default function AdminPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [t]);
+
+  useEffect(() => {
+    if (isSignedIn) {
+      fetchPayments();
+    } else if (isLoaded) {
+      router.push("/sign-in");
+    }
+  }, [isSignedIn, isLoaded, fetchPayments, router]);
+
+  // Redirect non-admin users after verification
+  useEffect(() => {
+    if (authorized === false) {
+      router.push("/dashboard");
+    }
+  }, [authorized, router]);
 
   const handleAction = async (paymentId: string, action: "approve" | "reject") => {
     setActionLoading(paymentId);
@@ -127,9 +137,11 @@ export default function AdminPage() {
                     <span className={`px-2 py-0.5 text-xs rounded-full ${
                       p.user.subscriptionStatus === "pro"
                         ? "bg-blue-100 text-blue-700"
+                        : p.user.subscriptionStatus === "pro_trial"
+                        ? "bg-purple-100 text-purple-700"
                         : "bg-gray-100 text-gray-600"
                     }`}>
-                      {p.user.subscriptionStatus === "pro" ? "Pro" : "Free"}
+                      {p.user.subscriptionStatus === "pro" ? "Pro" : p.user.subscriptionStatus === "pro_trial" ? "Trial" : "Free"}
                     </span>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">

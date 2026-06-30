@@ -22,11 +22,20 @@ const envSchema = z.object({
   // AI (critical for core feature)
   DEEPSEEK_API_KEY: z.string().min(1, "DEEPSEEK_API_KEY is required for AI summarization"),
 
+  // AI fallback providers (optional but recommended)
+  GROQ_API_KEY: z.string().optional(),
+  SILICONFLOW_API_KEY: z.string().optional(),
+
+  // Redis / Upstash (optional — enables shared rate limiting & caching)
+  UPSTASH_REDIS_REST_URL: z.string().url().optional(),
+  UPSTASH_REDIS_REST_TOKEN: z.string().optional(),
+
   // Email (important for password reset)
   RESEND_API_KEY: z.string().optional(),
   EMAIL_FROM: z.string().optional(),
 
   // Payments (important for monetization)
+  CREEM_API_KEY: z.string().optional(),
   CREEM_SECRET_KEY: z.string().optional(),
   CREEM_WEBHOOK_SECRET: z.string().optional(),
   NEXT_PUBLIC_CREEM_PRICE_MONTHLY: z.string().optional(),
@@ -37,6 +46,9 @@ const envSchema = z.object({
     .string()
     .url()
     .optional(),
+
+  // Monitoring
+  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
 });
 
 // ── Validate and export ──

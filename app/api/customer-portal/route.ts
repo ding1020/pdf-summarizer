@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "User not found." }, { status: 404 });
   }
 
-  if (user.subscriptionStatus !== "pro") {
+  if (user.subscriptionStatus !== "pro" && user.subscriptionStatus !== "pro_trial") {
     return NextResponse.json(
       { error: "Only Pro users can access the customer portal." },
       { status: 403 },
@@ -113,7 +113,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json(
         {
           error:
-            "Could not open the customer portal. Please email ding10201020@hotmail.com for help with your subscription.",
+            `Could not open the customer portal. Please email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com"} for help with your subscription.`,
         },
         { status: 502 },
       );

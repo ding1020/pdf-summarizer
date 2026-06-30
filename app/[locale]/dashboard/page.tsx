@@ -4,6 +4,7 @@ import FileUploadWrapper from "./FileUploadWrapper";
 import AuthDependentUI from "./AuthUI";
 import GuestBanner from "./GuestBanner";
 import SubscriptionWidget from "@/components/SubscriptionWidget";
+import OnboardingGuideWrapper from "./OnboardingGuideWrapper";
 
 // ── Auth UI Skeleton (shown while Clerk loads) ──
 function AuthUISkeleton() {
@@ -55,6 +56,11 @@ export default async function DashboardPage({
         {/* Guest Banner — only shown when NOT signed in */}
         <Suspense fallback={null}>
           <GuestBanner />
+        </Suspense>
+
+        {/* Onboarding Guide — shown on first visit for signed-in users */}
+        <Suspense fallback={null}>
+          <OnboardingGuideWrapper />
         </Suspense>
 
         {/* Upload Section */}

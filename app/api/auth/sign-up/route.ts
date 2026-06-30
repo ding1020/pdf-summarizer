@@ -3,13 +3,23 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
-import { sendEmail, verifyEmailEmail } from "@/lib/email";
+import { sendEmail, verifyEmailEmail, trialWelcomeEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
+import { recordAudit } from "@/lib/audit";
+import { TRIAL_DURATION_DAYS } from "@/lib/subscription";
+import { validateCsrf } from "@/lib/csrf";
 
 import { getClientIP } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      return NextResponse.json(
+        { error: "Invalid security token. Please refresh the page and try again." },
+        { status: 403 },
+      );
+    }
     // Rate limiting: prevent abuse
     const clientIp = getClientIP(req);
     const rateResult = await rateLimitAsync(`auth:signup:${clientIp}`, RATE_LIMITS.auth);
@@ -27,6 +37,13 @@ export async function POST(req: NextRequest) {
     }
     if (password.length < 8) {
       return NextResponse.json({ error: "Password must be at least 8 characters" }, { status: 400 });
+    }
+    // Password complexity: must contain uppercase, lowercase, and a digit
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      return NextResponse.json(
+        { error: "Password must include at least one uppercase letter, one lowercase letter, and one number" },
+        { status: 400 },
+      );
     }
 
     const normalizedEmail = email.trim().toLowerCase();
@@ -71,9 +88,10 @@ export async function POST(req: NextRequest) {
     const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
     const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
 
-    // Create user with hashed password
+    // Create user with hashed password AND 3-day Pro trial
     const passwordHash = await hashPassword(password);
-    await prisma.user.create({
+    const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+    const user = await prisma.user.create({
       data: {
         email: normalizedEmail,
         passwordHash,
@@ -82,20 +100,40 @@ export async function POST(req: NextRequest) {
         emailVerified: false,
         verifyToken: tokenHash,
         verifyExpires,
-        clerkId: `native_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`,
+        internalId: `native_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`,
+        subscriptionStatus: "pro_trial",
+        subscriptionEndDate: trialEnd,
       },
+    });
+
+    // Audit
+    await recordAudit({
+      userId: user.id,
+      action: "sign_up",
+      resource: "User",
+      resourceId: user.id,
+      details: { email: normalizedEmail },
+      ip: clientIp,
     });
 
     // Send verification email
     const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
     const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
     const name = firstName || "there";
-    const { subject, html } = verifyEmailEmail(name, verifyUrl);
 
     try {
-      await sendEmail({ to: normalizedEmail, subject, html });
+      // Send verification email first
+      const verify = verifyEmailEmail(name, verifyUrl);
+      await sendEmail({ to: normalizedEmail, subject: verify.subject, html: verify.html });
+
+      // Also send trial welcome email
+      const trialEndStr = trialEnd.toLocaleDateString("en-US", {
+        year: "numeric", month: "long", day: "numeric",
+      });
+      const trial = trialWelcomeEmail(name, trialEndStr);
+      await sendEmail({ to: normalizedEmail, subject: trial.subject, html: trial.html });
     } catch (emailErr) {
-      logger.warn("Verification email send failed, but account created", {
+      logger.warn("Welcome email(s) send failed, but account created", {
         email: normalizedEmail,
         error: emailErr instanceof Error ? emailErr.message : String(emailErr),
       });

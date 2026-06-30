@@ -44,19 +44,24 @@ export async function GET(req: Request) {
       );
     }
 
-    const isPro = user.subscriptionStatus === "pro";
+    const isPro = user.subscriptionStatus === "pro" || user.subscriptionStatus === "pro_trial";
 
     // Use UTC midnight for consistent daily reset
     const now = new Date();
     const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
 
-    const todayUsage = await prisma.document.count({
-      where: {
-        userId: user.id,
-        summary: { not: null },
-        createdAt: { gte: startOfDay },
-      },
+    // Read User.usageCount (atomic counter) — the same data source that enforces the limit.
+    // Using document count would desync from the actual limit enforcement.
+    const userWithUsage = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { usageCount: true, usageResetAt: true },
     });
+
+    let todayUsage = 0;
+    if (userWithUsage) {
+      const needsReset = userWithUsage.usageResetAt.getTime() < startOfDay.getTime();
+      todayUsage = needsReset ? 0 : userWithUsage.usageCount;
+    }
 
     const remaining = isPro ? -1 : Math.max(0, FREE_DAILY_LIMIT - todayUsage);
     const limit = isPro ? -1 : FREE_DAILY_LIMIT;

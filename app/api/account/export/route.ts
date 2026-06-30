@@ -75,7 +75,7 @@ export async function GET(req: Request) {
       },
       personalData: {
         email: user.email,
-        clerkId: user.clerkId,
+        internalId: user.internalId,
         subscriptionStatus: user.subscriptionStatus,
         subscriptionId: user.subscriptionId,
         creemSubscriptionId: user.creemSubscriptionId,
