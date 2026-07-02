@@ -4,6 +4,9 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "regions": ["iad1", "hkg1"],
+  "env": {
+    "ADMIN_EMAIL": "277070660@qq.com"
+  },
   "crons": [
     {
       "path": "/api/cron/downgrade-expired",
