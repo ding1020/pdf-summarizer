@@ -7,6 +7,7 @@ import { prisma } from "@/lib/db";
 import { summarizeSchema } from "@/lib/schemas";
 import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
 import { getClientIP, resolveRateLimit } from "@/lib/api-utils";
+import { saveUsageLog, getUserType } from "@/lib/usage-log";
 
 export async function POST(req: NextRequest) {
   let userId: string | null = null;
@@ -164,6 +165,21 @@ export async function POST(req: NextRequest) {
 
     const summary = result.summary;
     const usedProvider = result.provider;
+
+    // ── Record AI usage for cost tracking ──
+    const userType = await getUserType(userId);
+    saveUsageLog({
+      userId,
+      provider: result.usage.provider,
+      model: result.usage.model,
+      inputTokens: result.usage.inputTokens,
+      outputTokens: result.usage.outputTokens,
+      totalTokens: result.usage.totalTokens,
+      costUSD: result.usage.costUSD,
+      userType,
+      route: "web",
+      ip: clientIp ?? undefined,
+    });
 
     logger.info("Summary generated", {
       documentId,

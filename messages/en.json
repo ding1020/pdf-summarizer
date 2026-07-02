@@ -572,8 +572,8 @@
     "networkError": "Network error. Please try again."
   },
   "admin": {
-    "title": "Payment Approvals",
-    "subtitle": "Review and approve payment submissions",
+    "title": "Admin Panel",
+    "subtitle": "Usage Stats · Payment Approvals",
     "refresh": "Refresh",
     "empty": "No pending payments",
     "forbidden": "Access denied",
@@ -584,6 +584,28 @@
     "planYearly": "Yearly",
     "alipay": "Alipay",
     "wechat": "WeChat",
-    "txnRef": "Ref"
+    "txnRef": "Ref",
+    "tabStats": "Usage Stats",
+    "tabPayments": "Payments",
+    "tabCalls": "Call Log",
+    "todayCalls": "Today Calls",
+    "todayTokens": "Today Tokens",
+    "todayCost": "Today Cost",
+    "todayUsers": "Today Active Users",
+    "yesterday": "Yesterday",
+    "totalUsers": "Total Users",
+    "allTimeCalls": "All-Time Calls",
+    "allTimeTokens": "All-Time Tokens",
+    "allTimeCost": "All-Time Cost",
+    "totalDocs": "Total Documents",
+    "weekChart": "Last 7 Days Calls",
+    "recentCalls": "Recent Call Log",
+    "time": "Time",
+    "provider": "Provider",
+    "type": "Type",
+    "tokens": "Tokens",
+    "cost": "Cost",
+    "providerBreakdown": "Provider Breakdown (This Month)",
+    "inputOutput": "In {input} / Out {output}"
   }
 }

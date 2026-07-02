@@ -539,8 +539,8 @@
     "networkError": "网络错误，请重试。"
   },
   "admin": {
-    "title": "付款审核",
-    "subtitle": "审核用户提交的付款凭证",
+    "title": "管理面板",
+    "subtitle": "用量统计 · 付款审核",
     "refresh": "刷新",
     "empty": "暂无待审核的付款",
     "forbidden": "无权访问",
@@ -551,6 +551,28 @@
     "planYearly": "年付",
     "alipay": "支付宝",
     "wechat": "微信",
-    "txnRef": "单号"
+    "txnRef": "单号",
+    "tabStats": "用量统计",
+    "tabPayments": "付款审核",
+    "tabCalls": "调用记录",
+    "todayCalls": "今日调用",
+    "todayTokens": "今日Token",
+    "todayCost": "今日费用",
+    "todayUsers": "今日活跃用户",
+    "yesterday": "昨日",
+    "totalUsers": "总用户",
+    "allTimeCalls": "累计调用",
+    "allTimeTokens": "累计Token",
+    "allTimeCost": "累计费用",
+    "totalDocs": "文档总数",
+    "weekChart": "过去7天调用量",
+    "recentCalls": "最近调用记录",
+    "time": "时间",
+    "provider": "供应商",
+    "type": "类型",
+    "tokens": "Token",
+    "cost": "费用",
+    "providerBreakdown": "供应商分布（本月）",
+    "inputOutput": "入 {input} / 出 {output}"
   }
 }
