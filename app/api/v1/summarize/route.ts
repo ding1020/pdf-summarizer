@@ -16,6 +16,7 @@ import {
 import { getClientIP, getUserTier } from "@/lib/api-utils";
 import { rateLimitAsync, getClientIdentifier } from "@/lib/rate-limit";
 import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
+import { saveUsageLog, getUserType } from "@/lib/usage-log";
 
 async function authenticateApiKey(req: NextRequest): Promise<string | null> {
   const authHeader = req.headers.get("authorization");
@@ -187,6 +188,21 @@ export async function POST(req: NextRequest) {
   logger.info("[API v1] Summarize completed", {
     provider: usedProvider,
     totalTokens: usage.totalTokens,
+  });
+
+  // ── Record AI usage for cost tracking ──
+  const userType = await getUserType(userId);
+  saveUsageLog({
+    userId,
+    provider: usage.provider,
+    model: usage.model,
+    inputTokens: usage.inputTokens,
+    outputTokens: usage.outputTokens,
+    totalTokens: usage.totalTokens,
+    costUSD: 0, // v1 doesn't pass cost through, estimate separately
+    userType,
+    route: "api",
+    ip: getClientIP(req),
   });
 
   return new Response(

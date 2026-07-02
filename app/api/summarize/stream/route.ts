@@ -10,10 +10,12 @@ import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/
 import { logger } from "@/lib/logger";
 import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
 import { getClientIP, getUserTier } from "@/lib/api-utils";
+import { saveUsageLog, getUserType } from "@/lib/usage-log";
 
 export async function POST(req: NextRequest) {
   // ── Auth (required) ──
   const userId = await getAuthUserId();
+  const clientIp = getClientIP(req);
 
   if (!userId) {
     return new Response(
@@ -25,7 +27,6 @@ export async function POST(req: NextRequest) {
   // ── Rate Limiting (per-minute, differentiated: Pro > Free) ──
   let rateLimitResult: { remaining: number; resetTime: number } | null = null;
   try {
-    const clientIp = getClientIP(req);
     const identifier = getClientIdentifier(userId, clientIp);
 
     const tier = await getUserTier(userId);
@@ -149,6 +150,23 @@ export async function POST(req: NextRequest) {
         preferredProvider: provider as AIProvider,
         maxContentLength: maxLength,
       });
+
+    // ── Record AI usage for cost tracking ──
+    if (usage.provider !== "cache") {
+      const userType = await getUserType(userId);
+      saveUsageLog({
+        userId,
+        provider: usage.provider,
+        model: usage.model,
+        inputTokens: usage.inputTokens,
+        outputTokens: usage.outputTokens > 0 ? usage.outputTokens : 0,
+        totalTokens: usage.totalTokens > 0 ? usage.totalTokens : usage.inputTokens,
+        costUSD: usage.costUSD,
+        userType,
+        route: "stream",
+        ip: clientIp ?? undefined,
+      });
+    }
 
     const headers = new Headers({
       "Content-Type": "text/event-stream",

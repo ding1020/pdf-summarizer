@@ -154,3 +154,22 @@ model AuditLog {
   @@index([action])
   @@index([createdAt])
 }
+
+model UsageLog {
+  id           String   @id @default(uuid())
+  userId       String?  // nullable for guest/anonymous users
+  provider     String   // deepseek, groq, siliconflow, cache
+  model        String
+  inputTokens  Int
+  outputTokens Int
+  totalTokens  Int
+  costUSD      Float    @default(0)
+  userType     String   @default("free") // guest, free, trial, pro
+  route        String   @default("web")  // web, stream, api
+  ip           String?
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@index([provider])
+}
