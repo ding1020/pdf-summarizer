@@ -17,7 +17,7 @@ interface PaymentRow {
 }
 
 interface AdminStats {
-  today: { calls: number; tokens: number; cost: number; uniqueUsers: number };
+  today: { calls: number; tokens: number; inputTokens: number; outputTokens: number; cost: number; uniqueUsers: number };
   yesterday: { calls: number; tokens: number; cost: number };
   week: Array<{ date: string; calls: number; tokens: number; cost: number }>;
   totals: { calls: number; tokens: number; cost: number; firstRecorded: string | null };
