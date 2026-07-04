@@ -26,7 +26,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Install dependencies
@@ -39,7 +39,8 @@ jobs:
         run: mkdir -p backups
 
       - name: Backup database
-        run: npx prisma migrate diff --from-url "$DATABASE_URL" --to-empty -- Migration.sql || echo "Using database connection for backup"
+        run: |
+          npx prisma migrate diff --from-url "$DATABASE_URL" --to-empty > backups/Migration.sql || echo "Using database connection for backup"
         continue-on-error: true
 
       - name: Generate backup filename
