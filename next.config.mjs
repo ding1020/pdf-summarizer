@@ -9,10 +9,10 @@ const nextConfig = {
   poweredByHeader: false,
   compress: true,
 
-  // TypeScript & ESLint: use strict mode for production safety
+  // TypeScript: use strict mode for production safety
   // If build fails due to type errors, fix them rather than ignoring
+  // (eslint is run separately via npm run lint in CI — Next.js 16 no longer bundles it)
   typescript: { ignoreBuildErrors: false },
-  eslint: { ignoreDuringBuilds: false },
 
   // pdf-parse must be bundled as server external
   serverExternalPackages: ["pdf-parse"],
