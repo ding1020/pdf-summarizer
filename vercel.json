@@ -3,7 +3,7 @@
   "buildCommand": "npx prisma migrate deploy && npx prisma generate && next build",
   "devCommand": "npm run dev",
   "installCommand": "npm install",
-  "regions": ["iad1", "hkg1"],
+  "regions": ["iad1"],
   "env": {
     "ADMIN_EMAIL": "dingmeng10@sina.com"
   },
