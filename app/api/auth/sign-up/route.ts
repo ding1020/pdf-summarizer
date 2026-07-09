@@ -83,11 +83,6 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
     }
 
-    // Generate verification token — store only the SHA-256 hash
-    const rawToken = crypto.randomBytes(32).toString("hex");
-    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-    const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
-
     // Create user with hashed password AND 3-day Pro trial
     const passwordHash = await hashPassword(password);
     const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
@@ -97,9 +92,9 @@ export async function POST(req: NextRequest) {
         passwordHash,
         firstName: firstName || null,
         lastName: lastName || null,
-        emailVerified: false,
-        verifyToken: tokenHash,
-        verifyExpires,
+        emailVerified: true,
+        verifyToken: null,
+        verifyExpires: null,
         internalId: `native_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`,
         subscriptionStatus: "pro_trial",
         subscriptionEndDate: trialEnd,

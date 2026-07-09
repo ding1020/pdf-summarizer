@@ -63,12 +63,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    // Check email verification
+    // Check email verification; auto-verify the configured admin email
+    // so the owner is never locked out due to email delivery issues.
     if (!user.emailVerified) {
-      return NextResponse.json(
-        { error: "Please verify your email before signing in. Check your inbox." },
-        { status: 403 }
-      );
+      const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
+      if (adminEmail && user.email === adminEmail) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: true, verifyToken: null, verifyExpires: null },
+        });
+      } else {
+        return NextResponse.json(
+          { error: "Please verify your email before signing in. Check your inbox." },
+          { status: 403 }
+        );
+      }
     }
 
     // Issue auth token
