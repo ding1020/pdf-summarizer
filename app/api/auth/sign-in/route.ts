@@ -63,11 +63,10 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    // Check email verification; auto-verify the configured admin email
-    // so the owner is never locked out due to email delivery issues.
+    // Check email verification. Auto-verify the owner email so they are never
+    // locked out when email delivery (Resend/sina.com) fails.
     if (!user.emailVerified) {
-      const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();
-      if (adminEmail && user.email === adminEmail) {
+      if (user.email === "dingmeng10@sina.com") {
         await prisma.user.update({
           where: { id: user.id },
           data: { emailVerified: true, verifyToken: null, verifyExpires: null },
