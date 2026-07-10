@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/navigation";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-export default function SignInPage() {
+function SignInForm() {
   const t = useTranslations();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -198,5 +198,21 @@ export default function SignInPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function SignInFallback() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
+}
+
+export default function SignInPage() {
+  return (
+    <Suspense fallback={<SignInFallback />}>
+      <SignInForm />
+    </Suspense>
   );
 }
