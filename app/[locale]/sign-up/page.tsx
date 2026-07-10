@@ -40,6 +40,10 @@ export default function SignUpPage() {
     const result = await signUp(email, password, name || undefined);
     if (result.success) {
       setSuccess(true);
+      // Redirect to sign-in after 2s
+      setTimeout(() => {
+        router.push("/sign-in");
+      }, 2000);
     } else {
       setError(result.error || "Sign up failed");
     }
@@ -73,7 +77,7 @@ export default function SignUpPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {success && (
               <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm">
-                Account created! Please check your email to verify your account, then sign in.
+                Account created successfully! Redirecting to sign in...
               </div>
             )}
             {error && (

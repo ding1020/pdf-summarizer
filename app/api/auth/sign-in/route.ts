@@ -63,20 +63,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    // Check email verification. Auto-verify the owner email so they are never
-    // locked out when email delivery (Resend/sina.com) fails.
+    // Auto-verify any unverified account on sign-in, since email verification
+    // has been removed from the registration flow. Users who prove they have
+    // the correct password are trusted.
     if (!user.emailVerified) {
-      if (user.email === "dingmeng10@sina.com") {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { emailVerified: true, verifyToken: null, verifyExpires: null },
-        });
-      } else {
-        return NextResponse.json(
-          { error: "Please verify your email before signing in. Check your inbox." },
-          { status: 403 }
-        );
-      }
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { emailVerified: true, verifyToken: null, verifyExpires: null },
+      });
     }
 
     // Issue auth token

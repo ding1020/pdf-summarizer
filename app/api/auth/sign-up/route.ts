@@ -3,7 +3,7 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
-import { sendEmail, verifyEmailEmail, trialWelcomeEmail } from "@/lib/email";
+import { sendEmail, trialWelcomeEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { recordAudit } from "@/lib/audit";
 import { TRIAL_DURATION_DAYS } from "@/lib/subscription";
@@ -55,35 +55,48 @@ export async function POST(req: NextRequest) {
     });
 
     if (existing) {
-      // If user exists but not verified, allow re-sending verification
+      // If user exists but not verified, auto-verify and update password
+      // so they can sign in immediately (email verification is skipped entirely).
       if (!existing.emailVerified) {
-        // Generate new verification token and resend
-        const rawToken = crypto.randomBytes(32).toString("hex");
-        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
-        const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
-
+        const passwordHash = await hashPassword(password);
+        const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
         await prisma.user.update({
           where: { id: existing.id },
-          data: { verifyToken: tokenHash, verifyExpires },
+          data: {
+            emailVerified: true,
+            verifyToken: null,
+            verifyExpires: null,
+            passwordHash,
+            subscriptionStatus: "pro_trial",
+            subscriptionEndDate: trialEnd,
+          },
         });
-
-        const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
-        const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
-        const name = firstName || "there";
-        const { subject, html } = verifyEmailEmail(name, verifyUrl);
-        await sendEmail({ to: normalizedEmail, subject, html });
 
         return NextResponse.json({
           success: true,
-          message: "Account exists but not verified. A new verification email has been sent.",
+          message: "Account has been activated. You can now sign in.",
           autoSignedIn: false,
         });
       }
 
-      return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
+      // Already verified — allow password reset via re-registration
+      // since email-based password reset also depends on email delivery.
+      const passwordHash = await hashPassword(password);
+      await prisma.user.update({
+        where: { id: existing.id },
+        data: { passwordHash },
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: "Password has been updated. You can now sign in.",
+        autoSignedIn: false,
+      });
     }
 
     // Create user with hashed password AND 3-day Pro trial
+    // Email verification is skipped: new users can sign in immediately.
+    // Welcome emails are sent but failures are non-blocking.
     const passwordHash = await hashPassword(password);
     const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
     const user = await prisma.user.create({
@@ -111,24 +124,16 @@ export async function POST(req: NextRequest) {
       ip: clientIp,
     });
 
-    // Send verification email
-    const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
-    const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
+    // Send trial welcome email (non-blocking)
     const name = firstName || "there";
-
     try {
-      // Send verification email first
-      const verify = verifyEmailEmail(name, verifyUrl);
-      await sendEmail({ to: normalizedEmail, subject: verify.subject, html: verify.html });
-
-      // Also send trial welcome email
       const trialEndStr = trialEnd.toLocaleDateString("en-US", {
         year: "numeric", month: "long", day: "numeric",
       });
       const trial = trialWelcomeEmail(name, trialEndStr);
       await sendEmail({ to: normalizedEmail, subject: trial.subject, html: trial.html });
     } catch (emailErr) {
-      logger.warn("Welcome email(s) send failed, but account created", {
+      logger.warn("Trial welcome email send failed, but account created", {
         email: normalizedEmail,
         error: emailErr instanceof Error ? emailErr.message : String(emailErr),
       });
@@ -136,7 +141,7 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({
       success: true,
-      message: "Account created. Please check your email to verify your account.",
+      message: "Account created! You can now sign in.",
       autoSignedIn: false,
     });
   } catch (error) {
