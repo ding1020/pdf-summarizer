@@ -4,15 +4,17 @@
  * 1. Middleware sets a non-httpOnly csrf_token cookie on page GETs.
  * 2. Client reads the cookie and sends it as X-CSRF-Token header on POSTs.
  * 3. Server-side route handlers call validateCsrf() to compare them.
+ *
+ * Uses Web Crypto API (Edge Runtime compatible) instead of Node.js crypto.
  */
-import crypto from "crypto";
 import { NextRequest } from "next/server";
 
 const TOKEN_BYTES = 32;
 const REFRESH_WINDOW_MS = 5 * 60_000; // Refresh token older than 5 min
 
 export function generateCsrfToken(): string {
-  return crypto.randomBytes(TOKEN_BYTES).toString("hex");
+  const bytes = crypto.getRandomValues(new Uint8Array(TOKEN_BYTES));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
 }
 
 /**
