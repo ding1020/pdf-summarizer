@@ -6,6 +6,7 @@ import { logger } from "@/lib/logger";
 import { detectFileType, extractText, SUPPORTED_EXTENSIONS } from "@/lib/file-processor";
 import { MAX_FILE_SIZE } from "@/lib/constants";
 import { getClientIP } from "@/lib/api-utils";
+import { validateCsrf } from "@/lib/csrf";
 
 /**
  * POST /api/upload — Unified upload handler
@@ -19,6 +20,11 @@ import { getClientIP } from "@/lib/api-utils";
  */
 export async function POST(req: NextRequest) {
   const startTime = Date.now();
+
+  // ── CSRF Protection ──
+  if (!validateCsrf(req)) {
+    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+  }
 
   // ── Auth ──
   const userId = await getAuthUserId();

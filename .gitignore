@@ -55,3 +55,8 @@ test-output.txt
 # Windows / PowerShell
 $null
 test-*.ps1
+*.bat
+*.cjs
+*.mjs
+*.ps1
+!next-env.d.ts

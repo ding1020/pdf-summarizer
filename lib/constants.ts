@@ -19,10 +19,10 @@ export const PLAN_AMOUNTS: Record<string, number> = {
 };
 
 // ── Payment: Creem price ID whitelist ──
-// Source from env var for flexibility; falls back to hardcoded defaults.
-// Format: "prod_xxx,prod_yyy"
+// Must be set via CREEM_PRICE_ID_WHITELIST env var (format: "prod_xxx,prod_yyy").
+// If unconfigured, all Creem product IDs are accepted (trust the webhook signature).
 export const ALLOWED_CREEM_PRICE_IDS = new Set(
-  (process.env.CREEM_PRICE_ID_WHITELIST || "prod_2QOazgohfdxLNaIJi9IAND,prod_7GykYo9OXyvHnHOfStCLWk")
+  (process.env.CREEM_PRICE_ID_WHITELIST || "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean),

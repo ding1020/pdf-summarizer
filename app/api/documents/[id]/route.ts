@@ -3,6 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { validateCsrf } from "@/lib/csrf";
 
 export async function GET(
   req: NextRequest,
@@ -41,11 +42,24 @@ export async function GET(
       );
     }
 
-    // Get document
+    // Get document — exclude content to minimize bandwidth
     const document = await prisma.document.findFirst({
       where: {
         id: id,
         userId: user.id,
+      },
+      select: {
+        id: true,
+        filename: true,
+        fileSize: true,
+        pageCount: true,
+        status: true,
+        summary: true,
+        createdAt: true,
+        updatedAt: true,
+        isPublic: true,
+        shareId: true,
+        userId: true,
       },
     });
 
@@ -83,6 +97,11 @@ export async function DELETE(
         { error: "Authentication required" },
         { status: 401 }
       );
+    }
+
+    // CSRF Protection
+    if (!validateCsrf(req)) {
+      return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
     }
 
     // Rate limiting

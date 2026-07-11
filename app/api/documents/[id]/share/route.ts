@@ -2,9 +2,14 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
-import { randomBytes } from "crypto";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+
+/** Generate a crypto-random hex string (Web Crypto API, Edge Runtime safe). */
+function generateShareId(byteLength = 12): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(byteLength));
+  return Array.from(bytes, (b) => b.toString(16).padStart(2, "0")).join("");
+}
 
 /**
  * POST /api/documents/:id/share
@@ -52,7 +57,7 @@ export async function POST(
     }
 
     // Generate unique shareId
-    const shareId = randomBytes(12).toString("hex");
+    const shareId = generateShareId(12);
 
     await prisma.document.update({
       where: { id },

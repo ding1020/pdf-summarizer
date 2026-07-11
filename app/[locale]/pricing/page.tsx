@@ -1,332 +1,134 @@
-"use client";
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+import PricingClient from "./PricingClient";
+import { PLAN_AMOUNTS } from "@/lib/constants";
 
-import { useTranslations } from "next-intl";
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
-import { useRouter, Link } from "@/navigation";
-import PaymentModal from "@/components/PaymentModal";
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
-interface Toast {
-  id: string;
-  message: string;
-  type: "success" | "error" | "info";
+const DESCRIPTIONS: Record<string, string> = {
+  en: "Simple, transparent pricing for AI-powered PDF summaries. Start free with 5 summaries/day. Upgrade to Pro for unlimited access — only $9/month.",
+  zh: "简单透明的 AI PDF 摘要定价。每天 5 次免费摘要，升级 Pro 无限使用 — 仅 ¥59/月。",
+  ja: "シンプルで透明なAI PDF要約の料金プラン。1日5回の無料要約。プロ版は月額わずか$9で無制限。",
+  ko: "간단하고 투명한 AI PDF 요약 가격. 하루 5회 무료 요약. 프로 플랜은 월 $9에 무제한 이용.",
+  es: "Precios simples y transparentes para resúmenes PDF con IA. Comienza gratis con 5 resúmenes/día. Pro ilimitado — solo $9/mes.",
+  fr: "Tarification simple et transparente pour les résumés PDF par IA. Gratuit avec 5 résumés/jour. Pro illimité — seulement 9$/mois.",
+  de: "Einfache, transparente Preise für KI-PDF-Zusammenfassungen. Kostenlos mit 5/Tag starten. Pro unbegrenzt — nur 9$/Monat.",
+};
+
+const LOCALE_MAP: Record<string, string> = {
+  en: "en_US", zh: "zh_CN", ja: "ja_JP", ko: "ko_KR", es: "es_ES", fr: "fr_FR", de: "de_DE",
+};
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const ogLocale = LOCALE_MAP[locale] || "en_US";
+  const description = DESCRIPTIONS[locale] || DESCRIPTIONS.en;
+
+  return {
+    title: "Pricing — PDF Summary AI",
+    description,
+    keywords: [
+      "PDF summarizer pricing", "AI summary plans", "document summarizer cost",
+      "PDF AI free trial", "Pro PDF summarizer",
+    ],
+    openGraph: {
+      type: "website",
+      locale: ogLocale,
+      url: `${BASE_URL}/${locale}/pricing`,
+      siteName: "PDF Summary AI",
+      title: "Pricing — PDF Summary AI",
+      description,
+      images: [
+        {
+          url: `/og?title=${encodeURIComponent("Simple Pricing")}&description=${encodeURIComponent(description)}&locale=${locale}`,
+          width: 1200,
+          height: 630,
+          alt: "PDF Summary AI Pricing",
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: "Pricing — PDF Summary AI",
+      description,
+      images: [`/og?title=${encodeURIComponent("Simple Pricing")}&description=${encodeURIComponent(description)}&locale=${locale}`],
+    },
+    robots: { index: true, follow: true },
+    alternates: {
+      canonical: `${BASE_URL}/${locale}/pricing`,
+    },
+  };
 }
 
-export default function PricingPage() {
-  const t = useTranslations("pricing");
-  const { isLoaded, isSignedIn } = useAuth();
-  const router = useRouter();
-  const [selectedBilling, setSelectedBilling] = useState<"monthly" | "yearly">("monthly");
-  const [showModal, setShowModal] = useState(false);
-  const [toasts, setToasts] = useState<Toast[]>([]);
+export default async function PricingPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "pricing" });
 
-  const showToast = (message: string, type: Toast["type"] = "info") => {
-    const id = Date.now().toString();
-    setToasts((prev) => [...prev, { id, message, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 5000);
-  };
-
-  const dismissToast = (id: string) => {
-    setToasts((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const plans = [
-    {
-      name: t("free.name"),
-      price: t("free.price"),
-      period: t("free.period"),
-      description: t("free.description"),
-      features: t.raw("free.features") as string[],
-      limitations: t.raw("free.limitations") as string[] | undefined,
-      buttonText: t("free.button"),
-      buttonVariant: "outline" as const,
-      highlighted: false,
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: "Pricing — PDF Summary AI",
+    description: t("subtitle"),
+    url: `${BASE_URL}/${locale}/pricing`,
+    mainEntity: {
+      "@type": "ItemList",
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          item: {
+            "@type": "Product",
+            name: "PDF Summary AI Free",
+            description: t("free.description"),
+            offers: {
+              "@type": "Offer",
+              price: "0",
+              priceCurrency: "USD",
+            },
+          },
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          item: {
+            "@type": "Product",
+            name: "PDF Summary AI Pro",
+            description: t("pro.description"),
+            offers: [
+              {
+                "@type": "Offer",
+                name: "Pro Monthly",
+                price: ((PLAN_AMOUNTS.pro_monthly || 799) / 100).toFixed(2),
+                priceCurrency: "USD",
+              },
+              {
+                "@type": "Offer",
+                name: "Pro Yearly",
+                price: ((PLAN_AMOUNTS.pro_yearly || 6900) / 100).toFixed(2),
+                priceCurrency: "USD",
+              },
+            ],
+          },
+        },
+      ],
     },
-  ];
-
-  const proPlan = {
-    name: t("pro.name"),
-    monthlyPrice: t("pro.price"),
-    yearlyPrice: t("pro.yearlyPrice"),
-    period: selectedBilling === "yearly" ? t("pro.yearlyPeriod") : t("pro.period"),
-    yearlyPeriod: t("pro.yearlyPeriod"),
-    description: t("pro.description"),
-    features: t.raw("pro.features") as string[],
-    buttonText: t("pro.button"),
-    buttonVariant: "solid" as const,
-    highlighted: true,
   };
-
-  const handleUpgrade = () => {
-    if (!isSignedIn) {
-      router.push("/sign-in");
-      return;
-    }
-    setShowModal(true);
-  };
-
-  const handleFreeClick = () => {
-    if (!isSignedIn) {
-      router.push("/sign-up");
-      return;
-    }
-    // Signed-in free user: already on this plan, no action needed
-    // (Pro users won't see the free card at all)
-  };
-
-  const priceAmount = selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice;
-  const planType = selectedBilling === "yearly" ? "pro_yearly" : "pro_monthly";
-
-  if (!isLoaded) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
 
   return (
-    <main className="min-h-screen bg-gray-50 py-16" id="main-content">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            {t("title")}
-          </h1>
-          <p className="text-xl text-gray-600">
-            {t("subtitle")}
-          </p>
-        </div>
-
-        {/* Trust Badges */}
-        <div className="flex flex-wrap justify-center gap-6 mb-12">
-          <div className="flex items-center gap-2 text-gray-600">
-            <svg className="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-            </svg>
-            <span className="text-sm font-medium">{t("badges.secure")}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-            </svg>
-            <span className="text-sm font-medium">{t("badges.poweredBy")}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <svg className="w-5 h-5 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <span className="text-sm font-medium">{t("badges.cancel")}</span>
-          </div>
-          <div className="flex items-center gap-2 text-gray-600">
-            <svg className="w-5 h-5 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <span className="text-sm font-medium">{t("badges.support")}</span>
-          </div>
-        </div>
-
-        {/* Billing Toggle */}
-        <div className="flex justify-center mb-8">
-          <div className="bg-white rounded-full p-1 inline-flex shadow-sm border">
-            <button
-              onClick={() => setSelectedBilling("monthly")}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors ${
-                selectedBilling === "monthly"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("billing.monthly")}
-            </button>
-            <button
-              onClick={() => setSelectedBilling("yearly")}
-              className={`px-6 py-2 rounded-full text-sm font-medium transition-colors flex items-center gap-2 ${
-                selectedBilling === "yearly"
-                  ? "bg-blue-600 text-white"
-                  : "text-gray-600 hover:text-gray-900"
-              }`}
-            >
-              {t("billing.yearly")}
-              <span className="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">
-                {t("billing.savePercent")}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className="bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200"
-            >
-              <div className="p-8">
-                <h2 className="text-2xl font-bold text-gray-900">{plan.name}</h2>
-                <p className="text-gray-500 mt-1">{plan.description}</p>
-                
-                <div className="mt-6 flex items-baseline">
-                  <span className="text-4xl font-bold text-gray-900">
-                    {plan.price}
-                  </span>
-                  <span className="text-gray-500 ml-1">{plan.period}</span>
-                </div>
-
-                <ul className="mt-8 space-y-4">
-                  {plan.features.map((feature, index) => (
-                    <li key={index} className="flex items-start">
-                      <svg className="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span className="text-gray-700">{feature}</span>
-                    </li>
-                  ))}
-                  {plan.limitations?.map((limitation, index) => (
-                    <li key={index} className="flex items-start opacity-50">
-                      <svg className="h-6 w-6 text-gray-400 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                      <span className="text-gray-500">{limitation}</span>
-                    </li>
-                  ))}
-                </ul>
-
-                <button
-                  onClick={handleFreeClick}
-                  className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  {!isSignedIn ? t("common.getStarted") : plan.buttonText}
-                </button>
-              </div>
-            </div>
-          ))}
-
-          {/* Pro Plan Card */}
-          <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-blue-500 relative">
-            {selectedBilling === "yearly" && (
-              <div className="absolute top-4 right-4">
-                <span className="px-3 py-1 bg-green-500 text-white text-sm font-medium rounded-full">
-                  {t("bestValue")}
-                </span>
-              </div>
-            )}
-            
-            <div className="bg-blue-500 text-white text-center py-2 text-sm font-medium">
-              {t("mostPopular")}
-            </div>
-            
-            <div className="p-8">
-              <h2 className="text-2xl font-bold text-gray-900">{proPlan.name}</h2>
-              <p className="text-gray-500 mt-1">{proPlan.description}</p>
-              
-              <div className="mt-6 flex items-baseline">
-                <span className="text-4xl font-bold text-gray-900">
-                  {selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice}
-                </span>
-                <span className="text-gray-500 ml-1">
-                  {selectedBilling === "yearly" ? proPlan.yearlyPeriod : proPlan.period}
-                </span>
-              </div>
-              {selectedBilling === "yearly" && (
-                <p className="text-sm text-gray-500 mt-1">{t("pro.pricePerMonth")}</p>
-              )}
-
-              <ul className="mt-8 space-y-4">
-                {proPlan.features.map((feature, index) => (
-                  <li key={index} className="flex items-start">
-                    <svg className="h-6 w-6 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span className="text-gray-700">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <button
-                onClick={handleUpgrade}
-                className="mt-8 w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                {proPlan.buttonText}
-              </button>
-
-              <p className="text-center text-xs text-gray-500 mt-4">
-                {t("securePayment")}
-              </p>
-
-              <p className="text-center text-xs text-gray-500 mt-2">
-                🔒 {t("refundGuarantee")} ·{" "}
-                <Link href="/refund" className="text-blue-600 hover:underline">{t("viewRefundPolicy")}</Link>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* FAQ */}
-        <div className="mt-16 max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-8">{t("faq.title")}</h2>
-          
-          <div className="space-y-6">
-            <div>
-              <h3 className="font-semibold text-gray-900">{t("faq.cancel")}</h3>
-              <p className="text-gray-600 mt-1">{t("faq.cancelAnswer")}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">{t("faq.payment")}</h3>
-              <p className="text-gray-600 mt-1">{t("faq.paymentAnswer")}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold text-gray-900">{t("faq.trial")}</h3>
-              <p className="text-gray-600 mt-1">{t("faq.trialAnswer")}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Contact */}
-        <div className="mt-12 text-center text-gray-500">
-          <p>
-            {t("questions")} <a href={`mailto:${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com"}`} className="text-blue-600 hover:underline">{t("contactUs")}</a>
-          </p>
-        </div>
-
-        {/* Toast Container */}
-        <div className="fixed bottom-4 right-4 z-50 space-y-2">
-          {toasts.map((toast) => (
-            <div
-              key={toast.id}
-              className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg min-w-[300px] max-w-md animate-slide-in ${
-                toast.type === "error" ? "bg-red-50 border border-red-200 text-red-800" :
-                toast.type === "success" ? "bg-green-50 border border-green-200 text-green-800" :
-                "bg-blue-50 border border-blue-200 text-blue-800"
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={
-                  toast.type === "error" ? "M6 18L18 6M6 6l12 12" :
-                  toast.type === "success" ? "M5 13l4 4L19 7" :
-                  "M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-                } />
-              </svg>
-              <span className="flex-1 text-sm">{toast.message}</span>
-              <button onClick={() => dismissToast(toast.id)} className="p-1 hover:bg-black/10 rounded">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Payment Modal */}
-      <PaymentModal
-        plan={planType}
-        amount={priceAmount}
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-    </main>
+      <PricingClient />
+    </>
   );
 }
