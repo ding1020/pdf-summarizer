@@ -189,6 +189,15 @@ export default async function LocaleLayout({
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <meta name="theme-color" content="#2563eb" />
         <meta name="baidu-site-verification" content="codeva-xIqxE0gVLC" />
+        {process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION && (
+          <meta name="msvalidate.01" content={process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION} />
+        )}
+        {process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION && (
+          <meta name="yandex-verification" content={process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION} />
+        )}
+        {process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION && (
+          <meta name="google-site-verification" content={process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION} />
+        )}
         <script
           type="application/ld+json"
           nonce={nonce}

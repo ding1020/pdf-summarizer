@@ -1,53 +1,134 @@
-# 📄 PDF Summarizer — AI-Powered PDF Summary Platform
+<div align="center">
 
-AI-driven SaaS platform that automatically generates concise summaries from uploaded PDF documents. Supports 7 languages and multiple AI providers with automatic fallback.
+# 📄 PDFSum
 
-**[🌐 Live Site](https://www.pdfsum.com)**
+### Summarize any PDF in 30 seconds with AI
 
----
+**7 languages · Streaming output · Free tier · No credit card**
 
-## ✨ Features
+[![Live Site](https://img.shields.io/badge/🌐_Live_Site-pdfsum.com-blue?style=for-the-badge)](https://www.pdfsum.com)
+[![Blog](https://img.shields.io/badge/📖_Blog-20+_Articles-green?style=for-the-badge)](https://www.pdfsum.com/en/blog)
+[![License](https://img.shields.io/badge/License-All_Rights_Reserved-lightgrey?style=for-the-badge)](#license)
 
-- **AI Summary Generation** — Upload any PDF and get an intelligent summary in seconds
-- **Multi-Provider Fallback** — DeepSeek → Groq → SiliconFlow automatic failover
-- **Streaming SSE** — Real-time summary streaming for fast UX
-- **7-Language Support** — English, 中文, 日本語, 한국어, Español, Français, Deutsch
-- **Guest Mode** — Try without signing up (3 summaries/day)
-- **Pro Subscription** — Powered by Creem (unlimited summaries, priority AI)
-- **GDPR Compliant** — Data minimization, cookie consent, right to deletion
-- **Dark/Light Ready** — Tailwind CSS with CSS variables theming
+</div>
 
 ---
 
-## 🛠 Tech Stack
+> **TL;DR** — Upload a PDF, get a structured AI summary in seconds. Built for students, researchers, and professionals who read too much. **[Try it free →](https://www.pdfsum.com)**
+
+---
+
+## 🎯 What it does
+
+| Feature | Description |
+|---------|-------------|
+| ⚡ **Instant AI Summary** | Upload any PDF → get an executive summary + key findings + action items in ~30 seconds |
+| 🌍 **7 Languages** | English · 中文 · 日本語 · 한국어 · Español · Français · Deutsch |
+| 🔄 **Multi-Provider Fallback** | DeepSeek → Groq → SiliconFlow automatic failover (no single point of failure) |
+| 📡 **Streaming Output** | See the summary build in real time via SSE |
+| 🔐 **GDPR Compliant** | Data minimization, cookie consent, right to deletion, files auto-purged |
+| 🧑‍💻 **Guest Mode** | Try 3 summaries/day with no signup |
+| 💳 **Pro Plan** | Unlimited summaries + priority AI via Creem subscription |
+| 🔌 **Developer API** | REST API for programmatic PDF summarization |
+
+---
+
+## 🖼️ Screenshots
+
+| Home | Summary Generation |
+|:---:|:---:|
+| ![Home](https://www.pdfsum.com/og-image.png) | _Upload a PDF to see streaming AI summary in action_ |
+
+> **[Open the live app to see it in action →](https://www.pdfsum.com)**
+
+---
+
+## 🚀 Try it now
+
+1. Go to **[pdfsum.com](https://www.pdfsum.com)**
+2. Click **"Get Started Free"**
+3. Upload any PDF (≤ 20 MB)
+4. Watch the AI summary stream in real time
+
+**No credit card. No installation. 3 free summaries/day as a guest, 5/day with a free account.**
+
+---
+
+## 📖 Read the Blog
+
+20+ SEO-optimized articles on PDF summarization, AI tools, and productivity:
+
+- [How to Summarize a PDF: Complete Guide (2026)](https://www.pdfsum.com/en/blog/how-to-summarize-a-pdf)
+- [Summarize Research Papers with AI](https://www.pdfsum.com/en/blog/summarize-research-papers-ai)
+- [Best Free AI Document Summarizer in 2026](https://www.pdfsum.com/en/blog/free-ai-document-summarizer)
+- [PDF Summary API for Developers](https://www.pdfsum.com/en/blog/pdf-summary-api-developers)
+- [Summarize Legal Documents with AI](https://www.pdfsum.com/en/blog/summarize-legal-documents-ai)
+
+**[View all articles →](https://www.pdfsum.com/en/blog)**
+
+---
+
+## 💰 Pricing
+
+| Plan | Price | Summaries/day | Features |
+|------|-------|---------------|----------|
+| **Guest** | Free | 3 | No signup, no credit card |
+| **Free** | Free | 5 | Account required |
+| **Pro Monthly** | $5/mo | Unlimited | Priority AI, no ads |
+| **Pro Yearly** | $50/yr | Unlimited | 2 months free, priority AI |
+
+**[See full pricing →](https://www.pdfsum.com/en/pricing)**
+
+---
+
+## 🛠️ Tech Stack
+
+<details>
+<summary><b>Click to expand — for developers</b></summary>
 
 | Layer | Technology |
 |-------|-----------|
-| **Framework** | Next.js 15 (App Router) |
+| **Framework** | Next.js 16 (App Router) |
 | **Language** | TypeScript 5.x |
-| **Runtime** | Node.js ≥ 20.0.0 |
-| **Auth** | Self-built JWT (HMAC-SHA256) — migrated from Clerk |
-| **Database** | PostgreSQL (NeonDB / Supabase) + Prisma ORM |
-| **AI** | DeepSeek, Groq, SiliconFlow (OpenAI-compatible) |
-| **Payments** | Creem (subscriptions + customer portal + webhooks) |
+| **Auth** | Self-built JWT (HMAC-SHA256) |
+| **Database** | PostgreSQL (Supabase) + Prisma ORM |
+| **AI** | DeepSeek · Groq · SiliconFlow (OpenAI-compatible) |
+| **Payments** | Creem (subscriptions + webhooks + customer portal) |
 | **i18n** | next-intl v4 |
-| **CSS** | Tailwind CSS 3 |
+| **Styling** | Tailwind CSS 3 |
 | **Monitoring** | Sentry |
+| **Email** | Resend (11 transactional templates) |
 | **Deployment** | Vercel (US East) |
 | **Testing** | Vitest + Playwright |
 
+</details>
+
 ---
 
-## 🚀 Quick Start
+## 🔒 Security & Compliance
+
+- **CSP Headers** — Strict Content Security Policy
+- **HSTS** — Preloaded with 2-year max-age
+- **HMAC Webhook Verification** — Timing-safe comparison for Creem
+- **Rate Limiting** — Per-user/per-IP with LRU eviction
+- **Zod Validation** — All API inputs validated
+- **GDPR** — Data minimization, cookie consent, content truncation, right to erasure
+
+---
+
+## 💻 Self-Host / Develop
+
+<details>
+<summary><b>Local development setup</b></summary>
 
 ### Prerequisites
 - Node.js ≥ 20.0.0
-- PostgreSQL database (local: SQLite supported for dev)
+- PostgreSQL (or SQLite for local dev)
 
 ### 1. Clone & Install
 
 ```bash
-git clone <your-repo-url> pdf-summarizer
+git clone https://github.com/ding1020/pdf-summarizer.git
 cd pdf-summarizer
 npm install
 ```
@@ -58,28 +139,13 @@ npm install
 cp .env.local.example .env.local
 ```
 
-Edit `.env.local` and fill in the required variables:
+Edit `.env.local`:
 
 ```env
-# App
 NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# Database (SQLite for local dev)
 DATABASE_URL="file:./dev.db"
-
-# Auth (self-built JWT)
 AUTH_SECRET=replace_with_64char_hex_secret
-
-# AI (at least one provider required)
 DEEPSEEK_API_KEY=sk-***
-# GROQ_API_KEY=gsk_***
-# SILICONFLOW_API_KEY=sk-***
-
-# Creem Payments (for production)
-NEXT_PUBLIC_CREEM_PRICE_MONTHLY=prod_***
-NEXT_PUBLIC_CREEM_PRICE_YEARLY=prod_***
-CREEM_SECRET_KEY=creem_***
-CREEM_WEBHOOK_SECRET=whsec_***
 ```
 
 ### 3. Initialize Database
@@ -96,50 +162,7 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000)
 
----
-
-## 📦 Scripts
-
-| Command | Description |
-|---------|------------|
-| `npm run dev` | Start development server |
-| `npm run build` | Build for production |
-| `npm run start` | Start production server |
-| `npm run lint` | Run ESLint |
-| `npm run test` | Run unit tests (Vitest) |
-| `npm run test:e2e` | Run E2E tests (Playwright) |
-| `npm run db:push` | Push Prisma schema to DB |
-| `npm run db:studio` | Open Prisma Studio GUI |
-| `npm run check-config` | Validate environment config |
-
----
-
-## 🌍 Internationalization
-
-Translations live in `messages/`:
-- `en.json` — English (base)
-- `zh.json` — Chinese
-- `ja.json` — Japanese
-- `ko.json` — Korean
-- `es.json` — Spanish
-- `fr.json` — French
-- `de.json` — German
-
-To add a new language:
-1. Copy `messages/en.json` → `messages/xx.json`
-2. Translate all values
-3. Add locale to `navigation.ts` routing config
-
----
-
-## 🔒 Security
-
-- **CSP Headers** — Strict Content Security Policy
-- **HSTS** — Preloaded with 2-year max-age
-- **HMAC Webhook Verification** — Timing-safe comparison for Creem
-- **Rate Limiting** — Per-user/per-IP with LRU eviction
-- **Zod Validation** — All API inputs validated
-- **GDPR** — Data minimization, cookie consent, content truncation
+</details>
 
 ---
 
@@ -147,43 +170,65 @@ To add a new language:
 
 ```
 ├── app/
-│   ├── [locale]/          # i18n pages (dashboard, pricing, help, etc.)
-│   ├── api/               # API routes (summarize, upload, webhooks, etc.)
+│   ├── [locale]/          # i18n pages (home, dashboard, pricing, blog, etc.)
+│   ├── api/               # 41 API routes (summarize, upload, webhooks, etc.)
 │   ├── robots.ts          # SEO robots.txt
-│   └── sitemap.ts         # Multi-language sitemap
+│   └── sitemap.ts         # Multi-language sitemap (200+ URLs)
 ├── components/            # Shared React components
-├── lib/                   # Utilities (ai, db, logger, rate-limit, schemas)
-├── messages/              # i18n translation files
-├── prisma/                # Database schema
+├── lib/                   # AI providers, db, auth, rate-limit, logger
+│   └── blog-posts.ts     # 20 SEO articles data
+├── messages/              # 7-language i18n files
+├── prisma/                # Database schema (8 models)
 ├── tests/                 # Unit & E2E tests
-├── types/                 # TypeScript type declarations
-├── middleware.ts           # Auth (self-built JWT) + i18n routing
-├── next.config.mjs        # Next.js config (Sentry, CSP, i18n)
-└── vercel.json            # Vercel deployment config
+├── middleware.ts          # JWT auth + i18n routing
+└── next.config.mjs        # Next.js config (Sentry, CSP, i18n)
 ```
 
 ---
 
-## 🚢 Deployment
+## 📊 Project Stats
 
-This project is configured for **Vercel** with automatic deploys.
+- **123+** git commits
+- **41** API routes
+- **8** database models
+- **20** SEO blog articles
+- **7** supported languages
+- **200+** sitemap URLs
+- **11** transactional email templates
+- **3** scheduled cron jobs
 
-```bash
-# 1. Push to GitHub
-git push origin main
+---
 
-# 2. Import in Vercel
-# - Framework: Next.js
-# - Build Command: npm run vercel-build
-# - Root Directory: ./
+## 🗺️ Roadmap
 
-# 3. Set all environment variables in Vercel dashboard
-```
+- [ ] PDF Q&A chat (chat with your document)
+- [ ] Batch PDF processing
+- [ ] Chrome extension
+- [ ] Export to PDF / Word / Markdown
+- [ ] API key dashboard for developers
+- [ ] Team accounts
 
-For manual deployment scripts, see `deploy-production.sh` / `deploy-production.bat`.
+---
+
+## 🤝 Connect
+
+- **Live Site:** [pdfsum.com](https://www.pdfsum.com)
+- **Blog:** [pdfsum.com/en/blog](https://www.pdfsum.com/en/blog)
+- **GitHub:** [github.com/ding1020/pdf-summarizer](https://github.com/ding1020/pdf-summarizer)
+- **Issues:** [Report a bug](https://github.com/ding1020/pdf-summarizer/issues)
 
 ---
 
 ## 📄 License
 
-All rights reserved. © 2024 PDF Summarizer
+All rights reserved. © 2024–2026 PDFSum. The source code is viewable for reference; the live product is a commercial SaaS.
+
+---
+
+<div align="center">
+
+**[⭐ Star this repo](https://github.com/ding1020/pdf-summarizer)** if you find it useful!
+
+**[🚀 Try PDFSum free →](https://www.pdfsum.com)**
+
+</div>
