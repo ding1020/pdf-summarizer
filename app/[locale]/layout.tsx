@@ -170,11 +170,6 @@ export default async function LocaleLayout({
         priceCurrency: "CNY",
       },
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      reviewCount: "126",
-    },
     featureList: [
       "AI-powered PDF summarization",
       "Multi-language support (7 languages)",

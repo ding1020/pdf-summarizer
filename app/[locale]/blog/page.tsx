@@ -1,41 +1,15 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
+import { blogPostsMeta } from "@/lib/blog-posts";
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Blog | PDF Summary AI",
-    description: "Tips, guides, and updates about AI document summarization.",
-    keywords: ["PDF summarizer blog", "AI summary tips", "document analysis guide"],
+    description: "Tips, guides, and tutorials about AI document summarization. Learn how to summarize PDFs, research papers, legal documents, and more.",
+    keywords: ["PDF summarizer blog", "AI summary tips", "document analysis guide", "how to summarize pdf", "pdf summary tool"],
   };
 }
-
-const posts = [
-  {
-    slug: "ai-pdf-summary-guide",
-    title: "How AI PDF Summarization Works: A Complete Guide",
-    date: "2026-07-15",
-    excerpt:
-      "Learn how modern AI models process PDF documents, extract key information, and generate accurate summaries in seconds. From OCR to LLM, understand the full pipeline.",
-    tags: ["Guide", "AI"],
-  },
-  {
-    slug: "best-pdf-summarizer-tools",
-    title: "5 Best Free PDF Summarizer Tools Compared (2026)",
-    date: "2026-07-10",
-    excerpt:
-      "We tested and compared the top free PDF summarization tools. See how PDFSum stacks up against the competition in speed, accuracy, and language support.",
-    tags: ["Comparison", "Tools"],
-  },
-  {
-    slug: "academic-reading-faster",
-    title: "Speed Up Academic Reading: AI Summaries for Research Papers",
-    date: "2026-07-05",
-    excerpt:
-      "Researchers spend hours reading papers. AI summarization can cut that to minutes. Here's how to use it effectively for literature reviews and research.",
-    tags: ["Academic", "Productivity"],
-  },
-];
 
 export default async function BlogPage() {
   const t = await getTranslations();
@@ -50,13 +24,13 @@ export default async function BlogPage() {
           </p>
         </div>
 
-        {posts.length === 0 ? (
+        {blogPostsMeta.length === 0 ? (
           <div className="text-center py-16 text-gray-400">
             <p className="text-lg">No posts yet. Check back soon!</p>
           </div>
         ) : (
           <div className="grid md:grid-cols-2 gap-6">
-            {posts.map((post) => (
+            {blogPostsMeta.map((post) => (
               <Link
                 key={post.slug}
                 href={`/blog/${post.slug}` as any}

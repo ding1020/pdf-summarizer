@@ -6,21 +6,6 @@ import HomeUploadWrapper from "@/components/HomeUploadWrapper";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
-// ═══════════════════════════════════════════════════════════════
-// Shared SVG fragments — extracted to reduce page size
-// ═══════════════════════════════════════════════════════════════
-function StarRating() {
-  return (
-    <div className="flex gap-1">
-      {[...Array(5)].map((_, i) => (
-        <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-        </svg>
-      ))}
-    </div>
-  );
-}
-
 const DESCRIPTIONS: Record<string, string> = {
   en: "Upload any PDF and get AI-powered summaries instantly. Extract key insights in seconds, not hours. Free plan available — no credit card required.",
   zh: "上传任意 PDF，即刻获得 AI 智能摘要。数秒内提取关键洞察，无需信用卡，免费开始使用。",
@@ -91,6 +76,7 @@ export default async function HomePage({
   const siteName = "PDF Summary AI";
 
   // ── Homepage-specific JSON-LD ──
+  // Note: aggregateRating removed — will be re-added once we collect real user reviews
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "WebApplication",
@@ -105,11 +91,6 @@ export default async function HomePage({
       lowPrice: "0",
       highPrice: ((PLAN_AMOUNTS.pro_yearly || 57900) / 100).toFixed(2),
       offerCount: "2",
-    },
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      reviewCount: "126",
     },
   };
 
@@ -310,41 +291,49 @@ export default async function HomePage({
           </div>
         </section>
 
-        {/* CTA */}
-        <section className="py-20">
+        {/* Use Cases — honest section, no fake stats */}
+        <section className="py-20 bg-gray-50">
           <div className="max-w-6xl mx-auto px-4">
-            {/* Stats */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">{t("features.title")}</h2>
+              <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+                Trusted by students, researchers, and professionals worldwide for fast, accurate document summaries.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
               {[
-                { num: "10,000+", labelKey: "stats.documents" },
-                { num: "99.9%", labelKey: "stats.uptime" },
-                { num: "7", labelKey: "stats.languages" },
-                { num: "30s", labelKey: "stats.speed" },
-              ].map((stat) => (
-                <div key={stat.labelKey} className="text-center">
-                  <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">{stat.num}</div>
-                  <div className="text-sm text-gray-500">{t(stat.labelKey)}</div>
+                { icon: "academic", title: "Students", desc: "Summarize lecture notes, textbooks, and research papers in seconds." },
+                { icon: "research", title: "Researchers", desc: "Process literature reviews faster — scan 20+ papers in an afternoon." },
+                { icon: "business", title: "Professionals", desc: "Extract key points from reports, contracts, and proposals instantly." },
+                { icon: "legal", title: "Legal Teams", desc: "Get concise summaries of lengthy legal documents and case files." },
+              ].map((item) => (
+                <div key={item.title} className="bg-white border border-gray-200 p-6 rounded-2xl hover:shadow-lg transition-shadow">
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mb-4">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      {item.icon === "academic" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 14l9-5-9-5-9 5 9 5z M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />}
+                      {item.icon === "research" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />}
+                      {item.icon === "business" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />}
+                      {item.icon === "legal" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" />}
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
+                  <p className="text-sm text-gray-600 leading-relaxed">{item.desc}</p>
                 </div>
               ))}
             </div>
 
-            {/* Testimonials */}
-            <div className="grid md:grid-cols-3 gap-6 mb-16">
-              {["testimonial1", "testimonial2", "testimonial3"].map((key, i) => (
-                <div key={key} className="bg-white border border-gray-200 rounded-xl p-6">
-                  <div className="mb-3">
-                    <StarRating />
-                  </div>
-                  <p className="text-gray-600 text-sm mb-4 leading-relaxed">&ldquo;{t(key)}&rdquo;</p>
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold ${["bg-blue-500", "bg-purple-500", "bg-green-500"][i]}`}>
-                      {["A", "M", "S"][i]}
-                    </div>
-                    <div>
-                      <div className="text-sm font-medium text-gray-900">{t(`${key}Name`)}</div>
-                      <div className="text-xs text-gray-400">{t(`${key}Role`)}</div>
-                    </div>
-                  </div>
+            {/* Key highlights — factual, no fake numbers */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-16">
+              {[
+                { num: "7", label: "Languages" },
+                { num: "30s", label: "Avg Speed" },
+                { num: "$0", label: "Free Plan" },
+                { num: "GDPR", label: "Compliant" },
+              ].map((stat) => (
+                <div key={stat.label} className="text-center">
+                  <div className="text-3xl md:text-4xl font-bold text-blue-600 mb-1">{stat.num}</div>
+                  <div className="text-sm text-gray-500">{stat.label}</div>
                 </div>
               ))}
             </div>
