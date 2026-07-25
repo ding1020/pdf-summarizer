@@ -4,13 +4,12 @@ import { memo } from "react";
 import ReactMarkdown from "react-markdown";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
+import FeedbackButtons from "@/components/FeedbackButtons";
 
 interface SummaryDisplayProps {
   summary: string;
   isSummarizing: boolean;
   copied: boolean;
-  filename: string;
-  pageCount: number;
   documentId: string;
   sharingDocumentId: string | null;
   onCopy: () => void;
@@ -83,6 +82,12 @@ const SummaryDisplay = memo(function SummaryDisplay({
           ) : null}
         </div>
       </div>
+      
+      {summary && !isSummarizing && (
+        <div className="flex justify-end mb-3">
+          <FeedbackButtons documentId={documentId} />
+        </div>
+      )}
       
       {summary ? (
         <div className="prose prose-blue max-w-none bg-white dark:bg-gray-900 rounded-lg p-4 border border-blue-100 dark:border-blue-900">

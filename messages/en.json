@@ -33,6 +33,12 @@
     "aiAnalysis": "AI Analysis",
     "getSummary": "Get Summary"
   },
+  "home": {
+    "uploadTitle": "Try It Now — Free",
+    "uploadSubtitleGuest": "No sign-up required. Upload a PDF and see the AI magic.",
+    "uploadSubtitleSigned": "Upload a PDF and get an AI summary instantly.",
+    "uploadHint": "PDF files only · Max 20MB · Files are encrypted and auto-deleted after processing"
+  },
   "trust": {
     "secure": "Secure & Private",
     "noCreditCard": "No Credit Card Required",
@@ -506,6 +512,9 @@
     "billedMonthly": "Billed monthly",
     "freeLimit": "5 summaries per day",
     "renews": "Renews",
+    "renewalDate": "Renewal date",
+    "usage": "Usage",
+    "unlimited": "Unlimited",
     "statusActive": "Active",
     "upgradeTitle": "Upgrade to Pro",
     "upgradeDesc": "Get unlimited summaries, priority support, and more features.",
@@ -522,7 +531,12 @@
     "helpText": "Need help? Contact us at",
     "errorGeneric": "Something went wrong. Please try again.",
     "errorPortal": "Failed to access customer portal",
-    "errorPaymentConfig": "Payment system is being configured. Please contact support."
+    "errorPaymentConfig": "Payment system is being configured. Please contact support.",
+    "errorTrialNoPortal": "You're on a Pro Trial. A billing portal will be available after you upgrade to a paid subscription. Contact support for help.",
+    "errorManualSubscription": "Your subscription is managed manually. Please contact support for billing changes.",
+    "errorNoSubscription": "You don't have an active subscription, so the billing portal is not available.",
+    "planTitle": "Your Plan",
+    "manageSub": "Manage Subscription"
   },
   "onboarding": {
     "step1Title": "Upload Your PDF",

@@ -18,6 +18,7 @@ import {
   MAX_CONTENT_LENGTH,
   PRO_MAX_CONTENT_LENGTH,
 } from "@/lib/constants";
+import { isProStatus } from "./subscription";
 
 // ── IP extraction ──
 
@@ -31,8 +32,6 @@ export function getClientIP(req: NextRequest): string {
 }
 
 // ── Subscription tier ──
-
-import { isProStatus } from "./subscription";
 
 export type UserTier = "pro" | "free";
 

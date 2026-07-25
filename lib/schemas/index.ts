@@ -16,12 +16,14 @@ export type UploadInput = z.infer<typeof uploadSchema>;
 
 // Summarize validation schema
 // documentId accepts: UUIDs (registered users) or guest_* format (anonymous users)
+// It is optional because guest users may call /api/summarize with content only.
 export const summarizeSchema = z.object({
   documentId: z
     .string()
-    .min(1, { message: 'Document ID is required' })
+    .min(1, { message: 'Document ID cannot be empty' })
+    .optional()
     .refine(
-      (val) => /^[a-f0-9-]{36}$/.test(val) || /^guest_\d+_[a-z0-9]+$/.test(val),
+      (val) => !val || /^[a-f0-9-]{36}$/.test(val) || /^guest_\d+_[a-z0-9]+$/.test(val),
       { message: 'Invalid document ID format' },
     ),
   content: z

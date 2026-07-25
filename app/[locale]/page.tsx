@@ -2,8 +2,24 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
 import { PLAN_AMOUNTS } from "@/lib/constants";
+import HomeUploadWrapper from "@/components/HomeUploadWrapper";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+
+// ═══════════════════════════════════════════════════════════════
+// Shared SVG fragments — extracted to reduce page size
+// ═══════════════════════════════════════════════════════════════
+function StarRating() {
+  return (
+    <div className="flex gap-1">
+      {[...Array(5)].map((_, i) => (
+        <svg key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+      ))}
+    </div>
+  );
+}
 
 const DESCRIPTIONS: Record<string, string> = {
   en: "Upload any PDF and get AI-powered summaries instantly. Extract key insights in seconds, not hours. Free plan available — no credit card required.",
@@ -85,7 +101,7 @@ export default async function HomePage({
     operatingSystem: "All",
     offers: {
       "@type": "AggregateOffer",
-      priceCurrency: "USD",
+      priceCurrency: "CNY",
       lowPrice: "0",
       highPrice: ((PLAN_AMOUNTS.pro_yearly || 57900) / 100).toFixed(2),
       offerCount: "2",
@@ -205,6 +221,9 @@ export default async function HomePage({
           </div>
         </section>
 
+        {/* Quick Upload — Immediate trial on landing page */}
+        <HomeUploadWrapper />
+
         {/* Trust Indicators */}
         <section className="py-8 bg-gray-50 border-b">
           <div className="max-w-6xl mx-auto px-4">
@@ -243,13 +262,20 @@ export default async function HomePage({
 
             <div className="grid md:grid-cols-3 gap-8">
               {[
-                { key: "fast", color: "blue", icon: "bolt" },
-                { key: "secure", color: "green", icon: "shield" },
-                { key: "free", color: "purple", icon: "currency" },
-              ].map(({ key, color }) => (
+                { key: "fast", color: "blue" },
+                { key: "secure", color: "green" },
+                { key: "free", color: "purple" },
+              ].map(({ key, color }) => {
+                const colorMap: Record<string, { bg: string; text: string }> = {
+                  blue: { bg: "bg-blue-100", text: "text-blue-600" },
+                  green: { bg: "bg-green-100", text: "text-green-600" },
+                  purple: { bg: "bg-purple-100", text: "text-purple-600" },
+                };
+                const classes = colorMap[color] || colorMap.blue;
+                return (
                 <div key={key} className="bg-white border border-gray-200 p-8 rounded-2xl hover:shadow-lg transition-shadow">
-                  <div className={`w-14 h-14 bg-${color}-100 rounded-xl flex items-center justify-center mb-6`}>
-                    <svg className={`w-7 h-7 text-${color}-600`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className={`w-14 h-14 ${classes.bg} rounded-xl flex items-center justify-center mb-6`}>
+                    <svg className={`w-7 h-7 ${classes.text}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       {key === "fast" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />}
                       {key === "secure" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />}
                       {key === "free" && <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />}
@@ -258,7 +284,8 @@ export default async function HomePage({
                   <h3 className="text-xl font-bold mb-3">{t(`features.${key}.title` as any)}</h3>
                   <p className="text-gray-600 leading-relaxed">{t(`features.${key}.desc` as any)}</p>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </section>
@@ -305,12 +332,8 @@ export default async function HomePage({
             <div className="grid md:grid-cols-3 gap-6 mb-16">
               {["testimonial1", "testimonial2", "testimonial3"].map((key, i) => (
                 <div key={key} className="bg-white border border-gray-200 rounded-xl p-6">
-                  <div className="flex gap-1 mb-3">
-                    {[...Array(5)].map((_, s) => (
-                      <svg key={s} className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
-                    ))}
+                  <div className="mb-3">
+                    <StarRating />
                   </div>
                   <p className="text-gray-600 text-sm mb-4 leading-relaxed">&ldquo;{t(key)}&rdquo;</p>
                   <div className="flex items-center gap-3">
@@ -357,6 +380,8 @@ export default async function HomePage({
               </div>
               <div className="flex items-center gap-6 text-gray-400 text-sm">
                 <Link href="/pricing" className="hover:text-white transition">{t("footer.pricing")}</Link>
+                <Link href="/blog" className="hover:text-white transition">Blog</Link>
+                <Link href="/changelog" className="hover:text-white transition">Changelog</Link>
                 <Link href="/privacy" className="hover:text-white transition">{t("footer.privacy")}</Link>
                 <Link href="/terms" className="hover:text-white transition">{t("footer.terms")}</Link>
                 <Link href="/refund" className="hover:text-white transition">{t("footer.refund")}</Link>

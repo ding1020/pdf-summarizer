@@ -199,19 +199,57 @@ export function trialExpiringEmail(
   daysLeft: number,
 ): { subject: string; html: string } {
   return {
-    subject: `⏰ Your PDFSum Pro trial ends in ${daysLeft} day${daysLeft > 1 ? "s" : ""}`,
+    subject: `⏰ Your PDFSum Pro trial ends in ${daysLeft} day${daysLeft > 1 ? "s" : ""} — 20% off upgrade`,
     html: `
       <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
         <h1 style="color:#7c3aed">Your Trial is Almost Over, ${name}</h1>
         <p>Your <strong>3-day Pro trial</strong> ends in <strong>${daysLeft} day${daysLeft > 1 ? "s" : ""}</strong>.</p>
         <p>After that, you'll be on the Free plan with 5 summaries per day. Don't lose unlimited access:</p>
+        <div style="background:#faf5ff;border:1px solid #e9d5ff;border-radius:12px;padding:16px;margin:20px 0">
+          <p style="margin:0;font-size:16px;font-weight:700;color:#7c3aed">🎁 Limited-Time Offer</p>
+          <p style="margin:8px 0 0;color:#6b7280;font-size:14px">
+            <strong>20% off</strong> your first payment — monthly or yearly. Offer expires when your trial ends.
+          </p>
+        </div>
         <p style="margin:24px 0">
           <a href="https://www.pdfsum.com/pricing" style="display:inline-block;padding:12px 24px;background:#7c3aed;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
-            Upgrade to Pro Now →
+            Upgrade Now — 20% Off →
           </a>
         </p>
         <p style="color:#6b7280;font-size:13px">
           Pro Monthly: $7.99 · Pro Yearly: $69 (28% off)
+        </p>
+        <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
+        <p style="color:#9ca3af;font-size:12px">
+          PDFSum · ${SUPPORT_EMAIL}
+        </p>
+      </div>
+    `,
+  };
+}
+
+export function activationReminderEmail(
+  name: string,
+): { subject: string; html: string } {
+  return {
+    subject: "👋 Ready to try PDFSum? Upload your first PDF!",
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;padding:20px">
+        <h1 style="color:#2563eb">Hi ${name}, Ready to Get Started?</h1>
+        <p>You signed up for <strong>PDFSum</strong> but haven't uploaded a PDF yet. Here's what you're missing:</p>
+        <ul>
+          <li>⚡ AI summaries in seconds</li>
+          <li>📄 Support for long documents</li>
+          <li>🌍 7 languages</li>
+          <li>🔒 Enterprise-grade security</li>
+        </ul>
+        <p style="margin:24px 0">
+          <a href="https://www.pdfsum.com/dashboard" style="display:inline-block;padding:12px 24px;background:#2563eb;color:#fff;border-radius:8px;text-decoration:none;font-weight:600">
+            Upload Your First PDF →
+          </a>
+        </p>
+        <p style="color:#6b7280;font-size:13px">
+          You're on the <strong>3-day Pro trial</strong> — unlimited summaries, no limits. Try it while it lasts!
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
         <p style="color:#9ca3af;font-size:12px">

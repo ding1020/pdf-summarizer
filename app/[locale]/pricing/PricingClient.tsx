@@ -229,7 +229,15 @@ export default function PricingClient() {
                 </span>
               </div>
               {selectedBilling === "yearly" && (
-                <p className="text-sm text-gray-500 mt-1">{t("pro.pricePerMonth")}</p>
+                <p className="text-sm text-green-600 mt-1 font-medium">
+                  {t("pro.pricePerMonth")}
+                </p>
+              )}
+              {selectedBilling === "monthly" && (
+                <p className="text-sm text-gray-400 mt-1">
+                  {t("billing.yearly")}: {proPlan.yearlyPrice}
+                  {" · "}<span className="text-green-600 font-medium">{t("billing.savePercent")}</span>
+                </p>
               )}
 
               <ul className="mt-8 space-y-4">

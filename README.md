@@ -26,7 +26,7 @@ AI-driven SaaS platform that automatically generates concise summaries from uplo
 | **Framework** | Next.js 15 (App Router) |
 | **Language** | TypeScript 5.x |
 | **Runtime** | Node.js ≥ 20.0.0 |
-| **Auth** | Clerk |
+| **Auth** | Self-built JWT (HMAC-SHA256) — migrated from Clerk |
 | **Database** | PostgreSQL (NeonDB / Supabase) + Prisma ORM |
 | **AI** | DeepSeek, Groq, SiliconFlow (OpenAI-compatible) |
 | **Payments** | Creem (subscriptions + customer portal + webhooks) |
@@ -67,9 +67,8 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 # Database (SQLite for local dev)
 DATABASE_URL="file:./dev.db"
 
-# Auth (Clerk)
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_***
-CLERK_SECRET_KEY=sk_test_***
+# Auth (self-built JWT)
+AUTH_SECRET=replace_with_64char_hex_secret
 
 # AI (at least one provider required)
 DEEPSEEK_API_KEY=sk-***
@@ -158,7 +157,7 @@ To add a new language:
 ├── prisma/                # Database schema
 ├── tests/                 # Unit & E2E tests
 ├── types/                 # TypeScript type declarations
-├── middleware.ts           # Auth (Clerk) + i18n routing
+├── middleware.ts           # Auth (self-built JWT) + i18n routing
 ├── next.config.mjs        # Next.js config (Sentry, CSP, i18n)
 └── vercel.json            # Vercel deployment config
 ```

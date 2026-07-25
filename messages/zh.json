@@ -33,6 +33,12 @@
     "aiAnalysis": "AI分析",
     "getSummary": "获取摘要"
   },
+  "home": {
+    "uploadTitle": "免费试用 — 即刻体验",
+    "uploadSubtitleGuest": "无需注册，上传 PDF 即可体验 AI 摘要。",
+    "uploadSubtitleSigned": "上传 PDF，即刻获得 AI 智能摘要。",
+    "uploadHint": "仅支持 PDF · 最大 20MB · 文件加密处理，自动删除"
+  },
   "trust": {
     "secure": "安全私密",
     "noCreditCard": "无需信用卡",
@@ -480,10 +486,20 @@
     "currentPlan": "当前方案",
     "planFree": "免费版",
     "planPro": "专业版",
+    "planTrial": "专业版试用",
+    "trialDesc": "3天无限访问",
+    "trialEnds": "试用结束",
+    "statusTrial": "试用中",
+    "trialMessage": "试用期内您拥有完整专业版访问权限，升级后即可继续保留！",
+    "trialUpgradeTitle": "正在享受试用？",
+    "trialUpgradeDesc": "立即升级，试用期结束后继续保留无限访问权限。",
     "billedAnnually": "按年计费",
     "billedMonthly": "按月计费",
     "freeLimit": "每天5次摘要",
     "renews": "续订日期",
+    "renewalDate": "续费日期",
+    "usage": "用量",
+    "unlimited": "无限制",
     "statusActive": "活跃",
     "upgradeTitle": "升级到专业版",
     "upgradeDesc": "享受无限次摘要、优先客户支持和更多功能。",
@@ -500,7 +516,12 @@
     "helpText": "需要帮助？请联系",
     "errorGeneric": "出了点问题，请重试。",
     "errorPortal": "无法访问客户门户",
-    "errorPaymentConfig": "支付系统正在配置中。请联系客服。"
+    "errorPaymentConfig": "支付系统正在配置中。请联系客服。",
+    "errorTrialNoPortal": "您正在使用专业版试用，升级为付费订阅后即可使用账单管理功能。如需帮助，请联系客服。",
+    "errorManualSubscription": "您的订阅为人工管理，如需更改账单信息，请联系客服。",
+    "errorNoSubscription": "您当前没有有效订阅，无法打开账单管理。",
+    "planTitle": "您的方案",
+    "manageSub": "管理订阅"
   },
   "seo": {
     "homeTitle": "PDF智能摘要 - 秒级提取关键信息",

@@ -30,6 +30,16 @@ const providerConfigs: Record<string, AIConfig> = {
   },
 };
 
+/** Check if a provider's API key is configured (no throw, just boolean). */
+export function isProviderAvailable(provider: AIProvider): boolean {
+  const key = provider === "deepseek"
+    ? process.env.DEEPSEEK_API_KEY
+    : provider === "groq"
+      ? process.env.GROQ_API_KEY
+      : process.env.SILICONFLOW_API_KEY;
+  return Boolean(key);
+}
+
 export function getAIProvider(provider: AIProvider) {
   const config = providerConfigs[provider];
 
@@ -130,7 +140,7 @@ export function getSystemPrompt(
 /** Estimated cost per 1M tokens (USD) for each provider */
 const PROVIDER_COST_PER_1M: Record<AIProvider, { input: number; output: number }> = {
   deepseek: { input: 0.14, output: 0.28 },
-  groq: { input: 0.0, output: 0.0 },       // Groq has free tier
+  groq: { input: 0.0, output: 0.0 },       // Groq free tier (30 req/min, 14.4K req/day)
   siliconflow: { input: 0.0, output: 0.0 }, // SiliconFlow has free tier
 };
 
@@ -197,19 +207,30 @@ export interface SummarizeResult {
   usage: TokenUsage;
 }
 
-/** Ordered fallback chain, starting from preferred provider */
+/** Ordered fallback chain, starting from preferred provider.
+ *  Only includes providers whose API keys are actually configured. */
 export function getProviderFallbackChain(
   preferred?: AIProvider | string,
 ): { provider: AIProvider; model: string }[] {
-  const full: { provider: AIProvider; model: string }[] = [
+  const all: { provider: AIProvider; model: string }[] = [
     { provider: "deepseek", model: getModelForProvider("deepseek") },
     { provider: "groq", model: getModelForProvider("groq") },
     { provider: "siliconflow", model: getModelForProvider("siliconflow") },
   ];
-  if (!preferred) return full;
-  const idx = full.findIndex((p) => p.provider === preferred);
-  if (idx < 0) return full;
-  return [...full.slice(idx), ...full.slice(0, idx)];
+
+  // Filter to only available providers (keys configured)
+  const available = all.filter((p) => isProviderAvailable(p.provider));
+
+  if (available.length === 0) {
+    logger.error("[ai] No AI provider keys configured — summarization will fail");
+    return [];
+  }
+
+  if (!preferred) return available;
+
+  const idx = available.findIndex((p) => p.provider === preferred);
+  if (idx < 0) return available;
+  return [...available.slice(idx), ...available.slice(0, idx)];
 }
 
 /**
@@ -224,7 +245,7 @@ export async function summarizeWithFallback(
     content,
     language = "multilingual",
     preferredProvider = "deepseek",
-    maxTokens = 2000,
+    maxTokens = 4096,
     maxContentLength = 15000,
   } = options;
 
@@ -262,6 +283,11 @@ export async function summarizeWithFallback(
   }
 
   const fallbackChain = getProviderFallbackChain(preferredProvider);
+
+  if (fallbackChain.length === 0) {
+    throw new Error("No AI provider configured. Set at least DEEPSEEK_API_KEY in environment variables.");
+  }
+
   const errors: string[] = [];
   const AI_TIMEOUT_MS = parseInt(process.env.AI_TIMEOUT_MS || "30000", 10);
 
@@ -340,7 +366,7 @@ export async function summarizeStreamWithFallback(
     content,
     language = "multilingual",
     preferredProvider = "deepseek",
-    maxTokens = 2000,
+    maxTokens = 4096,
     maxContentLength = MAX_CONTENT_LENGTH,
     signal: externalSignal,
     timeoutMs = 30_000,
@@ -352,6 +378,11 @@ export async function summarizeStreamWithFallback(
       : content;
 
   const fallbackChain = getProviderFallbackChain(preferredProvider);
+
+  if (fallbackChain.length === 0) {
+    throw new Error("No AI provider configured. Set at least DEEPSEEK_API_KEY in environment variables.");
+  }
+
   const errors: string[] = [];
 
   for (const { provider, model } of fallbackChain) {

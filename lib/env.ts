@@ -6,6 +6,7 @@
  * a user request with a cryptic 500.
  */
 import { z } from "zod";
+import { logger } from "./logger";
 
 const isProduction = process.env.NODE_ENV === "production";
 
@@ -73,7 +74,7 @@ export function validateEnv(): z.infer<typeof envSchema> {
       throw new Error(message);
     } else {
       // In development: warn but don't crash
-      console.warn(message);
+      logger.warn(message);
     }
   }
 

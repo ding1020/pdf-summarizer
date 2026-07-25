@@ -5,7 +5,6 @@ import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { routing } from "@/navigation";
-import { GoogleAnalytics } from "@next/third-parties/google";
 import { Analytics } from "@vercel/analytics/react";
 import Navigation from "@/components/Navigation";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
@@ -19,7 +18,15 @@ import { ToastProvider } from "@/hooks/useToast";
 import { ConfirmProvider } from "@/hooks/useConfirm";
 import { ToastContainer } from "@/components/Toast";
 import { PLAN_AMOUNTS } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 import "@/app/globals.css";
+
+// ── Startup diagnostics for production analytics ──
+if (process.env.NODE_ENV === "production") {
+  if (!process.env.NEXT_PUBLIC_CLARITY_ID) {
+    logger.info("[analytics] NEXT_PUBLIC_CLARITY_ID is not set — Microsoft Clarity session recording disabled.");
+  }
+}
 
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
@@ -148,19 +155,19 @@ export default async function LocaleLayout({
         "@type": "Offer",
         name: "Free",
         price: "0",
-        priceCurrency: "USD",
+        priceCurrency: "CNY",
       },
       {
         "@type": "Offer",
         name: "Pro Monthly",
-        price: ((PLAN_AMOUNTS.pro_monthly || 799) / 100).toFixed(2),
-        priceCurrency: "USD",
+        price: ((PLAN_AMOUNTS.pro_monthly || 5900) / 100).toFixed(2),
+        priceCurrency: "CNY",
       },
       {
         "@type": "Offer",
         name: "Pro Yearly",
-        price: ((PLAN_AMOUNTS.pro_yearly || 6900) / 100).toFixed(2),
-        priceCurrency: "USD",
+        price: ((PLAN_AMOUNTS.pro_yearly || 57900) / 100).toFixed(2),
+        priceCurrency: "CNY",
       },
     ],
     aggregateRating: {
@@ -192,8 +199,10 @@ export default async function LocaleLayout({
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
+
       </head>
       <body className={inter.className}>
+
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider>
           <ToastProvider>
@@ -223,9 +232,6 @@ export default async function LocaleLayout({
           </ToastProvider>
           <ClientCookieConsent />
           <Analytics />
-          {process.env.NEXT_PUBLIC_GA_ID && (
-            <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID} />
-          )}
           {process.env.NEXT_PUBLIC_CLARITY_ID && (
             <Script
               id="clarity-analytics"
@@ -233,6 +239,36 @@ export default async function LocaleLayout({
               nonce={nonce}
               dangerouslySetInnerHTML={{
                 __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${process.env.NEXT_PUBLIC_CLARITY_ID}");`,
+              }}
+            />
+          )}
+          {/* Google Analytics (GA4) — loaded only in production when ID is set */}
+          {process.env.NEXT_PUBLIC_GA_ID && (
+            <Script
+              id="google-analytics"
+              strategy="afterInteractive"
+              nonce={nonce}
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+            />
+          )}
+          {process.env.NEXT_PUBLIC_GA_ID && (
+            <Script
+              id="google-analytics-init"
+              strategy="afterInteractive"
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${process.env.NEXT_PUBLIC_GA_ID}',{send_page_view:true});`,
+              }}
+            />
+          )}
+          {/* Google Tag Manager — loaded only in production when ID is set */}
+          {process.env.NEXT_PUBLIC_GTM_ID && (
+            <Script
+              id="gtm-script"
+              strategy="afterInteractive"
+              nonce={nonce}
+              dangerouslySetInnerHTML={{
+                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;var n=d.querySelector('[nonce]');n&&j.setAttribute('nonce',n.nonce||'');f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`,
               }}
             />
           )}

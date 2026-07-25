@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
-import { summarizeWithFallback, checkAndIncrementDailyUsage, type AIProvider } from "@/lib/ai";
+import { summarizeWithFallback, checkAndIncrementDailyUsage, type AIProvider, type TokenUsage } from "@/lib/ai";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
@@ -156,26 +156,45 @@ export async function POST(req: NextRequest) {
       : resolvedContent;
 
     // ── Summarize with automatic provider fallback ──
-    const result = await summarizeWithFallback({
-      content: truncatedContent,
-      language,
-      preferredProvider: provider as AIProvider,
-      maxContentLength: MAX_CONTENT_LENGTH,
-    });
+    let summary: string;
+    let usedProvider: AIProvider;
+    let aiUsage: TokenUsage;
+    try {
+      const result = await summarizeWithFallback({
+        content: truncatedContent,
+        language,
+        preferredProvider: provider as AIProvider,
+        maxContentLength: MAX_CONTENT_LENGTH,
+      });
+      summary = result.summary;
+      usedProvider = result.provider;
+      aiUsage = result.usage;
+    } catch (aiError) {
+      const errMsg = aiError instanceof Error ? aiError.message : String(aiError);
+      logger.error(
+        "All AI providers failed for /api/summarize",
+        aiError instanceof Error ? aiError : new Error(errMsg),
+        { isGuest, contentLength: truncatedContent.length },
+      );
+      return NextResponse.json(
+        {
+          error: "AI service is temporarily unavailable. Please try again in a moment.",
+          code: "ai_service_unavailable",
+          details: process.env.NODE_ENV === "development" ? errMsg : undefined,
+        },
+        { status: 503, headers: { "Content-Type": "application/json" } },
+      );
+    }
 
-    const summary = result.summary;
-    const usedProvider = result.provider;
-
-    // ── Record AI usage for cost tracking ──
     const userType = await getUserType(userId);
     saveUsageLog({
       userId,
-      provider: result.usage.provider,
-      model: result.usage.model,
-      inputTokens: result.usage.inputTokens,
-      outputTokens: result.usage.outputTokens,
-      totalTokens: result.usage.totalTokens,
-      costUSD: result.usage.costUSD,
+      provider: aiUsage.provider,
+      model: aiUsage.model,
+      inputTokens: aiUsage.inputTokens,
+      outputTokens: aiUsage.outputTokens,
+      totalTokens: aiUsage.totalTokens,
+      costUSD: aiUsage.costUSD,
       userType,
       route: "web",
       ip: clientIp ?? undefined,

@@ -358,8 +358,11 @@
     "title": "Gestion de l'Abonnement",
     "subtitle": "Gérez votre plan et vos paramètres de facturation",
     "currentPlan": "Plan Actuel", "planFree": "Gratuit", "planPro": "Pro",
+    "planTrial": "Essai Pro", "trialDesc": "Accès illimité pendant 3 jours", "trialEnds": "Fin de l'essai",
+    "statusTrial": "Essai", "trialMessage": "Vous avez un accès complet à Pro pendant l'essai. Passez à la version supérieure pour le conserver !",
+    "trialUpgradeTitle": "Vous appréciez l'essai ?", "trialUpgradeDesc": "Passez à la version supérieure maintenant pour conserver un accès illimité après la fin de votre essai.",
     "billedAnnually": "Facturé annuellement", "billedMonthly": "Facturé mensuellement",
-    "freeLimit": "5 résumés par jour", "renews": "Se renouvelle", "statusActive": "Actif",
+    "freeLimit": "5 résumés par jour", "renews": "Se renouvelle", "renewalDate": "Date de renouvellement", "usage": "Utilisation", "unlimited": "Illimité", "statusActive": "Actif",
     "upgradeTitle": "Passer à Pro",
     "upgradeDesc": "Obtenez des résumés illimités, un support prioritaire et plus de fonctionnalités.",
     "upgradeButton": "Mettre à Niveau", "processing": "Traitement...",
@@ -373,7 +376,12 @@
     "helpText": "Besoin d'aide ? Contactez-nous à",
     "errorGeneric": "Quelque chose s'est mal passé. Veuillez réessayer.",
     "errorPortal": "Échec d'accès au portail client",
-    "errorPaymentConfig": "Le système de paiement est en cours de configuration. Veuillez contacter le support."
+    "errorPaymentConfig": "Le système de paiement est en cours de configuration. Veuillez contacter le support.",
+    "errorTrialNoPortal": "Vous êtes en période d'essai Pro. Le portail de facturation sera disponible après le passage à un abonnement payant. Contactez le support pour obtenir de l'aide.",
+    "errorManualSubscription": "Votre abonnement est géré manuellement. Veuillez contacter le support pour toute modification de facturation.",
+    "errorNoSubscription": "Vous n'avez pas d'abonnement actif, le portail de facturation n'est donc pas disponible.",
+    "planTitle": "Votre Plan",
+    "manageSub": "Gérer l'abonnement"
   },
   "seo": {
     "homeTitle": "PDF Résumé IA - Obtenez des Informations en Secondes",

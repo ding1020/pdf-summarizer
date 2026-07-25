@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const { email, password, firstName, lastName } = await req.json();
+    const { email, password, firstName, lastName, utm_source, utm_medium, utm_campaign } = await req.json();
 
     if (!email || !password) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
@@ -115,12 +115,16 @@ export async function POST(req: NextRequest) {
     });
 
     // Audit
+    const utmData =
+      utm_source || utm_medium || utm_campaign
+        ? { utm_source, utm_medium, utm_campaign }
+        : undefined;
     await recordAudit({
       userId: user.id,
       action: "sign_up",
       resource: "User",
       resourceId: user.id,
-      details: { email: normalizedEmail },
+      details: { email: normalizedEmail, ...(utmData && { utm: utmData }) },
       ip: clientIp,
     });
 

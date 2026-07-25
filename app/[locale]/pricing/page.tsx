@@ -106,14 +106,14 @@ export default async function PricingPage({
               {
                 "@type": "Offer",
                 name: "Pro Monthly",
-                price: ((PLAN_AMOUNTS.pro_monthly || 799) / 100).toFixed(2),
-                priceCurrency: "USD",
+                price: ((PLAN_AMOUNTS.pro_monthly || 5900) / 100).toFixed(2),
+                priceCurrency: "CNY",
               },
               {
                 "@type": "Offer",
                 name: "Pro Yearly",
-                price: ((PLAN_AMOUNTS.pro_yearly || 6900) / 100).toFixed(2),
-                priceCurrency: "USD",
+                price: ((PLAN_AMOUNTS.pro_yearly || 57900) / 100).toFixed(2),
+                priceCurrency: "CNY",
               },
             ],
           },

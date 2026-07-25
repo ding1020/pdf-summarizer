@@ -60,3 +60,5 @@ test-*.ps1
 *.mjs
 *.ps1
 !next-env.d.ts
+
+.vercel

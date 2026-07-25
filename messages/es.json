@@ -358,8 +358,11 @@
     "title": "Gestión de Suscripción",
     "subtitle": "Administra tu plan y configuración de facturación",
     "currentPlan": "Plan Actual", "planFree": "Gratis", "planPro": "Pro",
+    "planTrial": "Prueba Pro", "trialDesc": "Acceso ilimitado de 3 días", "trialEnds": "La prueba termina",
+    "statusTrial": "Prueba", "trialMessage": "Tienes acceso completo a Pro durante la prueba. ¡Mejora para mantenerlo!",
+    "trialUpgradeTitle": "¿Disfrutando de la prueba?", "trialUpgradeDesc": "Mejora ahora para mantener el acceso ilimitado después de que termine tu prueba.",
     "billedAnnually": "Facturado anualmente", "billedMonthly": "Facturado mensualmente",
-    "freeLimit": "5 resúmenes por día", "renews": "Se renueva", "statusActive": "Activo",
+    "freeLimit": "5 resúmenes por día", "renews": "Se renueva", "renewalDate": "Fecha de renovación", "usage": "Uso", "unlimited": "Ilimitado", "statusActive": "Activo",
     "upgradeTitle": "Actualizar a Pro",
     "upgradeDesc": "Obtén resúmenes ilimitados, soporte prioritario y más funciones.",
     "upgradeButton": "Actualizar Ahora", "processing": "Procesando...",
@@ -373,7 +376,12 @@
     "helpText": "¿Necesitas ayuda? Contáctanos en",
     "errorGeneric": "Algo salió mal. Intenta de nuevo.",
     "errorPortal": "Error al acceder al portal del cliente",
-    "errorPaymentConfig": "El sistema de pago está en configuración. Contacta al soporte."
+    "errorPaymentConfig": "El sistema de pago está en configuración. Contacta al soporte.",
+    "errorTrialNoPortal": "Estás en una Prueba Pro. El portal de facturación estará disponible después de actualizar a una suscripción de pago. Contacta al soporte para obtener ayuda.",
+    "errorManualSubscription": "Tu suscripción se gestiona manualmente. Contacta al soporte para cambios de facturación.",
+    "errorNoSubscription": "No tienes una suscripción activa, por lo que el portal de facturación no está disponible.",
+    "planTitle": "Tu Plan",
+    "manageSub": "Gestionar Suscripción"
   },
   "seo": {
     "homeTitle": "PDF Resumen AI - Obtén Información en Segundos",

@@ -8,10 +8,22 @@ import UploadDropzone from "./UploadDropzone";
 import FileInfoCard from "./FileInfoCard";
 import SummaryDisplay from "./SummaryDisplay";
 import ErrorMessage from "./ErrorMessage";
+import { UploadSkeleton, SummarySkeleton } from "./Skeleton";
 
 // Constants
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_FILE_SIZE_DISPLAY = "20MB";
+
+// CSRF: read cookie set by middleware, send it as a header on every POST.
+// (The middleware sets __csrf_token on all page GETs — see middleware.ts.)
+function getCsrfHeaders(): Record<string, string> {
+  if (typeof document === "undefined") return {};
+  const token = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith("__csrf_token="))
+    ?.split("=")[1];
+  return token ? { "X-CSRF-Token": token } : {};
+}
 
 interface FileUploadProps {
   onUploadComplete?: (data: {
@@ -69,11 +81,14 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     // For guests, the streaming endpoint requires auth — fall back to non-streaming
     if (isGuest) {
       try {
-        const response = await fetch("/api/summarize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ documentId, content }),
-        });
+      const response = await fetch("/api/summarize", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...getCsrfHeaders(),
+        },
+        body: JSON.stringify({ documentId, content }),
+      });
         const data = await response.json();
         if (!response.ok) throw new Error(data.error || t("summarizeFailed"));
         if (isMountedRef.current) {
@@ -96,7 +111,10 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     try {
       const response = await fetch("/api/summarize/stream", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          ...getCsrfHeaders(),
+        },
         body: JSON.stringify({ content, documentId }),
         signal: abortController.signal,
       });
@@ -146,7 +164,10 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       try {
         await fetch("/api/summarize", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            ...getCsrfHeaders(),
+          },
           body: JSON.stringify({
             documentId,
             content: content.slice(0, 100),
@@ -249,6 +270,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
         const response = await fetch("/api/upload", {
           method: "POST",
+          headers: {
+            ...getCsrfHeaders(),
+          },
           body: formData,
         });
 
@@ -303,20 +327,32 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         disabled={isUploading || isSummarizing}
       />
 
+      {/* Upload loading skeleton */}
+      {isUploading && !result && <UploadSkeleton />}
+
+      {/* Summarizing skeleton (show while waiting, before summary arrives) */}
+      {isSummarizing && result && !summary && (
+        <div className="space-y-6">
+          <FileInfoCard filename={result.filename} pageCount={result.pageCount} />
+          <SummarySkeleton />
+        </div>
+      )}
+
       {/* Error Message */}
       <ErrorMessage error={error} />
 
       {/* Results */}
       {result && (
         <div className="space-y-6">
-          <FileInfoCard filename={result.filename} pageCount={result.pageCount} />
+          {/* Avoid double-rendering FileInfoCard when showing skeleton during summarize */}
+          {(!isSummarizing || summary) && (
+            <FileInfoCard filename={result.filename} pageCount={result.pageCount} />
+          )}
 
           <SummaryDisplay
             summary={summary}
             isSummarizing={isSummarizing}
             copied={copied}
-            filename={result.filename}
-            pageCount={result.pageCount}
             documentId={result.documentId}
             sharingDocumentId={sharingDocumentId}
             onCopy={handleCopy}

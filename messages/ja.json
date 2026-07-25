@@ -358,8 +358,11 @@
     "title": "サブスクリプション管理",
     "subtitle": "プランと請求設定を管理",
     "currentPlan": "現在のプラン", "planFree": "フリー", "planPro": "プロ",
+    "planTrial": "プロ試用版", "trialDesc": "3日間無制限アクセス", "trialEnds": "試用終了",
+    "statusTrial": "試用中", "trialMessage": "試用期間中、Proの全機能をご利用いただけます。アップグレードして継続しましょう！",
+    "trialUpgradeTitle": "試用をお楽しみですか？", "trialUpgradeDesc": "今すぐアップグレードして、試用終了後も無制限アクセスを維持しましょう。",
     "billedAnnually": "年額請求", "billedMonthly": "月額請求",
-    "freeLimit": "1日5回サマリー", "renews": "更新日", "statusActive": "アクティブ",
+    "freeLimit": "1日5回サマリー", "renews": "更新日", "renewalDate": "更新日", "usage": "使用量", "unlimited": "無制限", "statusActive": "アクティブ",
     "upgradeTitle": "プロにアップグレード",
     "upgradeDesc": "無制限のサマリー、優先サポート、さらに多くの機能を利用できます。",
     "upgradeButton": "今すぐアップグレード", "processing": "処理中...",
@@ -373,7 +376,12 @@
     "helpText": "お困りですか？こちらまでご連絡ください：",
     "errorGeneric": "問題が発生しました。再試行してください。",
     "errorPortal": "カスタマーポータルにアクセスできませんでした",
-    "errorPaymentConfig": "決済システムを設定中です。サポートにお問い合わせください。"
+    "errorPaymentConfig": "決済システムを設定中です。サポートにお問い合わせください。",
+    "errorTrialNoPortal": "プロ試用版をご利用中です。有料プランにアップグレードすると請求ポータルが利用可能になります。サポートまでお問い合わせください。",
+    "errorManualSubscription": "ご契約は手動で管理されています。請求内容の変更はサポートまでご連絡ください。",
+    "errorNoSubscription": "有効なご契約がないため、請求ポータルはご利用いただけません。",
+    "planTitle": "プラン",
+    "manageSub": "サブスクリプション管理"
   },
   "seo": {
     "homeTitle": "PDF サマリー AI - 数秒でインサイトを獲得",

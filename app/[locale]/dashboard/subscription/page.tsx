@@ -55,12 +55,34 @@ export default function SubscriptionPage() {
       if (data.url) {
         window.location.href = data.url;
       } else {
-        toast.error(data.error || "Failed to open subscription management.");
+        // Map API error codes to localized messages
+        const localized = mapPortalError(t, data.code, data.error);
+        toast.error(localized);
       }
     } catch {
-      toast.error("Connection error. Please try again.");
+      toast.error(t("errorGeneric") || "Connection error. Please try again.");
     } finally {
       setManagingPortal(false);
+    }
+  };
+
+  // Translate API error codes into the user's locale.
+  const mapPortalError = (
+    tr: ReturnType<typeof useTranslations<"subscription">>,
+    code?: string,
+    fallback?: string
+  ): string => {
+    switch (code) {
+      case "trial_no_portal":
+        return tr("errorTrialNoPortal");
+      case "manual_subscription":
+        return tr("errorManualSubscription");
+      case "no_subscription":
+        return tr("errorNoSubscription");
+      case "creem_not_configured":
+        return tr("errorPaymentConfig");
+      default:
+        return fallback || tr("errorPortal") || "Failed to open subscription management.";
     }
   };
 

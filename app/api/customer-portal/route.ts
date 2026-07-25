@@ -105,15 +105,37 @@ export async function GET(req: NextRequest) {
     if (!portalUrl) {
       logger.warn("Could not create Creem customer portal session", {
         userId,
+        subscriptionStatus: user.subscriptionStatus,
         hasSubscriptionId: !!user.creemSubscriptionId,
         hasCustomerId: !!user.creemCustomerId,
       });
 
-      // Last resort: send user to Creem billing support
+      const supportEmail =
+        process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
+
+      // Pro Trial users don't have a paid Creem subscription yet.
+      if (user.subscriptionStatus === "pro_trial") {
+        return NextResponse.json({
+          error: `You're on a Pro Trial. A billing portal will be available after you upgrade to a paid subscription. Contact ${supportEmail} for help.`,
+          code: "trial_no_portal",
+          supportEmail,
+        });
+      }
+
+      // Pro users without Creem IDs (e.g. manual China payments) can't manage via Creem.
+      if (user.subscriptionStatus === "pro") {
+        return NextResponse.json({
+          error: `Your subscription is managed manually. Please email ${supportEmail} for billing changes.`,
+          code: "manual_subscription",
+          supportEmail,
+        });
+      }
+
       return NextResponse.json(
         {
-          error:
-            `Could not open the customer portal. Please email ${process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com"} for help with your subscription.`,
+          error: `Could not open the customer portal. Please email ${supportEmail} for help with your subscription.`,
+          code: "portal_unavailable",
+          supportEmail,
         },
         { status: 502 },
       );

@@ -21,18 +21,18 @@ function generateNonce(): string {
 
 /**
  * Build Content-Security-Policy header with dynamic nonce.
- * Uses 'strict-dynamic' so third-party analytics (GTM, Clarity) can inject
+ * Uses 'strict-dynamic' so third-party analytics (Clarity) can inject
  * their scripts without needing 'unsafe-inline'.
  */
 function buildCsp(nonce: string): string {
   return [
     "default-src 'self'",
-    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms`,
-    `script-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://www.googletagmanager.com https://*.clarity.ms https://zz.bdstatic.com http://push.zhanzhang.baidu.com`,
+    `script-src 'self' 'unsafe-inline' 'nonce-${nonce}' https://*.clarity.ms https://*.googletagmanager.com`,
+    `script-src-elem 'self' 'unsafe-inline' 'nonce-${nonce}' https://*.clarity.ms https://zz.bdstatic.com http://push.zhanzhang.baidu.com https://*.googletagmanager.com`,
     "style-src 'self' 'unsafe-inline'",
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://*.google-analytics.com",
     "font-src 'self' data:",
-    "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.creem.io https://api.resend.com https://api.stripe.com https://www.google-analytics.com https://region1.google-analytics.com https://*.sentry.io",
+    "connect-src 'self' https://api.deepseek.com https://api.groq.com https://api.siliconflow.cn https://api.creem.io https://api.resend.com https://api.stripe.com https://*.sentry.io https://*.google-analytics.com https://*.analytics.google.com",
     "frame-src 'self' https://checkout.creem.io https://checkout.stripe.com",
     "frame-ancestors 'none'",
     "media-src 'none'",
@@ -49,9 +49,18 @@ function buildCsp(nonce: string): string {
  *    → Unauthenticated users redirected to /sign-in
  *    → Authenticated users pass through to i18n handler
  *
- * 2. Write API routes
+ * 2. Write API routes (listed in WRITE_API_PATTERNS)
  *    → No __auth_token cookie → immediate 401
  *    → Token present → passes through (API layer does full verification)
+ *
+ * ⚠️  INTENTIONALLY OPEN (no middleware protection):
+ *    /api/summarize — Guests must be able to paste content and get AI summaries
+ *                      (this is the core acquisition funnel: preview → sign up)
+ *    /api/upload     — Guests must be able to upload PDFs for preview
+ *                      (handles guest/signed-in branching internally)
+ *    /api/v1/*       — Developer API uses API-key auth, not cookie-based
+ *
+ * These routes handle their own auth/guest logic internally.
  */
 export default async function middleware(request: NextRequest): Promise<NextResponse | Response> {
   try {
@@ -91,9 +100,10 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     }).catch(() => {});
   }
 
-  // ── 2. Protect write-sensitive API routes ──
+  // ── 2. Protect write-sensitive API routes (AUTHENTICATED ONLY) ──
+  // NOTE: /api/summarize and /api/upload are INTENTIONALLY NOT in this list
+  // — guests need them for the core acquisition funnel (upload → preview → sign up).
   const WRITE_API_PATTERNS = [
-    "/api/summarize",
     "/api/documents",
     "/api/account",
     "/api/payment",
@@ -121,9 +131,23 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     return apiResponse;
   }
 
-  // ── 3. Page routes: apply CSP nonce and security headers ──
+  // ── 3. UTM tracking: persist UTM params in cookies for 30 days ──
   const response = await handleI18n(request);
   response.headers.set("X-Request-Id", requestId);
+  const utmParams = ["utm_source", "utm_medium", "utm_campaign", "utm_term", "utm_content"];
+  for (const param of utmParams) {
+    const value = request.nextUrl.searchParams.get(param);
+    if (value) {
+      response.cookies.set(`__${param}`, value, {
+        httpOnly: false,
+        sameSite: "lax",
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+      });
+    }
+  }
+
   response.headers.set("Content-Security-Policy", buildCsp(nonce));
 
   // Pass nonce to layout via short-lived httpOnly cookie
@@ -135,11 +159,16 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     secure: process.env.NODE_ENV === "production",
   });
 
-  // CSRF protection: set a readable cookie on auth page GETs for cookie-to-header validation.
-  // The client reads this cookie and sends its value as X-CSRF-Token header on POST.
-  const AUTH_PAGES = ["/sign-in", "/sign-up", "/forgot-password", "/reset-password"];
-  const isAuthPage = AUTH_PAGES.some((p) => pathname.endsWith(p));
-  if (isAuthPage && request.method === "GET") {
+  // CSRF protection: set a readable cookie on EVERY page GET (except API/static)
+  // so the client always has a CSRF token to send back as X-CSRF-Token on POST.
+  // Previously we only set it on auth pages, which broke uploads for users who
+  // landed directly on the dashboard without visiting a sign-in page first.
+  const isApiOrStatic =
+    pathname.startsWith("/api/") ||
+    pathname.startsWith("/_next/") ||
+    pathname.startsWith("/favicon") ||
+    /\.[a-zA-Z0-9]+$/.test(pathname); // any file with an extension
+  if (request.method === "GET" && !isApiOrStatic) {
     const csrfToken = request.cookies.get("__csrf_token")?.value || generateCsrfToken();
     response.cookies.set("__csrf_token", csrfToken, {
       httpOnly: false, // Must be readable by client JS
@@ -176,7 +205,6 @@ export const config = {
     // Page routes (exclude static assets, _next, api root pattern)
     "/((?!api|_next|_vercel|.*\\..*).*)",
     // Explicitly protect these API paths
-    "/api/summarize/:path*",
     "/api/documents/:path*",
     "/api/account/:path*",
     "/api/payment/:path*",

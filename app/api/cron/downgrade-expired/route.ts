@@ -17,10 +17,13 @@ import { recordAudit } from "@/lib/audit";
 import { sendEmail, trialExpiringEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  // ── Auth ──
+  // ── Auth (support both Vercel Cron Bearer and legacy x-cron-secret) ──
+  const auth = req.headers.get("authorization") || "";
+  const bearer = auth.replace(/^Bearer\s+/i, "");
   const cronSecret = req.headers.get("x-cron-secret");
-  if (cronSecret !== process.env.CRON_SECRET) {
-    logger.warn("Cron: invalid or missing x-cron-secret");
+  const provided = cronSecret || bearer;
+  if (!process.env.CRON_SECRET || provided !== process.env.CRON_SECRET) {
+    logger.warn("Cron: invalid or missing cron secret");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

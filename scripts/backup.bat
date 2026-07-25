@@ -4,8 +4,8 @@ REM Usage: backup.bat [backup_name_suffix]
 
 setlocal enabledelayedexpansion
 
-set BACKUP_DIR=%BACKUP_DIR% || set BACKUP_DIR=.\backups
-set RETENTION_DAYS=%RETENTION_DAYS% || set RETENTION_DAYS=30
+if not defined BACKUP_DIR set BACKUP_DIR=.\backups
+if not defined RETENTION_DAYS set RETENTION_DAYS=30
 set TIMESTAMP=%date:~-4%%date:~3,2%%date:~0,2%_%time:~0,2%%time:~3,2%%time:~6,2%
 set TIMESTAMP=%TIMESTAMP: =0%
 set BACKUP_NAME=backup_%TIMESTAMP%_%~1

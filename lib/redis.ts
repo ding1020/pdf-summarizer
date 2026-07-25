@@ -21,7 +21,9 @@ export function getRedis(): Redis | null {
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
 
   if (!url || !token) {
-    logger.info("[redis] Redis not configured — using in-memory fallback");
+    logger.warn(
+      "[redis] Redis is not configured. Set UPSTASH_REDIS_REST_URL and UPSTASH_REDIS_REST_TOKEN for production (shared rate limits & AI cache). Using in-memory fallback.",
+    );
     return null;
   }
 

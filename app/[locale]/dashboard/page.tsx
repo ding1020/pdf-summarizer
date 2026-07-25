@@ -5,6 +5,7 @@ import AuthDependentUI from "./AuthUI";
 import GuestBanner from "./GuestBanner";
 import SubscriptionWidget from "@/components/SubscriptionWidget";
 import OnboardingGuideWrapper from "./OnboardingGuideWrapper";
+import DashboardUsageTracker from "@/components/DashboardUsageTracker";
 
 // ── Auth UI Skeleton (shown while Clerk loads) ──
 function AuthUISkeleton() {
@@ -108,6 +109,9 @@ export default async function DashboardPage({
             </div>
           </div>
         </div>
+
+        {/* NPS Modal — shows after 7th summary */}
+        <DashboardUsageTracker />
 
       </div>
     </main>

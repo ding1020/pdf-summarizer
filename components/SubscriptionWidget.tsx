@@ -15,7 +15,11 @@ interface SubscriptionData {
 
 export default function SubscriptionWidget() {
   const { isSignedIn } = useAuth();
+  // Most keys (planTitle, trialMessage, manageSub, billingButton, etc.) live in
+  // the "subscription" namespace. Only "upgrade" lives in "dashboard" — that's
+  // the raw key the user saw on screen. Load both namespaces to cover all cases.
   const t = useTranslations("subscription");
+  const dt = useTranslations("dashboard");
   const [data, setData] = useState<SubscriptionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -160,7 +164,7 @@ export default function SubscriptionWidget() {
             href="/pricing"
             className="flex-1 text-center px-3 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"
           >
-            {t("upgrade") || "Upgrade to Pro"}
+            {dt("upgrade") || "Upgrade to Pro"}
           </Link>
         ) : (
           <>

@@ -125,7 +125,9 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (e: unknown) {
-    console.error("OG image generation failed:", e);
+    if (process.env.NODE_ENV !== "production") {
+      console.error("OG image generation failed:", e);
+    }
     return new Response("Failed to generate image", { status: 500 });
   }
 }

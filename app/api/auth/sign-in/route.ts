@@ -102,7 +102,12 @@ export async function POST(req: NextRequest) {
 
     return response;
   } catch (error) {
-    logger.error("Sign-in error", error instanceof Error ? error : new Error(String(error)));
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error("Sign-in error", err, {
+      stack: err.stack,
+      name: err.name,
+      message: err.message,
+    });
     return NextResponse.json(
       { error: "Sign-in failed. Please try again." },
       { status: 500 }

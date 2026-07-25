@@ -1,13 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getRedis } from "@/lib/redis";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { getClientIP } from "@/lib/api-utils";
 
 // Health check — confirms Vercel App is alive and all dependencies are reachable
-export async function GET(req: Request) {
+export async function GET(req: NextRequest) {
   // Light rate limiting to prevent abuse
-  const clientIp = getClientIP(req as unknown as import("next/server").NextRequest);
+  const clientIp = getClientIP(req);
   const identifier = getClientIdentifier(null, clientIp);
   const rateLimitResult = await rateLimitAsync(identifier, { windowMs: 60_000, maxRequests: 5 });
 
