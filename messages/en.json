@@ -116,13 +116,13 @@
       "cancel": "Can I cancel anytime?",
       "cancelAnswer": "Yes, you can cancel your subscription at any time. You'll continue to have access until the end of your billing period.",
       "payment": "What payment methods do you accept?",
-      "paymentAnswer": "We support Alipay and WeChat Pay for domestic users. Overseas users please contact us via email.",
+      "paymentAnswer": "We accept all major credit cards and digital wallets through our secure payment partner Creem.",
       "trial": "Is there a free trial?",
       "trialAnswer": "Our Free plan lets you try the service with no commitment. Upgrade to Pro when you're ready."
     },
     "badges": {
       "secure": "Secure Payment",
-      "poweredBy": "Alipay / WeChat",
+      "poweredBy": "Creem",
       "cancel": "Cancel Anytime",
       "support": "24/7 Support"
     },
@@ -133,8 +133,8 @@
     },
     "pro": {
       "name": "Pro",
-      "price": "$9",
-      "yearlyPrice": "$79",
+      "price": "$7",
+      "yearlyPrice": "$59",
       "period": "/month",
       "yearlyPeriod": "/year (Save 27%)",
       "description": "For power users and professionals",
@@ -142,12 +142,12 @@
         "Unlimited PDF summaries",
         "Advanced AI with better quality",
         "Unlimited document history",
-        "Export to Word/PDF",
+        "Download summaries as Markdown",
         "Priority support",
-        "Longer documents (up to 200 pages)"
+        "Longer documents (up to ~30 pages)"
       ],
       "button": "Upgrade to Pro",
-      "pricePerMonth": "Equivalent to $6.58/month"
+      "pricePerMonth": "Equivalent to $4.92/month"
     },
     "bestValue": "Best Value",
     "payWithCard": "Pay with Credit Card",
@@ -157,7 +157,7 @@
       "generic": "Something went wrong. Please try again."
     },
     "processing": "Processing...",
-    "securePayment": "Scan to pay, manual activation",
+    "securePayment": "Secure checkout powered by Creem",
     "submitting": "Submitting...",
     "modal": {
       "monthly": "Pro · Monthly",
@@ -337,7 +337,7 @@
     "faq1q": "What file formats are supported?",
     "faq1a": "We currently support PDF files only. Make sure your PDF contains selectable text - scanned documents may not work properly.",
     "faq2q": "What's the maximum file size?",
-    "faq2a": "Free users can upload PDFs up to 20MB. Pro users have access to larger file support (up to 50MB) and longer documents (up to 200 pages).",
+    "faq2a": "Free users can upload PDFs up to 20MB. Pro users can upload larger files (up to 50MB) and longer documents (up to ~30 pages).",
     "faq3q": "How does the daily limit work?",
     "faq3a": "Free users get 5 PDF summaries per day. This limit resets at midnight (UTC). Pro users have unlimited access.",
     "faq4q": "Can I cancel my subscription anytime?",
@@ -349,7 +349,7 @@
     "faq7q": "Why is my summary incomplete?",
     "faq7a": "For very long documents, we process up to 15,000 characters. For complete summaries of lengthy PDFs, please upgrade to Pro.",
     "faq8q": "Can I export my summaries?",
-    "faq8a": "Pro users can export summaries in multiple formats including PDF and Word. Free users can copy the summary text directly.",
+    "faq8a": "Pro users can download summaries as Markdown. Free users can copy the summary text directly.",
     "footerLinks": {
       "privacy": "Privacy Policy",
       "terms": "Terms of Service",
@@ -544,7 +544,7 @@
     "step2Title": "AI Analysis",
     "step2Desc": "Our AI reads and understands your document. It extracts key points, generates summaries, and identifies important insights automatically.",
     "step3Title": "Get Your Summary",
-    "step3Desc": "Download your summary as PDF or Word. Export charts, share via link, or copy to clipboard. All in one click.",
+    "step3Desc": "Download your summary as Markdown, share via link, or copy to clipboard. All in one click.",
     "back": "Back",
     "next": "Next",
     "gotIt": "Got It!"

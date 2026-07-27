@@ -92,8 +92,8 @@
     },
     "pro": {
       "name": "Pro",
-      "price": "€9",
-      "yearlyPrice": "€79",
+      "price": "$7",
+      "yearlyPrice": "$59",
       "period": "/Monat",
       "yearlyPeriod": "/Jahr (27 % sparen)",
       "description": "Für Power-User und Profis",
@@ -101,12 +101,12 @@
         "Unbegrenzte PDF-Zusammenfassungen",
         "Fortgeschrittene KI mit besserer Qualität",
         "Unbegrenzter Dokumentenverlauf",
-        "Export nach Word/PDF",
+        "Zusammenfassungen als Markdown herunterladen",
         "Prioritätssupport",
-        "Längere Dokumente (bis zu 200 Seiten)"
+        "Längere Dokumente (bis zu ~30 Seiten)"
       ],
       "button": "Auf Pro Upgraden",
-      "pricePerMonth": "Entspricht €6,58/Monat"
+      "pricePerMonth": "Entspricht $4,92/Monat"
     },
     "faq": {
       "title": "Häufig Gestellte Fragen",
@@ -307,7 +307,7 @@
     "faq1q": "Welche Dateiformate werden unterstützt?",
     "faq1a": "Wir unterstützen derzeit nur PDF-Dateien. Stellen Sie sicher, dass Ihr PDF auswählbaren Text enthält - gescannte Dokumente funktionieren möglicherweise nicht richtig.",
     "faq2q": "Was ist die maximale Dateigröße?",
-    "faq2a": "Kostenlose Benutzer können PDFs bis zu 20MB hochladen. Pro-Benutzer haben Zugriff auf größere Dateien (bis zu 50MB) und längere Dokumente (bis zu 200 Seiten).",
+    "faq2a": "Kostenlose Benutzer können PDFs bis zu 20MB hochladen. Pro-Benutzer haben Zugriff auf größere Dateien (bis zu 50MB) und längere Dokumente (bis zu ~30 Seiten).",
     "faq3q": "Wie funktioniert das tägliche Limit?",
     "faq3a": "Kostenlose Benutzer erhalten 5 PDF-Zusammenfassungen pro Tag. Dieses Limit wird um Mitternacht (UTC) zurückgesetzt. Pro-Benutzer haben unbegrenzten Zugriff.",
     "faq4q": "Kann ich mein Abonnement jederzeit kündigen?",
@@ -319,7 +319,7 @@
     "faq7q": "Warum ist meine Zusammenfassung unvollständig?",
     "faq7a": "Bei sehr langen Dokumenten verarbeiten wir bis zu 15.000 Zeichen. Für vollständige Zusammenfassungen langer PDFs upgraden Sie bitte auf Pro.",
     "faq8q": "Kann ich meine Zusammenfassungen exportieren?",
-    "faq8a": "Pro-Benutzer können Zusammenfassungen in mehreren Formaten exportieren, einschließlich PDF und Word. Kostenlose Benutzer können den Zusammenfassungstext direkt kopieren.",
+    "faq8a": "Pro-Benutzer können Zusammenfassungen als Markdown herunterladen. Kostenlose Benutzer können den Zusammenfassungstext direkt kopieren.",
     "footerLinks": {
       "privacy": "Datenschutzerklärung",
       "terms": "Nutzungsbedingungen",

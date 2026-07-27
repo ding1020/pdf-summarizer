@@ -3,10 +3,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "regions": ["iad1"],
-  "env": {
-    "ADMIN_EMAIL": "dingmeng10@sina.com",
-    "CRON_SECRET": "d1f567d9506d396a48f41b41c13ef351a7ee489606276b452d23b86634de47c2"
-  },
   "crons": [
     {
       "path": "/api/cron/downgrade-expired",

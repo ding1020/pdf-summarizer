@@ -14,10 +14,10 @@ export const GUEST_RATE_LIMIT = { windowMs: 60_000, maxRequests: 5 } as const;
 export const FREE_USER_RATE_LIMIT = { windowMs: 60_000, maxRequests: 20 } as const;
 export const PRO_RATE_LIMIT = { windowMs: 60_000, maxRequests: 60 } as const;
 
-// ── Payment: China plan amounts (in cents) ──
+// ── Payment: Plan amounts in USD cents ──
 export const PLAN_AMOUNTS: Record<string, number> = {
-  pro_monthly: 5900,  // ¥59.00
-  pro_yearly: 57900,  // ¥579.00
+  pro_monthly: 700,   // $7.00
+  pro_yearly: 5900,   // $59.00
 };
 
 // ── Payment: Creem price ID whitelist ──

@@ -74,8 +74,8 @@
 |------|-------|---------------|----------|
 | **Guest** | Free | 3 | No signup, no credit card |
 | **Free** | Free | 5 | Account required |
-| **Pro Monthly** | $5/mo | Unlimited | Priority AI, no ads |
-| **Pro Yearly** | $50/yr | Unlimited | 2 months free, priority AI |
+| **Pro Monthly** | $7/mo | Unlimited | Priority AI, Markdown export |
+| **Pro Yearly** | $59/yr | Unlimited | ~2 months free, priority AI |
 
 **[See full pricing →](https://www.pdfsum.com/en/pricing)**
 
