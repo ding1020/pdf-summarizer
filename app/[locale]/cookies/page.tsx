@@ -13,7 +13,7 @@ export default function CookiesPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t("title")}</h1>
         
         <div className="prose prose-gray max-w-none">
-          <p className="text-gray-600 mb-6">{t("updated")}: {new Date().toLocaleDateString()}</p>
+          <p className="text-gray-600 mb-6">{t("updated")}: June 1, 2026</p>
           
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">{t("whatAre")}</h2>
           <p className="text-gray-600 mb-4">{t("whatAreDesc")}</p>

@@ -172,9 +172,31 @@ export default async function LocaleLayout({
     ],
     featureList: [
       "AI-powered PDF summarization",
+      "Chat with PDF — ask questions about your documents",
       "Multi-language support (7 languages)",
       "Streaming real-time summaries",
-      "Secure encrypted processing",
+      "OCR support for scanned PDFs",
+      "Developer API for programmatic access",
+      "Secure encrypted processing with auto-deletion",
+    ],
+  };
+
+  const orgJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "PDF Summary AI",
+    url: BASE_URL,
+    logo: `${BASE_URL}/logo.png`,
+    description: "AI-powered PDF summarizer with multi-language support, Chat with PDF, and developer API.",
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer support",
+      email: "support@pdfsum.com",
+      availableLanguage: ["English", "Chinese", "Japanese", "Korean", "Spanish", "French", "German"],
+    },
+    sameAs: [
+      "https://twitter.com/pdfsum",
+      "https://github.com/ding1020/pdf-summarizer",
     ],
   };
 
@@ -187,6 +209,7 @@ export default async function LocaleLayout({
         <link rel="icon" href="/favicon.ico" />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <link rel="alternate" type="application/rss+xml" title="PDF Summary AI Blog" href="/feed.xml" />
         <meta name="theme-color" content="#2563eb" />
         <meta name="baidu-site-verification" content="codeva-xIqxE0gVLC" />
         <meta name="msvalidate.01" content="3AFF8524154433B8956FCD2CCFE1E5CB" />
@@ -200,6 +223,11 @@ export default async function LocaleLayout({
           type="application/ld+json"
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <script
+          type="application/ld+json"
+          nonce={nonce}
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
         />
 
       </head>

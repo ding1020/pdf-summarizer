@@ -116,7 +116,7 @@ export default async function PrivacyPage({
             </p>
           </section>
 
-          <p className="text-sm text-gray-500 pt-4 border-t">{t("updated")}: {new Date().toLocaleDateString()}</p>
+          <p className="text-sm text-gray-500 pt-4 border-t">{t("updated")}: June 1, 2026</p>
         </div>
       </div>
     </main>

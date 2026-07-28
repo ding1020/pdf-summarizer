@@ -120,8 +120,32 @@ export default async function BlogPostPage({
     );
   }
 
+  const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+
+  const articleJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: post.title,
+    description: post.excerpt,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: {
+      "@type": "Organization",
+      name: "PDF Summary AI",
+      url: BASE_URL,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "PDF Summary AI",
+      logo: { "@type": "ImageObject", url: `${BASE_URL}/logo.png` },
+    },
+    mainEntityOfPage: `${BASE_URL}/en/blog/${slug}`,
+    keywords: post.keywords?.join(", "),
+  };
+
   return (
     <main className="min-h-screen bg-white" id="main-content">
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
       <article className="max-w-3xl mx-auto px-4 py-16">
         <Link
           href="/blog"

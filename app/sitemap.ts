@@ -1,5 +1,6 @@
 import { MetadataRoute } from "next/types";
 import { blogSlugs } from "@/lib/blog-posts";
+import { alternatives } from "@/lib/alternatives";
 
 const locales = ["en", "zh", "ja", "ko", "es", "fr", "de"];
 
@@ -9,7 +10,7 @@ const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 const routesWithoutLocale = ["/sign-in", "/sign-up"];
 
 // Routes with locale prefix
-const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund", "/help", "/cookies", "/blog", "/changelog"];
+const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund", "/help", "/cookies", "/blog", "/changelog", "/alternatives"];
 
 // Build date — auto-generated on each deploy to reflect last modification
 const BUILD_DATE = new Date().toISOString().split("T")[0];
@@ -55,6 +56,24 @@ export default function sitemap(): MetadataRoute.Sitemap {
         alternates: {
           languages: Object.fromEntries(
             locales.map((l) => [l, `${baseUrl}/${l}/blog/${slug}`])
+          ),
+        },
+      });
+    });
+  });
+
+  // Add alternative comparison pages for each locale
+  const altSlugs = Object.keys(alternatives);
+  altSlugs.forEach((slug) => {
+    locales.forEach((locale) => {
+      sitemapRoutes.push({
+        url: `${baseUrl}/${locale}/alternatives/${slug}`,
+        lastModified: new Date(BUILD_DATE),
+        changeFrequency: "monthly" as const,
+        priority: 0.8,
+        alternates: {
+          languages: Object.fromEntries(
+            locales.map((l) => [l, `${baseUrl}/${l}/alternatives/${slug}`])
           ),
         },
       });

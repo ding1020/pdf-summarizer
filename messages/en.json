@@ -81,6 +81,9 @@
     "languages": "Languages",
     "speed": "Avg. summary time"
   },
+  "testimonials": {
+    "title": "Loved by professionals worldwide"
+  },
   "testimonial1": "This tool saved me hours each week. The summaries are incredibly accurate and well-structured.",
   "testimonial1Name": "Alex K.",
   "testimonial1Role": "Research Analyst",
