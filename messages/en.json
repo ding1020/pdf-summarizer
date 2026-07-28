@@ -281,7 +281,8 @@
     "shareSummary": "Share",
     "copied": "Copied!",
     "shareEnabled": "Share link copied!",
-    "shareDisabled": "Share"
+    "shareDisabled": "Share",
+    "downloadProOnly": "Pro feature — Click to upgrade"
   },
   "footer": {
     "brand": "PDF Summary",

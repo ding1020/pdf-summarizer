@@ -251,7 +251,8 @@
     "summarizeFailed": "サマリーの生成に失敗しました",
     "streamFailed": "ストリームの読み取りに失敗しました",
     "needHelp": "PDFアップロードについてヘルプが必要ですか？",
-    "errorTitle": "エラー"
+    "errorTitle": "エラー",
+    "downloadProOnly": "Pro機能 — クリックしてアップグレード"
   },
   "footer": {
     "brand": "PDF Summary",

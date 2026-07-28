@@ -251,7 +251,8 @@
     "summarizeFailed": "Échec de la génération du résumé",
     "streamFailed": "Échec de la lecture du flux",
     "needHelp": "Besoin d'aide pour le téléchargement de PDF ?",
-    "errorTitle": "Erreur"
+    "errorTitle": "Erreur",
+    "downloadProOnly": "Fonctionnalité Pro — Cliquez pour mettre à niveau"
   },
   "footer": {
     "brand": "PDF Summary",

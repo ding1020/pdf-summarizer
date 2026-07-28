@@ -12,6 +12,7 @@ interface SummaryDisplayProps {
   copied: boolean;
   documentId: string;
   sharingDocumentId: string | null;
+  isPro: boolean;
   onCopy: () => void;
   onDownload: () => void;
   onShare: () => void;
@@ -24,6 +25,7 @@ const SummaryDisplay = memo(function SummaryDisplay({
   copied,
   documentId,
   sharingDocumentId,
+  isPro,
   onCopy,
   onDownload,
   onShare,
@@ -61,12 +63,20 @@ const SummaryDisplay = memo(function SummaryDisplay({
               </button>
               <button
                 onClick={onDownload}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 hover:border-gray-300 transition-colors"
+                title={isPro ? t("downloadSummary") : t("downloadProOnly")}
+                className={`flex items-center gap-1 px-3 py-1.5 text-xs font-medium border rounded-lg transition-colors ${
+                  isPro
+                    ? "text-gray-600 bg-white border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+                    : "text-blue-600 bg-blue-50 border-blue-200 hover:bg-blue-100"
+                }`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 {t("downloadSummary")}
+                {!isPro && (
+                  <span className="ml-1 px-1 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded">PRO</span>
+                )}
               </button>
               <button
                 onClick={onShare}

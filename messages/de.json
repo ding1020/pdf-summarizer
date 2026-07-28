@@ -251,7 +251,8 @@
     "summarizeFailed": "Zusammenfassung konnte nicht erstellt werden",
     "streamFailed": "Stream konnte nicht gelesen werden",
     "needHelp": "Brauchen Sie Hilfe beim PDF-Upload?",
-    "errorTitle": "Fehler"
+    "errorTitle": "Fehler",
+    "downloadProOnly": "Pro-Funktion — Klicken zum Upgraden"
   },
   "footer": {
     "brand": "PDF Summary",

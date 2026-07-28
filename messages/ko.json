@@ -251,7 +251,8 @@
     "summarizeFailed": "요약 생성 실패",
     "streamFailed": "스트림 읽기 실패",
     "needHelp": "PDF 업로드에 도움이 필요하신가요?",
-    "errorTitle": "오류"
+    "errorTitle": "오류",
+    "downloadProOnly": "Pro 기능 — 클릭하여 업그레이드"
   },
   "footer": {
     "brand": "PDF Summary",

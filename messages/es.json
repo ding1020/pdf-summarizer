@@ -251,7 +251,8 @@
     "summarizeFailed": "Error al generar el resumen",
     "streamFailed": "Error al leer el flujo de datos",
     "needHelp": "¿Necesitas ayuda con la carga de PDF?",
-    "errorTitle": "Error"
+    "errorTitle": "Error",
+    "downloadProOnly": "Función Pro — Haz clic para mejorar"
   },
   "footer": {
     "brand": "PDF Summary",
