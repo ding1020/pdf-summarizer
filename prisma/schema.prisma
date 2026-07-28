@@ -101,7 +101,7 @@ model PaymentRequest {
   userId     String
   user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   plan       String    // "pro_monthly" | "pro_yearly"
-  amount     Int       // amount in cents (e.g. 5900 = ¥59.00)
+  amount     Int       // amount in USD cents (e.g. 700 = $7.00, 5900 = $59.00)
   channel    String    // "alipay" | "wechat" | "manual"
   txnRef     String?   // last 4 digits of transaction ID from user
   status     String    @default("pending") // pending | approved | rejected
