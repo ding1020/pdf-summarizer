@@ -60,16 +60,55 @@ export async function extractText(
 
 /**
  * Extract text from PDF buffer via pdf-parse.
+ * Falls back to Tencent Cloud OCR when the PDF is scanned (no extractable text).
  */
 async function extractPdf(buffer: Buffer): Promise<ExtractResult> {
   const data = await pdfParse(buffer);
+  const pageCount = data.numpages;
+  const text = data.text;
+
+  // ── OCR fallback for scanned PDFs ──
+  // If pdf-parse returns empty/short text, the PDF is likely a scan.
+  // Render pages to images and OCR them via Tencent Cloud.
+  let { needsOcr, pdfOcrFallback } = await import("./pdf-ocr");
+
+  if (needsOcr(text, pageCount)) {
+    console.info("[OCR] pdf-parse returned insufficient text, triggering OCR fallback", {
+      textLength: text.length,
+      pageCount,
+    });
+
+    try {
+      const ocrResult = await pdfOcrFallback(buffer);
+      console.info("[OCR] Fallback complete", {
+        ocrPages: ocrResult.ocrPagesProcessed,
+        textLength: ocrResult.text.length,
+      });
+
+      return {
+        text: ocrResult.text,
+        pageCount: ocrResult.pageCount,
+        metadata: {
+          title: data.info?.Title,
+          author: data.info?.Author,
+          pages: ocrResult.pageCount,
+          ocrUsed: true,
+          ocrPages: ocrResult.ocrPagesProcessed,
+        },
+      };
+    } catch (ocrError) {
+      console.error("[OCR] Fallback failed:", ocrError instanceof Error ? ocrError.message : ocrError);
+      // Return whatever pdf-parse got (even if empty) — better than crashing
+    }
+  }
+
   return {
-    text: data.text,
-    pageCount: data.numpages,
+    text,
+    pageCount,
     metadata: {
       title: data.info?.Title,
       author: data.info?.Author,
-      pages: data.numpages,
+      pages: pageCount,
     },
   };
 }
