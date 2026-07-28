@@ -622,5 +622,24 @@
     "cost": "Cost",
     "providerBreakdown": "Provider Breakdown (This Month)",
     "inputOutput": "In {input} / Out {output}"
+  },
+  "payment": {
+    "successTitle": "Payment Successful!",
+    "successDesc": "Your Pro subscription is now active. Enjoy unlimited PDF summaries!",
+    "successCta": "Go to Dashboard",
+    "cancelTitle": "Payment Canceled",
+    "cancelDesc": "Your payment was canceled. No charge was made. You can try again anytime.",
+    "cancelCta": "Back to Pricing"
+  },
+  "newsletter": {
+    "title": "Get Product Updates & Tips",
+    "subtitle": "Join our newsletter for AI summarization tips, new features, and exclusive deals.",
+    "placeholder": "Enter your email",
+    "subscribe": "Subscribe",
+    "subscribing": "Subscribing...",
+    "successMsg": "You are subscribed! Check your inbox.",
+    "alreadySubscribed": "You're already subscribed!",
+    "errorMsg": "Something went wrong. Please try again.",
+    "privacyNote": "No spam. Unsubscribe anytime."
   }
 }

@@ -6,13 +6,13 @@ import { PLAN_AMOUNTS } from "@/lib/constants";
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
 const DESCRIPTIONS: Record<string, string> = {
-  en: "Simple, transparent pricing for AI-powered PDF summaries. Start free with 5 summaries/day. Upgrade to Pro for unlimited access — only $9/month.",
-  zh: "简单透明的 AI PDF 摘要定价。每天 5 次免费摘要，升级 Pro 无限使用 — 仅 ¥59/月。",
-  ja: "シンプルで透明なAI PDF要約の料金プラン。1日5回の無料要約。プロ版は月額わずか$9で無制限。",
-  ko: "간단하고 투명한 AI PDF 요약 가격. 하루 5회 무료 요약. 프로 플랜은 월 $9에 무제한 이용.",
-  es: "Precios simples y transparentes para resúmenes PDF con IA. Comienza gratis con 5 resúmenes/día. Pro ilimitado — solo $9/mes.",
-  fr: "Tarification simple et transparente pour les résumés PDF par IA. Gratuit avec 5 résumés/jour. Pro illimité — seulement 9$/mois.",
-  de: "Einfache, transparente Preise für KI-PDF-Zusammenfassungen. Kostenlos mit 5/Tag starten. Pro unbegrenzt — nur 9$/Monat.",
+  en: "Simple, transparent pricing for AI-powered PDF summaries. Start free with 5 summaries/day. Upgrade to Pro for unlimited access — only $7/month.",
+  zh: "简单透明的 AI PDF 摘要定价。每天 5 次免费摘要，升级 Pro 无限使用 — 仅 $7/月。",
+  ja: "シンプルで透明なAI PDF要約の料金プラン。1日5回の無料要約。プロ版は月額わずか$7で無制限。",
+  ko: "간단하고 투명한 AI PDF 요약 가격. 하루 5회 무료 요약. 프로 플랜은 월 $7에 무제한 이용.",
+  es: "Precios simples y transparentes para resúmenes PDF con IA. Comienza gratis con 5 resúmenes/día. Pro ilimitado — solo $7/mes.",
+  fr: "Tarification simple et transparente pour les résumés PDF par IA. Gratuit avec 5 résumés/jour. Pro illimité — seulement 7$/mois.",
+  de: "Einfache, transparente Preise für KI-PDF-Zusammenfassungen. Kostenlos mit 5/Tag starten. Pro unbegrenzt — nur 7$/Monat.",
 };
 
 const LOCALE_MAP: Record<string, string> = {
@@ -106,14 +106,14 @@ export default async function PricingPage({
               {
                 "@type": "Offer",
                 name: "Pro Monthly",
-                price: ((PLAN_AMOUNTS.pro_monthly || 5900) / 100).toFixed(2),
-                priceCurrency: "CNY",
+                price: ((PLAN_AMOUNTS.pro_monthly || 700) / 100).toFixed(2),
+                priceCurrency: "USD",
               },
               {
                 "@type": "Offer",
                 name: "Pro Yearly",
-                price: ((PLAN_AMOUNTS.pro_yearly || 57900) / 100).toFixed(2),
-                priceCurrency: "CNY",
+                price: ((PLAN_AMOUNTS.pro_yearly || 5900) / 100).toFixed(2),
+                priceCurrency: "USD",
               },
             ],
           },

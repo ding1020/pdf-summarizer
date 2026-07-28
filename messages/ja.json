@@ -521,5 +521,24 @@
     "learnMore": "詳細を見る",
     "essentialOnly": "必要なもののみ",
     "acceptAll": "すべて許可"
+  },
+  "payment": {
+    "successTitle": "お支払い完了！",
+    "successDesc": "Proサブスクリプションが有効になりました。無制限のPDFサマリーをお楽しみください！",
+    "successCta": "ダッシュボードへ",
+    "cancelTitle": "お支払いがキャンセルされました",
+    "cancelDesc": "お支払いはキャンセルされました。課金は発生していません。いつでも再試行できます。",
+    "cancelCta": "料金ページに戻る"
+  },
+  "newsletter": {
+    "title": "製品アップデート＆ヒント",
+    "subtitle": "AI要約のヒント、新機能、限定オファーをお届けするニュースレターです。",
+    "placeholder": "メールアドレスを入力",
+    "subscribe": "登録",
+    "subscribing": "登録中...",
+    "successMsg": "登録完了！受信箱を確認してください。",
+    "alreadySubscribed": "既に登録されています！",
+    "errorMsg": "エラーが発生しました。再度お試しください。",
+    "privacyNote": "スパムなし。いつでも配信停止できます。"
   }
 }

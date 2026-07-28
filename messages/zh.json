@@ -596,5 +596,24 @@
     "cost": "费用",
     "providerBreakdown": "供应商分布（本月）",
     "inputOutput": "入 {input} / 出 {output}"
+  },
+  "payment": {
+    "successTitle": "支付成功！",
+    "successDesc": "您的 Pro 订阅已激活。畅享无限 PDF 摘要！",
+    "successCta": "前往仪表盘",
+    "cancelTitle": "支付已取消",
+    "cancelDesc": "您的支付已取消，未产生任何费用。您可以随时重试。",
+    "cancelCta": "返回定价页"
+  },
+  "newsletter": {
+    "title": "获取产品更新与技巧",
+    "subtitle": "订阅我们的邮件，获取 AI 摘要技巧、新功能通知和专属优惠。",
+    "placeholder": "输入您的邮箱",
+    "subscribe": "订阅",
+    "subscribing": "订阅中...",
+    "successMsg": "订阅成功！请查看收件箱。",
+    "alreadySubscribed": "您已订阅过！",
+    "errorMsg": "出错了，请重试。",
+    "privacyNote": "不发垃圾邮件，随时可退订。"
   }
 }

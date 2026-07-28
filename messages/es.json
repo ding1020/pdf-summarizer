@@ -521,5 +521,24 @@
     "learnMore": "Más información",
     "essentialOnly": "Solo esenciales",
     "acceptAll": "Aceptar todas"
+  },
+  "payment": {
+    "successTitle": "¡Pago exitoso!",
+    "successDesc": "Tu suscripción Pro ya está activa. ¡Disfruta de resúmenes PDF ilimitados!",
+    "successCta": "Ir al Panel",
+    "cancelTitle": "Pago cancelado",
+    "cancelDesc": "Tu pago fue cancelado. No se realizó ningún cargo. Puedes intentarlo de nuevo cuando quieras.",
+    "cancelCta": "Volver a Precios"
+  },
+  "newsletter": {
+    "title": "Actualizaciones y Consejos",
+    "subtitle": "Suscríbete a nuestro boletín para consejos de IA, nuevas funciones y ofertas exclusivas.",
+    "placeholder": "Ingresa tu correo",
+    "subscribe": "Suscribirse",
+    "subscribing": "Suscribiendo...",
+    "successMsg": "¡Suscripción exitosa! Revisa tu bandeja de entrada.",
+    "alreadySubscribed": "¡Ya estás suscrito!",
+    "errorMsg": "Algo salió mal. Inténtalo de nuevo.",
+    "privacyNote": "Sin spam. Cancela cuando quieras."
   }
 }

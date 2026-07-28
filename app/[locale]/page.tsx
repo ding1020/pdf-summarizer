@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
 import { PLAN_AMOUNTS } from "@/lib/constants";
 import HomeUploadWrapper from "@/components/HomeUploadWrapper";
+import NewsletterSignup from "@/components/NewsletterSignup";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
@@ -87,9 +88,9 @@ export default async function HomePage({
     operatingSystem: "All",
     offers: {
       "@type": "AggregateOffer",
-      priceCurrency: "CNY",
+      priceCurrency: "USD",
       lowPrice: "0",
-      highPrice: ((PLAN_AMOUNTS.pro_yearly || 57900) / 100).toFixed(2),
+      highPrice: ((PLAN_AMOUNTS.pro_yearly || 5900) / 100).toFixed(2),
       offerCount: "2",
     },
   };
@@ -354,6 +355,9 @@ export default async function HomePage({
             </div>
           </div>
         </section>
+
+        {/* Newsletter Signup */}
+        <NewsletterSignup locale={locale} />
 
         {/* Footer */}
         <footer className="bg-gray-900 py-12">

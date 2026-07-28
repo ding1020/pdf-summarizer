@@ -521,5 +521,24 @@
     "learnMore": "En savoir plus",
     "essentialOnly": "Essentiels uniquement",
     "acceptAll": "Tout accepter"
+  },
+  "payment": {
+    "successTitle": "Paiement réussi !",
+    "successDesc": "Votre abonnement Pro est maintenant actif. Profitez de résumés PDF illimités !",
+    "successCta": "Aller au Tableau de bord",
+    "cancelTitle": "Paiement annulé",
+    "cancelDesc": "Votre paiement a été annulé. Aucun frais n'a été facturé. Vous pouvez réessayer à tout moment.",
+    "cancelCta": "Retour aux Tarifs"
+  },
+  "newsletter": {
+    "title": "Mises à jour & Conseils",
+    "subtitle": "Abonnez-vous à notre newsletter pour des conseils IA, de nouvelles fonctionnalités et des offres exclusives.",
+    "placeholder": "Entrez votre email",
+    "subscribe": "S'abonner",
+    "subscribing": "Inscription...",
+    "successMsg": "Vous êtes inscrit ! Vérifiez votre boîte de réception.",
+    "alreadySubscribed": "Vous êtes déjà inscrit !",
+    "errorMsg": "Une erreur est survenue. Réessayez.",
+    "privacyNote": "Pas de spam. Désabonnement à tout moment."
   }
 }

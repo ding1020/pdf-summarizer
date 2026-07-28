@@ -173,3 +173,14 @@ model UsageLog {
   @@index([createdAt])
   @@index([provider])
 }
+
+model Subscriber {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  source    String?  // homepage, pricing, blog, etc.
+  locale    String?  // en, ja, zh, etc.
+  createdAt DateTime @default(now())
+
+  @@index([email])
+  @@index([createdAt])
+}

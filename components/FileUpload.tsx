@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useDropzone } from "react-dropzone";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/navigation";
 import { useToast } from "@/hooks/useToast";
 import UploadDropzone from "./UploadDropzone";
@@ -10,6 +10,7 @@ import FileInfoCard from "./FileInfoCard";
 import SummaryDisplay from "./SummaryDisplay";
 import ErrorMessage from "./ErrorMessage";
 import { UploadSkeleton, SummarySkeleton } from "./Skeleton";
+import { trackPdfUpload, trackSummaryCompleted } from "@/lib/analytics";
 
 // Constants
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
@@ -37,6 +38,7 @@ interface FileUploadProps {
 
 export default function FileUpload({ onUploadComplete }: FileUploadProps) {
   const t = useTranslations("upload");
+  const locale = useLocale();
   const toast = useToast();
   const [isUploading, setIsUploading] = useState(false);
   const [isSummarizing, setIsSummarizing] = useState(false);
@@ -192,6 +194,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         // Non-critical: summary already shown, DB save is best-effort
       }
 
+      // Analytics: track summary completed
+      trackSummaryCompleted("ai", "stream", locale, isPro);
+
       // Notify other components that usage count has changed
       window.dispatchEvent(new CustomEvent("usage-refresh"));
     } catch (err) {
@@ -299,6 +304,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       setError(null);
       setResult(null);
       setSummary("");
+
+      // Analytics: track upload initiated
+      trackPdfUpload(file.size, locale);
 
       try {
         const formData = new FormData();

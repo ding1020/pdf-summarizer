@@ -89,6 +89,8 @@ export async function POST(req: NextRequest) {
               source: "web",
               planType: body.planType || "pro_monthly",
             },
+            success_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com"}/${process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en"}/payment/success`,
+            cancel_url: `${process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com"}/${process.env.NEXT_PUBLIC_DEFAULT_LOCALE || "en"}/payment/cancel`,
           }),
           signal: abortController.signal,
         });

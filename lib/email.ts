@@ -59,8 +59,8 @@ export function paymentSuccessEmail(
         <ul>
           <li>✅ Unlimited PDF summaries</li>
           <li>✅ Advanced AI quality</li>
+          <li>✅ Download summaries as Markdown</li>
           <li>✅ Priority support</li>
-          <li>✅ Export to Word/PDF</li>
         </ul>
         <p>
           <a href="https://www.pdfsum.com/dashboard" style="color:#2563eb">Go to Dashboard →</a>
@@ -140,8 +140,8 @@ export function trialWelcomeEmail(
         <ul>
           <li>✅ Unlimited PDF summaries</li>
           <li>✅ Advanced AI quality</li>
+          <li>✅ Download summaries as Markdown</li>
           <li>✅ Priority support</li>
-          <li>✅ Export to Word/PDF</li>
         </ul>
         <p><strong>Trial ends:</strong> ${trialEndDate}</p>
         <p style="margin:24px 0">
@@ -217,7 +217,7 @@ export function trialExpiringEmail(
           </a>
         </p>
         <p style="color:#6b7280;font-size:13px">
-          Pro Monthly: $7.99 · Pro Yearly: $69 (28% off)
+          Pro Monthly: $7/mo · Pro Yearly: $59/yr (30% off)
         </p>
         <hr style="border:none;border-top:1px solid #e5e7eb;margin:20px 0" />
         <p style="color:#9ca3af;font-size:12px">
@@ -272,7 +272,7 @@ export function winBackEmail(
         <ul>
           <li>🚀 Faster AI summarization</li>
           <li>🌍 7-language support</li>
-          <li>📄 Export to Word & PDF</li>
+          <li>📄 Download as Markdown</li>
           <li>🔒 Enterprise-grade security</li>
         </ul>
         <p style="margin:24px 0">

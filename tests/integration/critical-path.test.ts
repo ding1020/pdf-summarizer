@@ -91,19 +91,19 @@ describe("Critical Path: Auth Flow", () => {
 describe("Critical Path: Payment Flow", () => {
   it("creates checkout session for Pro Monthly", () => {
     const plan = "pro_monthly";
-    const amount = 5900; // ¥59.00
+    const amount = 700; // $7.00
     const userId = "user-001";
 
     expect(plan).toBe("pro_monthly");
-    expect(amount).toBe(5900);
+    expect(amount).toBe(700);
     expect(userId).toBeTruthy();
   });
 
   it("creates checkout session for Pro Yearly", () => {
     const plan = "pro_yearly";
-    const amount = 57900; // ¥579.00
+    const amount = 5900; // $59.00
     expect(plan).toBe("pro_yearly");
-    expect(amount).toBe(57900);
+    expect(amount).toBe(5900);
   });
 
   it("rejects invalid price IDs", () => {

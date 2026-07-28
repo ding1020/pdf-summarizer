@@ -1,10 +1,11 @@
 "use client";
 
-import { useTranslations } from "next-intl";
-import { useState } from "react";
+import { useTranslations, useLocale } from "next-intl";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/navigation";
 import PaymentModal from "@/components/PaymentModal";
+import { trackPricingViewed, trackCheckoutClicked } from "@/lib/analytics";
 
 interface Toast {
   id: string;
@@ -14,11 +15,17 @@ interface Toast {
 
 export default function PricingClient() {
   const t = useTranslations("pricing");
+  const locale = useLocale();
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
   const [selectedBilling, setSelectedBilling] = useState<"monthly" | "yearly">("monthly");
   const [showModal, setShowModal] = useState(false);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  // Analytics: track pricing page view
+  useEffect(() => {
+    trackPricingViewed(locale);
+  }, [locale]);
 
   const showToast = (message: string, type: Toast["type"] = "info") => {
     const id = Date.now().toString();
@@ -64,6 +71,7 @@ export default function PricingClient() {
       router.push("/sign-in");
       return;
     }
+    trackCheckoutClicked(selectedBilling, locale);
     setShowModal(true);
   };
 

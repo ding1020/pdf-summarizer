@@ -521,5 +521,24 @@
     "learnMore": "Mehr erfahren",
     "essentialOnly": "Nur notwendige",
     "acceptAll": "Alle akzeptieren"
+  },
+  "payment": {
+    "successTitle": "Zahlung erfolgreich!",
+    "successDesc": "Ihr Pro-Abonnement ist jetzt aktiv. Genießen Sie unbegrenzte PDF-Zusammenfassungen!",
+    "successCta": "Zum Dashboard",
+    "cancelTitle": "Zahlung abgebrochen",
+    "cancelDesc": "Ihre Zahlung wurde abgebrochen. Es wurde nichts abgebucht. Sie können es jederzeit erneut versuchen.",
+    "cancelCta": "Zurück zur Preisübersicht"
+  },
+  "newsletter": {
+    "title": "Produkt-Updates & Tipps",
+    "subtitle": "Abonnieren Sie unseren Newsletter für KI-Zusammenfassungstipps, neue Funktionen und exklusive Angebote.",
+    "placeholder": "E-Mail-Adresse eingeben",
+    "subscribe": "Abonnieren",
+    "subscribing": "Abonnieren...",
+    "successMsg": "Sie sind angemeldet! Prüfen Sie Ihr Postfach.",
+    "alreadySubscribed": "Sie sind bereits abonniert!",
+    "errorMsg": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "privacyNote": "Kein Spam. Jederzeit abbestellbar."
   }
 }
