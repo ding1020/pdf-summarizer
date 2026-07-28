@@ -14,8 +14,8 @@ const nextConfig = {
   // (eslint is run separately via npm run lint in CI — Next.js 16 no longer bundles it)
   typescript: { ignoreBuildErrors: false },
 
-  // pdf-parse must be bundled as server external
-  serverExternalPackages: ["pdf-parse"],
+  // Native modules & heavy libs must be external (not bundled by Turbopack)
+  serverExternalPackages: ["pdf-parse", "@napi-rs/canvas", "pdfjs-dist"],
 
   // ⚡ Performance
   experimental: {
