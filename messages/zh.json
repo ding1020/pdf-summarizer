@@ -129,7 +129,8 @@
         "无限文档历史",
         "下载摘要为Markdown",
         "优先客户支持",
-        "支持更长文档（最高约30页）"
+        "支持更长文档（最高约30页）",
+        "PDF 对话 — 向 AI 提问文档内容"
       ],
       "button": "升级到专业版",
       "pricePerMonth": "相当于每月约$4.92"
@@ -615,5 +616,25 @@
     "alreadySubscribed": "您已订阅过！",
     "errorMsg": "出错了，请重试。",
     "privacyNote": "不发垃圾邮件，随时可退订。"
+  },
+  "chat": {
+    "title": "PDF 对话",
+    "subtitle": "针对文档内容提问",
+    "tryAsking": "试试问：",
+    "suggestions": {
+      "topic": "文档的主题是什么？",
+      "keyPoints": "有哪些要点？",
+      "methodology": "描述研究方法",
+      "conclusion": "结论是什么？"
+    },
+    "inputPlaceholder": "输入关于 PDF 的问题...",
+    "send": "发送",
+    "clear": "清除",
+    "error": "出错了，请重试。",
+    "streamError": "读取回复失败。",
+    "proRequired": "PDF 对话是 Pro 功能，升级后可用。",
+    "upgradePrompt": "升级 Pro 即可对话...",
+    "proHint": "PDF 对话是 Pro 功能。",
+    "upgradeLink": "立即升级"
   }
 }

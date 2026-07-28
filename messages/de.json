@@ -103,7 +103,8 @@
         "Unbegrenzter Dokumentenverlauf",
         "Zusammenfassungen als Markdown herunterladen",
         "Prioritätssupport",
-        "Längere Dokumente (bis zu ~30 Seiten)"
+        "Längere Dokumente (bis zu ~30 Seiten)",
+        "Mit PDF chatten — Fragen Sie die KI zu Ihrem Dokument"
       ],
       "button": "Auf Pro Upgraden",
       "pricePerMonth": "Entspricht $4,92/Monat"
@@ -540,5 +541,25 @@
     "alreadySubscribed": "Sie sind bereits abonniert!",
     "errorMsg": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
     "privacyNote": "Kein Spam. Jederzeit abbestellbar."
+  },
+  "chat": {
+    "title": "Mit PDF chatten",
+    "subtitle": "Stellen Sie Fragen zu Ihrem Dokument",
+    "tryAsking": "Fragen Sie z.B.:",
+    "suggestions": {
+      "topic": "Was ist das Hauptthema?",
+      "keyPoints": "Was sind die wichtigsten Punkte?",
+      "methodology": "Beschreiben Sie die Methodik",
+      "conclusion": "Was sind die Schlussfolgerungen?"
+    },
+    "inputPlaceholder": "Stellen Sie eine Frage zu Ihrem PDF...",
+    "send": "Senden",
+    "clear": "Löschen",
+    "error": "Etwas ist schiefgelaufen. Bitte erneut versuchen.",
+    "streamError": "Antwort konnte nicht gelesen werden.",
+    "proRequired": "Mit PDF chatten ist eine Pro-Funktion. Upgrade zum Freischalten.",
+    "upgradePrompt": "Upgrade auf Pro, um zu chatten...",
+    "proHint": "Mit PDF chatten ist eine Pro-Funktion.",
+    "upgradeLink": "Jetzt upgraden"
   }
 }

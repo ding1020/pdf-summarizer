@@ -64,3 +64,22 @@ export function trackNewsletterSignup(source: string, locale: string): void {
 export function trackCtaClick(ctaName: string, locale: string): void {
   trackEvent("cta_click", { ctaName, locale });
 }
+
+// ── Chat with PDF events ──
+
+export function trackChatQuestionAsked(locale: string, isPro: boolean): void {
+  trackEvent("chat_question_asked", { locale, isPro });
+}
+
+export function trackChatAnswerCompleted(
+  locale: string,
+  isPro: boolean,
+  provider: string,
+  searchMode: string,
+): void {
+  trackEvent("chat_answer_completed", { locale, isPro, provider, searchMode });
+}
+
+export function trackChatPaywallShown(locale: string): void {
+  trackEvent("chat_paywall_shown", { locale });
+}

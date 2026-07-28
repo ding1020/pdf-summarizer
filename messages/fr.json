@@ -103,7 +103,8 @@
         "Historique des documents illimité",
         "Télécharger les résumés en Markdown",
         "Support prioritaire",
-        "Documents plus longs (jusqu'à ~30 pages)"
+        "Documents plus longs (jusqu'à ~30 pages)",
+        "Discuter avec PDF — Posez des questions à l'IA"
       ],
       "button": "Passer à Pro",
       "pricePerMonth": "Équivalent à $4.92/mois"
@@ -540,5 +541,25 @@
     "alreadySubscribed": "Vous êtes déjà inscrit !",
     "errorMsg": "Une erreur est survenue. Réessayez.",
     "privacyNote": "Pas de spam. Désabonnement à tout moment."
+  },
+  "chat": {
+    "title": "Discuter avec PDF",
+    "subtitle": "Posez des questions sur votre document",
+    "tryAsking": "Essayez de demander :",
+    "suggestions": {
+      "topic": "Quel est le sujet principal ?",
+      "keyPoints": "Quels sont les points clés ?",
+      "methodology": "Décrivez la méthodologie",
+      "conclusion": "Quelles sont les conclusions ?"
+    },
+    "inputPlaceholder": "Posez une question sur votre PDF...",
+    "send": "Envoyer",
+    "clear": "Effacer",
+    "error": "Une erreur est survenue. Réessayez.",
+    "streamError": "Échec de la lecture de la réponse.",
+    "proRequired": "Discuter avec PDF est une fonction Pro. Mettez à niveau pour débloquer.",
+    "upgradePrompt": "Passez à Pro pour discuter avec votre PDF...",
+    "proHint": "Discuter avec PDF est une fonction Pro.",
+    "upgradeLink": "Mettre à niveau"
   }
 }

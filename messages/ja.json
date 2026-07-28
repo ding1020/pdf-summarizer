@@ -103,7 +103,8 @@
         "無制限のドキュメント履歴",
         "Markdown形式でダウンロード",
         "優先サポート",
-        "長いドキュメント対応（最大約30ページ）"
+        "長いドキュメント対応（最大約30ページ）",
+        "PDFとチャット — AIに文書について質問"
       ],
       "button": "プロにアップグレード",
       "pricePerMonth": "月額約$4.92相当"
@@ -540,5 +541,25 @@
     "alreadySubscribed": "既に登録されています！",
     "errorMsg": "エラーが発生しました。再度お試しください。",
     "privacyNote": "スパムなし。いつでも配信停止できます。"
+  },
+  "chat": {
+    "title": "PDFとチャット",
+    "subtitle": "ドキュメントについて質問する",
+    "tryAsking": "質問してみる：",
+    "suggestions": {
+      "topic": "主なテーマは何ですか？",
+      "keyPoints": "重要なポイントは？",
+      "methodology": "手法を教えてください",
+      "conclusion": "結論は何ですか？"
+    },
+    "inputPlaceholder": "PDFについて質問を入力...",
+    "send": "送信",
+    "clear": "クリア",
+    "error": "エラーが発生しました。再試行してください。",
+    "streamError": "応答の読み取りに失敗しました。",
+    "proRequired": "PDFとのチャットはPro機能です。アップグレードしてください。",
+    "upgradePrompt": "Proにアップグレードしてチャットを開始...",
+    "proHint": "PDFとのチャットはPro機能です。",
+    "upgradeLink": "今すぐアップグレード"
   }
 }

@@ -144,7 +144,8 @@
         "Unlimited document history",
         "Download summaries as Markdown",
         "Priority support",
-        "Longer documents (up to ~30 pages)"
+        "Longer documents (up to ~30 pages)",
+        "Chat with PDF — Ask AI about your document"
       ],
       "button": "Upgrade to Pro",
       "pricePerMonth": "Equivalent to $4.92/month"
@@ -641,5 +642,25 @@
     "alreadySubscribed": "You're already subscribed!",
     "errorMsg": "Something went wrong. Please try again.",
     "privacyNote": "No spam. Unsubscribe anytime."
+  },
+  "chat": {
+    "title": "Chat with PDF",
+    "subtitle": "Ask questions about your document",
+    "tryAsking": "Try asking:",
+    "suggestions": {
+      "topic": "What is the main topic?",
+      "keyPoints": "What are the key points?",
+      "methodology": "Describe the methodology",
+      "conclusion": "What are the conclusions?"
+    },
+    "inputPlaceholder": "Ask a question about your PDF...",
+    "send": "Send",
+    "clear": "Clear",
+    "error": "Something went wrong. Please try again.",
+    "streamError": "Failed to read response.",
+    "proRequired": "Chat with PDF is a Pro feature. Upgrade to unlock.",
+    "upgradePrompt": "Upgrade to Pro to chat with your PDF...",
+    "proHint": "Chat with PDF is a Pro feature.",
+    "upgradeLink": "Upgrade now"
   }
 }

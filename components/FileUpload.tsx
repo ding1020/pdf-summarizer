@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/useToast";
 import UploadDropzone from "./UploadDropzone";
 import FileInfoCard from "./FileInfoCard";
 import SummaryDisplay from "./SummaryDisplay";
+import ChatWithPDF from "./ChatWithPDF";
 import ErrorMessage from "./ErrorMessage";
 import { UploadSkeleton, SummarySkeleton } from "./Skeleton";
 import { trackPdfUpload, trackSummaryCompleted } from "@/lib/analytics";
@@ -405,6 +406,15 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
             onShare={handleShare}
             onCancel={cancelSummary}
           />
+
+          {/* Chat with PDF — Pro feature, appears below summary */}
+          {summary && !isSummarizing && (
+            <ChatWithPDF
+              content={result.content}
+              documentId={result.documentId}
+              isPro={isPro}
+            />
+          )}
         </div>
       )}
     </div>

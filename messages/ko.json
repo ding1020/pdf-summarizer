@@ -103,7 +103,8 @@
         "무제한 문서 기록",
         "Markdown으로 요약 다운로드",
         "우선 지원",
-        "긴 문서 지원 (최대 ~30페이지)"
+        "긴 문서 지원 (최대 ~30페이지)",
+        "PDF와 대화 — AI에게 문서 내용 질문"
       ],
       "button": "프로로 업그레이드",
       "pricePerMonth": "월 $4.92 상당"
@@ -540,5 +541,25 @@
     "alreadySubscribed": "이미 구독 중입니다!",
     "errorMsg": "오류가 발생했습니다. 다시 시도해주세요.",
     "privacyNote": "스팸 없음. 언제든 구독 취소 가능."
+  },
+  "chat": {
+    "title": "PDF와 대화",
+    "subtitle": "문서에 대해 질문하세요",
+    "tryAsking": "질문해보세요:",
+    "suggestions": {
+      "topic": "주요 주제가 무엇인가요?",
+      "keyPoints": "핵심 포인트는?",
+      "methodology": "연구 방법을 설명해주세요",
+      "conclusion": "결론이 무엇인가요?"
+    },
+    "inputPlaceholder": "PDF에 대한 질문을 입력하세요...",
+    "send": "전송",
+    "clear": "삭제",
+    "error": "오류가 발생했습니다. 다시 시도해주세요.",
+    "streamError": "응답을 읽지 못했습니다.",
+    "proRequired": "PDF와 대화는 Pro 기능입니다. 업그레이드하세요.",
+    "upgradePrompt": "Pro로 업그레이드하여 채팅을 시작하세요...",
+    "proHint": "PDF와 대화는 Pro 기능입니다.",
+    "upgradeLink": "지금 업그레이드"
   }
 }

@@ -103,7 +103,8 @@
         "Historial de documentos ilimitado",
         "Descargar resúmenes como Markdown",
         "Soporte prioritario",
-        "Documentos más largos (hasta ~30 páginas)"
+        "Documentos más largos (hasta ~30 páginas)",
+        "Chatear con PDF — Pregunta a la IA sobre tu documento"
       ],
       "button": "Actualizar a Pro",
       "pricePerMonth": "Equivalente a $4.92/mes"
@@ -540,5 +541,25 @@
     "alreadySubscribed": "¡Ya estás suscrito!",
     "errorMsg": "Algo salió mal. Inténtalo de nuevo.",
     "privacyNote": "Sin spam. Cancela cuando quieras."
+  },
+  "chat": {
+    "title": "Chatear con PDF",
+    "subtitle": "Haz preguntas sobre tu documento",
+    "tryAsking": "Prueba preguntar:",
+    "suggestions": {
+      "topic": "¿Cuál es el tema principal?",
+      "keyPoints": "¿Cuáles son los puntos clave?",
+      "methodology": "Describe la metodología",
+      "conclusion": "¿Cuáles son las conclusiones?"
+    },
+    "inputPlaceholder": "Haz una pregunta sobre tu PDF...",
+    "send": "Enviar",
+    "clear": "Limpiar",
+    "error": "Algo salió mal. Inténtalo de nuevo.",
+    "streamError": "Error al leer la respuesta.",
+    "proRequired": "Chatear con PDF es una función Pro. Actualiza para desbloquear.",
+    "upgradePrompt": "Actualiza a Pro para chatear con tu PDF...",
+    "proHint": "Chatear con PDF es una función Pro.",
+    "upgradeLink": "Actualizar ahora"
   }
 }
