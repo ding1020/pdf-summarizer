@@ -177,7 +177,30 @@
     "refundGuarantee": "30 天无条件退款保证",
     "viewRefundPolicy": "查看退款政策",
     "questions": "有问题？",
-    "contactUs": "联系我们"
+    "contactUs": "联系我们",
+    "proPlus": {
+      "name": "Pro+",
+      "price": "$19",
+      "yearlyPrice": "$159",
+      "period": "/月",
+      "yearlyPeriod": "/年",
+      "description": "为高级用户和团队设计",
+      "badge": "高级用户",
+      "button": "升级至 Pro+",
+      "pricePerMonth": "相当于 $13.25/月",
+      "features": [
+        "Pro 全部功能",
+        "每月 500 次 PDF 摘要",
+        "优先 AI 处理",
+        "超额 $0.03/次",
+        "团队协作（最多5人）",
+        "API 访问",
+        "专属客服",
+        "自定义集成"
+      ]
+    },
+    "comingSoon": "即将上线",
+    "paymentComingSoon": "付费方案即将上线，免费版已全面开放，敬请体验！"
   },
   "guest": {
     "welcomeTitle": "免费试用 PDF 智能摘要",
@@ -599,7 +622,12 @@
     "tokens": "Token",
     "cost": "费用",
     "providerBreakdown": "供应商分布（本月）",
-    "inputOutput": "入 {input} / 出 {output}"
+    "inputOutput": "入 {input} / 出 {output}",
+    "tabReviews": "评价",
+    "tabAlerts": "告警",
+    "mrr": "月经常性收入",
+    "thisMonth": "本月",
+    "lastMonthRevenue": "上月收入"
   },
   "payment": {
     "successTitle": "支付成功！",
@@ -639,5 +667,35 @@
     "upgradePrompt": "升级 Pro 即可对话...",
     "proHint": "PDF 对话是 Pro 功能。",
     "upgradeLink": "立即升级"
+  },
+  "reviews": {
+    "meta": {
+      "title": "用户评价 - PDF智能摘要",
+      "description": "查看真实用户对我们产品的评价"
+    },
+    "title": "用户评价",
+    "subtitle": "来自真实用户的真实反馈",
+    "outOf5": "满分 5 分",
+    "reviews": "条评价",
+    "writeReview": "撰写评价",
+    "yourRating": "您的评分",
+    "titlePlaceholder": "简要总结您的体验",
+    "reviewPlaceholder": "告诉我们您喜欢什么，或者我们可以如何改进...",
+    "submitting": "提交中...",
+    "submitReview": "提交评价",
+    "thankYou": "感谢您的评价！",
+    "reviewSubmitted": "您的评价已提交审核。",
+    "adminReply": "团队回复",
+    "noReviews": "暂无评价。成为第一个分享体验的用户！",
+    "filter": {
+      "all": "全部",
+      "positive": "好评",
+      "critical": "批评"
+    },
+    "sort": {
+      "newest": "最新",
+      "highest": "评分最高",
+      "lowest": "评分最低"
+    }
   }
 }

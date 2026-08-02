@@ -7,13 +7,13 @@
  *  - Idempotency
  *  - Rate limiting integration
  */
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll } from "vitest";
 import crypto from "crypto";
 
 // ── Signature Verification (inline test to avoid export coupling) ──
 function verifySignature(payload: string, secret: string, signature: string): boolean {
   // Validate signature is a valid hex string
-  if (!/^[a-f0-9]+$/i.test(signature) || signature.length < 8) return false;
+  if (!/^[a-f0-9]+$/i.test(signature) || signature.length < 64) return false;
 
   const expected = crypto.createHmac("sha256", secret).update(payload).digest("hex");
   const expectedBuf = Buffer.from(expected, "hex");
@@ -44,8 +44,8 @@ describe("Webhook Signature Verification", () => {
     expect(verifySignature(payload, secret, "gggg0000111122223333")).toBe(false);
   });
 
-  it("rejects a short signature (< 8 chars)", () => {
-    expect(verifySignature(payload, secret, "a1b2")).toBe(false);
+  it("rejects a short signature (< 64 chars)", () => {
+    expect(verifySignature(payload, secret, "a1b2c3d4e5f6")).toBe(false);
   });
 
   it("verifies different payloads produce different signatures", () => {
@@ -62,22 +62,33 @@ describe("Webhook Signature Verification", () => {
 
 // ── Event Type Dispatch Logic ──
 describe("Webhook Event Dispatch", () => {
-  it("EVENT_HANDLERS contains expected event types", async () => {
-    // Import the webhook route to check EVENT_HANDLERS
-    const mod = await import("@/app/api/webhooks/creem/route");
-    const handlers = Object.keys(mod.EVENT_HANDLERS || {});
+  // Import once — creem-webhook pulls in Prisma which is slow to load
+  let getEventHandler: (eventType: string) => ((data: Record<string, unknown>) => Promise<void>) | undefined;
 
-    // Core subscription events should be handled
+  beforeAll(async () => {
+    const mod = await import("@/lib/creem-webhook");
+    getEventHandler = mod.getEventHandler;
+  }, 30000);
+
+  it("getEventHandler returns handlers for expected event types", () => {
+    // Core subscription events should have handlers
     const expectedEvents = [
       "subscription.paid",
+      "subscription.active",
       "subscription.canceled",
       "subscription.past_due",
       "checkout.completed",
     ];
 
     for (const event of expectedEvents) {
-      expect(handlers.includes(event) || true).toBe(true); // Soft assertion
+      const handler = getEventHandler(event);
+      expect(handler).toBeDefined();
+      expect(typeof handler).toBe("function");
     }
+  });
+
+  it("getEventHandler returns undefined for unknown event types", () => {
+    expect(getEventHandler("unknown.event")).toBeUndefined();
   });
 });
 

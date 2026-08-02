@@ -35,7 +35,9 @@ export default function NpsModal({ usageCount }: NpsModalProps) {
   }, [usageCount, isSignedIn]);
 
   useEffect(() => {
-    checkAndShow();
+    queueMicrotask(() => {
+      checkAndShow();
+    });
   }, [checkAndShow]);
 
   const handleSubmit = async () => {

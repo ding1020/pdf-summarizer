@@ -39,7 +39,11 @@ export const summarizeSchema = z.object({
     .optional()
     .default('multilingual'),
   // Stream-generated summary passed from frontend (avoids re-calling AI)
-  streamSummary: z.string().optional(),
+  // Length-limited to prevent abuse (50K chars is generous for a summary)
+  streamSummary: z
+    .string()
+    .max(50000, { message: 'Stream summary too long' })
+    .optional(),
 });
 
 export type SummarizeInput = z.infer<typeof summarizeSchema>;

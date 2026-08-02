@@ -192,7 +192,30 @@
     "refundGuarantee": "30-Day Money-Back Guarantee",
     "viewRefundPolicy": "View Refund Policy",
     "questions": "Questions?",
-    "contactUs": "Contact us"
+    "contactUs": "Contact us",
+    "proPlus": {
+      "name": "Pro+",
+      "price": "$19",
+      "yearlyPrice": "$159",
+      "period": "/month",
+      "yearlyPeriod": "/year",
+      "description": "For power users and teams",
+      "badge": "Power User",
+      "button": "Upgrade to Pro+",
+      "pricePerMonth": "Equivalent to $13.25/month",
+      "features": [
+        "Everything in Pro",
+        "500 PDF summaries per month",
+        "Priority AI processing",
+        "$0.03 per extra summary",
+        "Team collaboration (up to 5)",
+        "API access",
+        "Dedicated support",
+        "Custom integrations"
+      ]
+    },
+    "comingSoon": "Coming Soon",
+    "paymentComingSoon": "Paid plans are coming soon. The free tier is fully active — enjoy it!"
   },
   "guest": {
     "welcomeTitle": "Try PDF Summarizer for Free",
@@ -625,7 +648,12 @@
     "tokens": "Tokens",
     "cost": "Cost",
     "providerBreakdown": "Provider Breakdown (This Month)",
-    "inputOutput": "In {input} / Out {output}"
+    "inputOutput": "In {input} / Out {output}",
+    "tabReviews": "Reviews",
+    "tabAlerts": "Alerts",
+    "mrr": "MRR",
+    "thisMonth": "This Month",
+    "lastMonthRevenue": "Last Month"
   },
   "payment": {
     "successTitle": "Payment Successful!",
@@ -665,5 +693,35 @@
     "upgradePrompt": "Upgrade to Pro to chat with your PDF...",
     "proHint": "Chat with PDF is a Pro feature.",
     "upgradeLink": "Upgrade now"
+  },
+  "reviews": {
+    "meta": {
+      "title": "Customer Reviews - PDF Summary",
+      "description": "See what our users say about PDF Summary"
+    },
+    "title": "Customer Reviews",
+    "subtitle": "Real feedback from real users",
+    "outOf5": "out of 5",
+    "reviews": "reviews",
+    "writeReview": "Write a Review",
+    "yourRating": "Your Rating",
+    "titlePlaceholder": "Summarize your experience",
+    "reviewPlaceholder": "Tell us what you liked or how we can improve...",
+    "submitting": "Submitting...",
+    "submitReview": "Submit Review",
+    "thankYou": "Thank you!",
+    "reviewSubmitted": "Your review has been submitted for approval.",
+    "adminReply": "Response from team",
+    "noReviews": "No reviews yet. Be the first to share your experience!",
+    "filter": {
+      "all": "All",
+      "positive": "Positive",
+      "critical": "Critical"
+    },
+    "sort": {
+      "newest": "Newest",
+      "highest": "Highest Rated",
+      "lowest": "Lowest Rated"
+    }
   }
 }

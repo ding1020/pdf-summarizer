@@ -4,6 +4,7 @@ import { Link } from "@/navigation";
 import { PLAN_AMOUNTS } from "@/lib/constants";
 import HomeUploadWrapper from "@/components/HomeUploadWrapper";
 import NewsletterSignup from "@/components/NewsletterSignup";
+import { cookies } from "next/headers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
@@ -20,6 +21,8 @@ const DESCRIPTIONS: Record<string, string> = {
 const LOCALE_MAP: Record<string, string> = {
   en: "en_US", zh: "zh_CN", ja: "ja_JP", ko: "ko_KR", es: "es_ES", fr: "fr_FR", de: "de_DE",
 };
+
+export const revalidate = 300;
 
 export async function generateMetadata({
   params,
@@ -73,6 +76,8 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
   const t = await getTranslations({ locale });
+  const cookieStore = await cookies();
+  const nonce = cookieStore.get("__csp_nonce")?.value;
   const heroSubtitle = t("hero.subtitle");
   const siteName = "PDF Summary AI";
 
@@ -99,6 +104,7 @@ export default async function HomePage({
     <>
       <script
         type="application/ld+json"
+        nonce={nonce}
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <main className="min-h-screen bg-white" id="main-content">
@@ -407,6 +413,7 @@ export default async function HomePage({
                 <Link href="/privacy" className="hover:text-white transition">{t("footer.privacy")}</Link>
                 <Link href="/terms" className="hover:text-white transition">{t("footer.terms")}</Link>
                 <Link href="/refund" className="hover:text-white transition">{t("footer.refund")}</Link>
+                <Link href="/dmca" className="hover:text-white transition">DMCA</Link>
               </div>
               <div className="text-gray-500 text-sm">
                 &copy; {new Date().getFullYear()} {t("footer.copyright")}

@@ -49,4 +49,4 @@ export function subscriptionBadgeVariant(status: string | null | undefined): str
 }
 
 /** Trial duration in days */
-export const TRIAL_DURATION_DAYS = 3;
+export const TRIAL_DURATION_DAYS = 14;

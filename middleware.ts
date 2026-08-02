@@ -109,6 +109,10 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     "/api/payment",
     "/api/api-keys",
     "/api/admin",
+    "/api/checkout",
+    "/api/customer-portal",
+    "/api/subscription",
+    "/api/feedback",
   ];
 
   if (
@@ -210,5 +214,9 @@ export const config = {
     "/api/payment/:path*",
     "/api/api-keys/:path*",
     "/api/admin/:path*",
+    "/api/checkout/:path*",
+    "/api/customer-portal/:path*",
+    "/api/subscription/:path*",
+    "/api/feedback/:path*",
   ],
 };

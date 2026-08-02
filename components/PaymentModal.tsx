@@ -17,7 +17,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
 
   useEffect(() => {
     if (!isOpen) return;
-    setError("");
+    queueMicrotask(() => setError(""));
 
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onClose();

@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/navigation";
 import { useSearchParams } from "next/navigation";
@@ -17,6 +17,7 @@ function SignInForm() {
   const [loading, setLoading] = useState(false);
   const [resendingVerification, setResendingVerification] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
+  const errorRef = useRef<string | null>(null);
 
   // Helper: read CSRF cookie and send as header
   const getCsrfHeader = (): Record<string, string> => {
@@ -50,7 +51,12 @@ function SignInForm() {
         expired_token: "This verification link has expired. Please sign up again or request a new one.",
         server_error: "A server error occurred during verification. Please try again.",
       };
-      setError(errorMessages[urlError] || "Something went wrong. Please try again.");
+      if (errorRef.current !== urlError) {
+        errorRef.current = urlError;
+        queueMicrotask(() => {
+          setError(errorMessages[urlError] || "Something went wrong. Please try again.");
+        });
+      }
     }
   }, [searchParams]);
 

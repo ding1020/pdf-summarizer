@@ -418,7 +418,13 @@ export async function summarizeStreamWithFallback(
         { signal: controller.signal },
       );
 
+      // Connection succeeded — clear the connection timeout,
+      // but set a longer hard limit to protect the streaming phase.
       clearTimeout(timeoutId);
+      const streamTimeoutId = setTimeout(
+        () => controller.abort(),
+        120_000, // 2 min max for entire stream
+      );
 
       let outputText = "";
       const encoder = new TextEncoder();
@@ -462,6 +468,8 @@ export async function summarizeStreamWithFallback(
             } else {
               streamController.error(err);
             }
+          } finally {
+            clearTimeout(streamTimeoutId);
           }
         },
       });

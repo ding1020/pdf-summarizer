@@ -33,6 +33,7 @@ export default function LanguageSwitcher() {
     if (newLocale === locale) return;
 
     // Set cookie so middleware remembers preference
+    // eslint-disable-next-line react-hooks/immutability
     document.cookie =
       `NEXT_LOCALE=${newLocale};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
 
@@ -45,7 +46,7 @@ export default function LanguageSwitcher() {
     } else {
       parts.unshift(newLocale);
     }
-    window.location.href = "/" + parts.join("/") + window.location.search;
+    window.location.assign("/" + parts.join("/") + window.location.search);
   };
 
   return (

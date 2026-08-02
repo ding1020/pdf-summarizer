@@ -175,7 +175,30 @@
       "line2": "Diseñado para investigadores, estudiantes y profesionales"
     },
     "questions": "¿Preguntas?",
-    "contactUs": "Contáctanos"
+    "contactUs": "Contáctanos",
+    "proPlus": {
+      "name": "Pro+",
+      "price": "$19",
+      "yearlyPrice": "$159",
+      "period": "/mes",
+      "yearlyPeriod": "/año",
+      "description": "Para usuarios avanzados y equipos",
+      "badge": "Usuario Avanzado",
+      "button": "Actualizar a Pro+",
+      "pricePerMonth": "Equivalente a $13.25/mes",
+      "features": [
+        "Todo lo incluido en Pro",
+        "500 resúmenes PDF/mes",
+        "Procesamiento AI prioritario",
+        "$0.03 por resumen extra",
+        "Colaboración en equipo (hasta 5)",
+        "Acceso API",
+        "Soporte dedicado",
+        "Integraciones personalizadas"
+      ]
+    },
+    "comingSoon": "Próximamente",
+    "paymentComingSoon": "Los planes de pago llegarán pronto. ¡La versión gratuita está disponible!"
   },
   "guest": {
     "welcomeTitle": "Prueba PDF Summarizer Gratis",
@@ -564,5 +587,35 @@
     "upgradePrompt": "Actualiza a Pro para chatear con tu PDF...",
     "proHint": "Chatear con PDF es una función Pro.",
     "upgradeLink": "Actualizar ahora"
+  },
+  "reviews": {
+    "meta": {
+      "title": "Reseñas - PDF Summary",
+      "description": "Vea lo que dicen nuestros usuarios"
+    },
+    "title": "Reseñas",
+    "subtitle": "Feedback real de usuarios reales",
+    "outOf5": "de 5",
+    "reviews": "reseñas",
+    "writeReview": "Escribir reseña",
+    "yourRating": "Tu calificación",
+    "titlePlaceholder": "Resume tu experiencia",
+    "reviewPlaceholder": "Cuéntanos qué te gustó...",
+    "submitting": "Enviando...",
+    "submitReview": "Enviar reseña",
+    "thankYou": "¡Gracias!",
+    "reviewSubmitted": "Tu reseña ha sido enviada para aprobación.",
+    "adminReply": "Respuesta del equipo",
+    "noReviews": "Aún no hay reseñas. ¡Sé el primero!",
+    "filter": {
+      "all": "Todas",
+      "positive": "Positivas",
+      "critical": "Críticas"
+    },
+    "sort": {
+      "newest": "Más reciente",
+      "highest": "Más alto",
+      "lowest": "Más bajo"
+    }
   }
 }

@@ -1,0 +1,60 @@
+﻿
+D:\VS\pdf-summarizer\app\[locale]\privacy\page.tsx
+  221:74  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\VS\pdf-summarizer\app\[locale]\sign-in\page.tsx
+  55:9  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\VS\pdf-summarizer\app\[locale]\sign-in\page.tsx:55:9
+  53 |       if (errorRef.current !== urlError) {
+  54 |         errorRef.current = urlError;
+> 55 |         setError(errorMessages[urlError] || "Something went wrong. Please try again.");
+     |         ^^^^^^^^ Avoid calling setState() directly within an effect
+  56 |       }
+  57 |     }
+  58 |   }, [searchParams]);  react-hooks/set-state-in-effect
+
+D:\VS\pdf-summarizer\components\DocumentHistory.tsx
+  157:6  warning  React Hook useCallback has a missing dependency: 'toast'. Either include it or remove the dependency array                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               react-hooks/exhaustive-deps
+  178:5  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\VS\pdf-summarizer\components\DocumentHistory.tsx:178:5
+  176 |
+  177 |   useEffect(() => {
+> 178 |     fetchDocuments();
+      |     ^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  179 |   }, [fetchDocuments]);
+  180 |
+  181 |   const handleDelete = useCallback(async (id: string) => {  react-hooks/set-state-in-effect
+
+D:\VS\pdf-summarizer\components\FileUpload.tsx
+  216:6  warning  React Hook useCallback has missing dependencies: 'isPro' and 'locale'. Either include them or remove the dependency array  react-hooks/exhaustive-deps
+  291:6  warning  React Hook useCallback has a missing dependency: 'toast'. Either include it or remove the dependency array                 react-hooks/exhaustive-deps
+  351:5  warning  React Hook useCallback has a missing dependency: 'locale'. Either include it or remove the dependency array                react-hooks/exhaustive-deps
+
+D:\VS\pdf-summarizer\components\LanguageSwitcher.tsx
+  36:5  warning  Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+D:\VS\pdf-summarizer\components\LanguageSwitcher.tsx:36:5
+  34 |
+  35 |     // Set cookie so middleware remembers preference
+> 36 |     document.cookie =
+     |     ^^^^^^^^ value cannot be modified
+  37 |       `NEXT_LOCALE=${newLocale};path=/;max-age=${60 * 60 * 24 * 365};SameSite=Lax`;
+  38 |
+  39 |     // Full navigation: ensures cookie is sent to server and middleware  react-hooks/immutability
+  48:5  warning  Error: This value cannot be modified

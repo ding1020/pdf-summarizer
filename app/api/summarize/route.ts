@@ -80,29 +80,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ==================== If stream already generated summary, skip checks & AI ====================
-    if (streamSummary) {
-      logger.info("Summary provided from stream — skipping AI re-generation", { documentId });
-      
-      // Still save to DB if signed-in
-      if (!isGuest && documentId) {
-        try {
-          await prisma.document.update({
-            where: { id: documentId },
-            data: { summary: streamSummary, status: "completed" },
-          });
-        } catch (dbError) {
-          logger.warn("Failed to save stream summary to DB", { documentId });
-        }
-      }
-
-      return NextResponse.json(
-        { success: true, summary: streamSummary, documentId, provider: "stream" },
-        { headers: getRateLimitHeaders(rateLimitResult) }
-      );
-    }
-
-    // ==================== Daily Usage Limit (only for actual AI calls, not stream-pass-through) ====================
+    // ==================== Daily Usage Limit (moved before streamSummary to prevent bypass) ====================
     if (!isGuest) {
       try {
         const usageCheck = await checkAndIncrementDailyUsage(userId!, FREE_DAILY_LIMIT);
@@ -141,6 +119,40 @@ export async function POST(req: NextRequest) {
           { status: 402, headers: { "Content-Type": "application/json" } },
         );
       }
+    }
+
+    // ==================== If stream already generated summary, skip AI re-generation ====================
+    if (streamSummary) {
+      logger.info("Summary provided from stream — skipping AI re-generation", { documentId });
+
+      // Still save to DB if signed-in — WITH ownership verification
+      if (!isGuest && documentId) {
+        try {
+          // Verify ownership before updating (prevents IDOR)
+          const doc = await prisma.document.findUnique({
+            where: { id: documentId },
+            select: { userId: true },
+          });
+          if (!doc || doc.userId !== userId!) {
+            logger.warn("Document ownership mismatch in streamSummary", { documentId, userId });
+            return NextResponse.json(
+              { error: "Document not found or access denied." },
+              { status: 403, headers: { "Content-Type": "application/json" } }
+            );
+          }
+          await prisma.document.update({
+            where: { id: documentId },
+            data: { summary: streamSummary, status: "completed" },
+          });
+        } catch (dbError) {
+          logger.warn("Failed to save stream summary to DB", { documentId });
+        }
+      }
+
+      return NextResponse.json(
+        { success: true, summary: streamSummary, documentId, provider: "stream" },
+        { headers: getRateLimitHeaders(rateLimitResult) }
+      );
     }
 
     if (!resolvedContent) {
@@ -187,7 +199,7 @@ export async function POST(req: NextRequest) {
     }
 
     const userType = await getUserType(userId);
-    saveUsageLog({
+    await saveUsageLog({
       userId,
       provider: aiUsage.provider,
       model: aiUsage.model,

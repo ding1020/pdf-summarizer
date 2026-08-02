@@ -3,9 +3,17 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import { validateCsrf } from "@/lib/csrf";
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      return NextResponse.json(
+        { error: "Invalid security token. Please refresh the page and try again." },
+        { status: 403 },
+      );
+    }
     const userId = await getAuthUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

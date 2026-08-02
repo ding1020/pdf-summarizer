@@ -7,7 +7,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
 import { logger } from "@/lib/logger";
-import { ALLOWED_CREEM_PRICE_IDS } from "@/lib/constants";
+import { ALLOWED_CREEM_PRICE_IDS, isPaymentEnabled } from "@/lib/constants";
+import { validateCsrf } from "@/lib/csrf";
 
 const CREEM_API_KEY = process.env.CREEM_SECRET_KEY?.replace(/^\uFEFF/, "");
 const CREEM_BASE_URL =
@@ -16,6 +17,23 @@ const CREEM_BASE_URL =
     : "https://api.creem.io/v1";
 
 export async function POST(req: NextRequest) {
+  // ── CSRF check ──
+  if (!validateCsrf(req)) {
+    return NextResponse.json(
+      { error: "Invalid security token. Please refresh the page and try again." },
+      { status: 403 },
+    );
+  }
+
+  // ── Feature flag: paid plans disabled in free-tier deployment ──
+  if (!isPaymentEnabled) {
+    logger.warn("Checkout blocked: payment not enabled (free-tier deployment)");
+    return NextResponse.json(
+      { error: "Paid plans are coming soon. The free tier is currently active.", code: "payment_not_enabled" },
+      { status: 503 },
+    );
+  }
+
   // ── Auth check ──
   const userId = await getAuthUserId();
   if (!userId) {

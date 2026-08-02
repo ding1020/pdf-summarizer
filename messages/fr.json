@@ -175,7 +175,30 @@
       "line2": "Conçu pour les chercheurs, étudiants et professionnels"
     },
     "questions": "Des questions ?",
-    "contactUs": "Nous contacter"
+    "contactUs": "Nous contacter",
+    "proPlus": {
+      "name": "Pro+",
+      "price": "$19",
+      "yearlyPrice": "$159",
+      "period": "/mois",
+      "yearlyPeriod": "/an",
+      "description": "Pour les utilisateurs avancés et les équipes",
+      "badge": "Utilisateur Avancé",
+      "button": "Passer à Pro+",
+      "pricePerMonth": "Équivalent à $13.25/mois",
+      "features": [
+        "Tout ce qui est inclus dans Pro",
+        "500 résumés PDF/mois",
+        "Traitement AI prioritaire",
+        "$0.03 par résumé supplémentaire",
+        "Collaboration en équipe (jusqu'à 5)",
+        "Accès API",
+        "Support dédié",
+        "Intégrations personnalisées"
+      ]
+    },
+    "comingSoon": "Bientôt disponible",
+    "paymentComingSoon": "Les forfaits payants arrivent bientôt. La version gratuite est disponible !"
   },
   "guest": {
     "welcomeTitle": "Essayez PDF Summarizer Gratuitement",
@@ -564,5 +587,35 @@
     "upgradePrompt": "Passez à Pro pour discuter avec votre PDF...",
     "proHint": "Discuter avec PDF est une fonction Pro.",
     "upgradeLink": "Mettre à niveau"
+  },
+  "reviews": {
+    "meta": {
+      "title": "Avis Clients - PDF Summary",
+      "description": "Découvrez ce que nos utilisateurs disent"
+    },
+    "title": "Avis Clients",
+    "subtitle": "Retours authentiques d'utilisateurs réels",
+    "outOf5": "sur 5",
+    "reviews": "avis",
+    "writeReview": "Écrire un avis",
+    "yourRating": "Votre note",
+    "titlePlaceholder": "Résumez votre expérience",
+    "reviewPlaceholder": "Dites-nous ce que vous avez aimé...",
+    "submitting": "Envoi en cours...",
+    "submitReview": "Soumettre l'avis",
+    "thankYou": "Merci !",
+    "reviewSubmitted": "Votre avis a été soumis pour approbation.",
+    "adminReply": "Réponse de l'équipe",
+    "noReviews": "Pas encore d'avis. Soyez le premier !",
+    "filter": {
+      "all": "Tous",
+      "positive": "Positif",
+      "critical": "Critique"
+    },
+    "sort": {
+      "newest": "Plus récent",
+      "highest": "Mieux noté",
+      "lowest": "Moins bien noté"
+    }
   }
 }

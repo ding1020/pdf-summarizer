@@ -175,7 +175,30 @@
       "line2": "연구자, 학생, 비즈니스 전문가를 위해 설계되었습니다"
     },
     "questions": "질문이 있으신가요?",
-    "contactUs": "문의하기"
+    "contactUs": "문의하기",
+    "proPlus": {
+      "name": "Pro+",
+      "price": "$19",
+      "yearlyPrice": "$159",
+      "period": "/월",
+      "yearlyPeriod": "/년",
+      "description": "파워 유저와 팀을 위해",
+      "badge": "파워 유저",
+      "button": "Pro+ 업그레이드",
+      "pricePerMonth": "월 $13.25 상당",
+      "features": [
+        "Pro의 모든 기능",
+        "월 500회 PDF 요약",
+        "우선 AI 처리",
+        "초과분 $0.03/회",
+        "팀 협업 (최대 5명)",
+        "API 접근",
+        "전담 지원",
+        "커스텀 통합"
+      ]
+    },
+    "comingSoon": "출시 예정",
+    "paymentComingSoon": "유료 플랜이 곧 출시됩니다. 무료 버전을 이용해 보세요."
   },
   "guest": {
     "welcomeTitle": "PDF Summarizer를 무료로 체험하세요",
@@ -564,5 +587,35 @@
     "upgradePrompt": "Pro로 업그레이드하여 채팅을 시작하세요...",
     "proHint": "PDF와 대화는 Pro 기능입니다.",
     "upgradeLink": "지금 업그레이드"
+  },
+  "reviews": {
+    "meta": {
+      "title": "고객 리뷰 - PDF Summary",
+      "description": "실제 사용자들의 평가를 확인하세요"
+    },
+    "title": "고객 리뷰",
+    "subtitle": "실제 사용자들의 진솔한 피드백",
+    "outOf5": "5점 만점",
+    "reviews": "개의 리뷰",
+    "writeReview": "리뷰 작성",
+    "yourRating": "별점",
+    "titlePlaceholder": "경험을 간략히 요약해주세요",
+    "reviewPlaceholder": "좋았던 점이나 개선점을 알려주세요...",
+    "submitting": "제출 중...",
+    "submitReview": "리뷰 제출",
+    "thankYou": "감사합니다!",
+    "reviewSubmitted": "리뷰가 승인 대기 중입니다.",
+    "adminReply": "팀 답변",
+    "noReviews": "아직 리뷰가 없습니다. 첫 번째 리뷰어가 되어보세요!",
+    "filter": {
+      "all": "전체",
+      "positive": "긍정",
+      "critical": "비판"
+    },
+    "sort": {
+      "newest": "최신",
+      "highest": "높은 평점",
+      "lowest": "낮은 평점"
+    }
   }
 }

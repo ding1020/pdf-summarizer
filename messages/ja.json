@@ -175,7 +175,30 @@
       "line2": "研究者、学生、ビジネスプロフェッショナル向けに設計"
     },
     "questions": "ご質問は？",
-    "contactUs": "お問い合わせ"
+    "contactUs": "お問い合わせ",
+    "proPlus": {
+      "name": "Pro+",
+      "price": "$19",
+      "yearlyPrice": "$159",
+      "period": "/月",
+      "yearlyPeriod": "/年",
+      "description": "パワーユーザーとチーム向け",
+      "badge": "パワーユーザー",
+      "button": "Pro+ にアップグレード",
+      "pricePerMonth": "月額 $13.25 相当",
+      "features": [
+        "Pro の全機能",
+        "月間 500 回の PDF 要約",
+        "優先 AI 処理",
+        "超過分 $0.03/回",
+        "チームコラボレーション（最大5名）",
+        "API アクセス",
+        "専用サポート",
+        "カスタム統合"
+      ]
+    },
+    "comingSoon": "近日公開",
+    "paymentComingSoon": "有料プランは近日公開予定です。無料版はご利用いただけます。"
   },
   "guest": {
     "welcomeTitle": "PDF Summarizerを無料でお試しください",
@@ -564,5 +587,35 @@
     "upgradePrompt": "Proにアップグレードしてチャットを開始...",
     "proHint": "PDFとのチャットはPro機能です。",
     "upgradeLink": "今すぐアップグレード"
+  },
+  "reviews": {
+    "meta": {
+      "title": "カスタマーレビュー - PDF Summary",
+      "description": "実際のユーザーの声をご覧ください"
+    },
+    "title": "カスタマーレビュー",
+    "subtitle": "実際のユーザーからのリアルなフィードバック",
+    "outOf5": "5点満点",
+    "reviews": "件のレビュー",
+    "writeReview": "レビューを書く",
+    "yourRating": "あなたの評価",
+    "titlePlaceholder": "体験を簡潔にまとめてください",
+    "reviewPlaceholder": "気に入った点や改善点を教えてください...",
+    "submitting": "送信中...",
+    "submitReview": "レビューを投稿",
+    "thankYou": "ありがとうございます！",
+    "reviewSubmitted": "レビューは承認待ちです。",
+    "adminReply": "チームからの返信",
+    "noReviews": "まだレビューがありません。最初のレビュアーになりましょう！",
+    "filter": {
+      "all": "すべて",
+      "positive": "高評価",
+      "critical": "低評価"
+    },
+    "sort": {
+      "newest": "最新",
+      "highest": "評価の高い順",
+      "lowest": "評価の低い順"
+    }
   }
 }

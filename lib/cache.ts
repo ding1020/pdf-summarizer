@@ -120,9 +120,10 @@ export function isCacheAvailable(): boolean {
   return true;
 }
 
-export default {
+const cache = {
   computeCacheKey,
   getCachedSummary,
   setCachedSummary,
   isCacheAvailable,
 };
+export default cache;

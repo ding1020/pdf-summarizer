@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
@@ -26,9 +26,13 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
   const [authTimedOut, setAuthTimedOut] = useState(false);
 
   // Timeout guard
+  const initRef = useRef(false);
   useEffect(() => {
     if (isLoaded) {
-      setAuthTimedOut(false);
+      if (!initRef.current) {
+        initRef.current = true;
+        setAuthTimedOut(false);
+      }
       return;
     }
     const timer = setTimeout(() => setAuthTimedOut(true), 3000);
@@ -49,10 +53,13 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
     }
   }, []);
 
+  const didFetchRef = useRef(false);
   useEffect(() => {
-    if (isSignedIn) {
-      fetchUsage();
-    } else {
+    if (isSignedIn && !didFetchRef.current) {
+      didFetchRef.current = true;
+      void fetchUsage();
+    } else if (!isSignedIn && didFetchRef.current) {
+      didFetchRef.current = false;
       setLoadingUsage(false);
     }
   }, [isSignedIn, refreshKey, fetchUsage]);
@@ -196,7 +203,7 @@ export default function AuthDependentUI({ refreshKey }: { refreshKey: number }) 
                 })}
                 {(() => {
                   const daysLeft = Math.ceil(
-                    (new Date(usage.subscriptionEndDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+                    (new Date(usage.subscriptionEndDate).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)
                   );
                   if (daysLeft > 0 && daysLeft <= 7) {
                     return (

@@ -28,15 +28,17 @@ export default function DashboardUsageTracker() {
   }, []);
 
   useEffect(() => {
-    // Initial fetch
-    fetchCount();
+    // Initial fetch on mount (use queueMicrotask to avoid sync setState in effect)
+    queueMicrotask(() => {
+      void fetchCount();
+    });
 
     // Listen for custom "usage-refresh" events from FileUpload
     const handler = () => {
       // Increment optimistically, then sync from API
       setUsageCount((prev) => prev + 1);
       // Also attempt a real sync
-      fetchCount();
+      void fetchCount();
     };
 
     window.addEventListener("usage-refresh", handler);

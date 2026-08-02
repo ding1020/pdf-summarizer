@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
@@ -41,12 +41,16 @@ export default function SubscriptionWidget() {
     }
   };
 
+  const didInitRef = useRef(false);
   useEffect(() => {
     if (!isSignedIn) {
-      setLoading(false);
+      if (didInitRef.current) {
+        queueMicrotask(() => setLoading(false));
+      }
       return;
     }
 
+    didInitRef.current = true;
     async function fetchData() {
       try {
         const [subRes, usageRes] = await Promise.all([

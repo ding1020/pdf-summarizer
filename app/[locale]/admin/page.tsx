@@ -3,7 +3,26 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
+
+// ── Stats Card (module-level to avoid ESLint warning) ──
+const colorStyles: Record<string, { border: string; text: string }> = {
+  blue:    { border: "border-blue-100",    text: "text-blue-600" },
+  green:   { border: "border-green-100",   text: "text-green-600" },
+  purple:  { border: "border-purple-100",  text: "text-purple-600" },
+  red:     { border: "border-red-100",     text: "text-red-600" },
+  gray:    { border: "border-gray-100",    text: "text-gray-600" },
+};
+function StatCard({ label, value, sub, color = "blue" }: { label: string; value: string; sub?: string; color?: string }) {
+  const cs = colorStyles[color] || colorStyles.blue;
+  return (
+  <div className={`bg-white rounded-lg border ${cs.border} p-4`}>
+    <p className="text-xs text-gray-500 mb-1">{label}</p>
+    <p className={`text-2xl font-bold ${cs.text}`}>{value}</p>
+    {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+  </div>
+  );
+}
 
 interface PaymentRow {
   id: string;
@@ -21,7 +40,9 @@ interface AdminStats {
   yesterday: { calls: number; tokens: number; cost: number };
   week: Array<{ date: string; calls: number; tokens: number; cost: number }>;
   totals: { calls: number; tokens: number; cost: number; firstRecorded: string | null };
-  users: { total: number; pro: number; free: number };
+  users: { total: number; pro: number; proPlus: number; free: number };
+  revenue: { thisMonth: number; lastMonth: number; mrr: number };
+  alerts: Array<{ id: string; name: string; metric: string; current: number; threshold: number; severity: string; firedAt: string }>;
   documents: number;
   recentCalls: Array<{
     id: string;
@@ -46,7 +67,7 @@ export default function AdminPage() {
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [authorized, setAuthorized] = useState<boolean | null>(null);
-  const [tab, setTab] = useState<"stats" | "payments" | "calls">("stats");
+  const [tab, setTab] = useState<"stats" | "payments" | "calls" | "reviews" | "alerts">("stats");
 
   const fetchPayments = useCallback(async () => {
     try {
@@ -83,14 +104,17 @@ export default function AdminPage() {
     }
   }, []);
 
+  const didFetchRef = useRef(false);
   useEffect(() => {
-    if (isSignedIn) {
-      fetchPayments();
-      fetchStats();
-    } else if (isLoaded) {
+    if (isSignedIn && !didFetchRef.current) {
+      didFetchRef.current = true;
+      void fetchPayments();
+      void fetchStats();
+    } else if (isLoaded && !isSignedIn) {
       router.push("/sign-in");
     }
-  }, [isSignedIn, isLoaded, fetchPayments, fetchStats, router]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSignedIn, isLoaded]);
 
   // Redirect non-admin users after verification
   useEffect(() => {
@@ -136,25 +160,6 @@ export default function AdminPage() {
 
   if (!isSignedIn) return null;
 
-  // ── Stats Card macro ──
-  const colorStyles: Record<string, { border: string; text: string }> = {
-    blue:    { border: "border-blue-100",    text: "text-blue-600" },
-    green:   { border: "border-green-100",   text: "text-green-600" },
-    purple:  { border: "border-purple-100",  text: "text-purple-600" },
-    red:     { border: "border-red-100",     text: "text-red-600" },
-    gray:    { border: "border-gray-100",    text: "text-gray-600" },
-  };
-  const StatCard = ({ label, value, sub, color = "blue" }: { label: string; value: string; sub?: string; color?: string }) => {
-    const cs = colorStyles[color] || colorStyles.blue;
-    return (
-    <div className={`bg-white rounded-lg border ${cs.border} p-4`}>
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${cs.text}`}>{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
-    </div>
-    );
-  };
-
   return (
     <main className="min-h-[80vh] py-8 px-4 max-w-5xl mx-auto" id="main-content">
       <div className="flex items-center justify-between mb-8">
@@ -180,13 +185,13 @@ export default function AdminPage() {
 
       {/* Tab Navigation */}
       <div className="flex gap-1 mb-6 bg-gray-100 p-1 rounded-lg w-fit">
-        {(["stats", "payments", "calls"] as const).map((tKey) => (
+        {(["stats", "payments", "calls", "reviews", "alerts"] as const).map((tKey) => (
           <button
             key={tKey}
             onClick={() => setTab(tKey)}
             className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${tab === tKey ? "bg-white text-gray-900 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
           >
-            {tKey === "stats" ? t("tabStats") : tKey === "payments" ? t("tabPayments") : t("tabCalls")}
+            {tKey === "stats" ? t("tabStats") : tKey === "payments" ? t("tabPayments") : tKey === "calls" ? t("tabCalls") : tKey === "reviews" ? t("tabReviews") : t("tabAlerts")}
           </button>
         ))}
       </div>
@@ -343,6 +348,51 @@ export default function AdminPage() {
             </div>
           )}
         </>
+      )}
+
+      {/* ──────────── ALERTS TAB ──────────── */}
+      {tab === "alerts" && stats && (
+        <div className="space-y-4">
+          {stats.alerts && stats.alerts.length > 0 ? (
+            stats.alerts.map((alert) => (
+              <div
+                key={alert.id}
+                className={`rounded-xl border p-5 ${
+                  alert.severity === "critical"
+                    ? "bg-red-50 border-red-200"
+                    : "bg-yellow-50 border-yellow-200"
+                }`}
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className={`px-2 py-0.5 text-xs font-medium rounded-full ${
+                        alert.severity === "critical"
+                          ? "bg-red-100 text-red-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}>
+                        {alert.severity === "critical" ? "CRITICAL" : "WARNING"}
+                      </span>
+                      <span className="text-xs text-gray-400">{new Date(alert.firedAt).toLocaleString()}</span>
+                    </div>
+                    <h3 className="font-semibold text-gray-900">{alert.name}</h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {alert.metric}: <strong>{alert.current.toFixed(2)}</strong> (threshold: {alert.threshold})
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-16 text-gray-500">
+              <svg className="w-16 h-16 mx-auto mb-4 text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <p className="text-lg">All systems operational</p>
+              <p className="text-sm text-gray-400 mt-1">No active alerts</p>
+            </div>
+          )}
+        </div>
       )}
 
       {/* ──────────── CALLS TAB ──────────── */}

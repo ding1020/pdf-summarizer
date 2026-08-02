@@ -160,6 +160,32 @@ export async function fetchUrlText(inputUrl: string): Promise<ExtractResult> {
 
   // Block internal/private network addresses
   const hostname = parsedUrl.hostname.toLowerCase();
+
+  // Decode decimal/hex/octal IP encodings to prevent bypass
+  let decodedHostname = hostname;
+  // Decimal encoding (e.g., 2130706433 → 127.0.0.1)
+  if (/^\d+$/.test(hostname)) {
+    const num = parseInt(hostname, 10);
+    if (num >= 0 && num <= 0xFFFFFFFF) {
+      decodedHostname = [
+        (num >>> 24) & 0xFF,
+        (num >>> 16) & 0xFF,
+        (num >>> 8) & 0xFF,
+        num & 0xFF,
+      ].join('.');
+    }
+  }
+  // Hex encoding (e.g., 0x7f.0x00.0x00.0x01)
+  if (hostname.startsWith('0x') || /^0x[0-9a-f]+/i.test(hostname)) {
+    const parts = hostname.split('.').map(p => {
+      if (p.startsWith('0x')) return parseInt(p, 16);
+      return parseInt(p, 10);
+    });
+    if (parts.every(p => !isNaN(p) && p >= 0 && p <= 255)) {
+      decodedHostname = parts.join('.');
+    }
+  }
+
   const blockedHostnames = [
     "localhost",
     "127.0.0.1",
@@ -168,30 +194,30 @@ export async function fetchUrlText(inputUrl: string): Promise<ExtractResult> {
     "[::]",
     "0",
   ];
-  if (blockedHostnames.includes(hostname)) {
+  if (blockedHostnames.includes(decodedHostname)) {
     throw new Error("Internal network URLs are not allowed");
   }
   if (
-    hostname.startsWith("192.168.") ||
-    hostname.startsWith("10.") ||
-    hostname.startsWith("172.16.") ||
-    hostname.startsWith("172.17.") ||
-    hostname.startsWith("172.18.") ||
-    hostname.startsWith("172.19.") ||
-    hostname.startsWith("172.20.") ||
-    hostname.startsWith("172.21.") ||
-    hostname.startsWith("172.22.") ||
-    hostname.startsWith("172.23.") ||
-    hostname.startsWith("172.24.") ||
-    hostname.startsWith("172.25.") ||
-    hostname.startsWith("172.26.") ||
-    hostname.startsWith("172.27.") ||
-    hostname.startsWith("172.28.") ||
-    hostname.startsWith("172.29.") ||
-    hostname.startsWith("172.30.") ||
-    hostname.startsWith("172.31.") ||
-    hostname.startsWith("169.254.") ||
-    hostname === "metadata.google.internal"
+    decodedHostname.startsWith("192.168.") ||
+    decodedHostname.startsWith("10.") ||
+    decodedHostname.startsWith("172.16.") ||
+    decodedHostname.startsWith("172.17.") ||
+    decodedHostname.startsWith("172.18.") ||
+    decodedHostname.startsWith("172.19.") ||
+    decodedHostname.startsWith("172.20.") ||
+    decodedHostname.startsWith("172.21.") ||
+    decodedHostname.startsWith("172.22.") ||
+    decodedHostname.startsWith("172.23.") ||
+    decodedHostname.startsWith("172.24.") ||
+    decodedHostname.startsWith("172.25.") ||
+    decodedHostname.startsWith("172.26.") ||
+    decodedHostname.startsWith("172.27.") ||
+    decodedHostname.startsWith("172.28.") ||
+    decodedHostname.startsWith("172.29.") ||
+    decodedHostname.startsWith("172.30.") ||
+    decodedHostname.startsWith("172.31.") ||
+    decodedHostname.startsWith("169.254.") ||
+    decodedHostname === "metadata.google.internal"
   ) {
     throw new Error("Internal network URLs are not allowed");
   }

@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/navigation";
 import PaymentModal from "@/components/PaymentModal";
 import { trackPricingViewed, trackCheckoutClicked } from "@/lib/analytics";
+import { isPaymentEnabled } from "@/lib/constants";
 
 interface Toast {
   id: string;
@@ -15,6 +16,7 @@ interface Toast {
 
 export default function PricingClient() {
   const t = useTranslations("pricing");
+  const tc = useTranslations("common");
   const locale = useLocale();
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
@@ -66,9 +68,27 @@ export default function PricingClient() {
     highlighted: true,
   };
 
+  const proPlusPlan = {
+    name: t("proPlus.name"),
+    monthlyPrice: t("proPlus.price"),
+    yearlyPrice: t("proPlus.yearlyPrice"),
+    period: selectedBilling === "yearly" ? t("proPlus.yearlyPeriod") : t("proPlus.period"),
+    yearlyPeriod: t("proPlus.yearlyPeriod"),
+    description: t("proPlus.description"),
+    features: t.raw("proPlus.features") as string[],
+    buttonText: t("proPlus.button"),
+    buttonVariant: "solid" as const,
+    highlighted: false,
+  };
+
   const handleUpgrade = () => {
     if (!isSignedIn) {
       router.push("/sign-in");
+      return;
+    }
+    // Free-tier deployment: paid plans not yet available
+    if (!isPaymentEnabled) {
+      showToast(t("paymentComingSoon"), "info");
       return;
     }
     trackCheckoutClicked(selectedBilling, locale);
@@ -164,7 +184,7 @@ export default function PricingClient() {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto mb-16">
+        <div className="grid md:grid-cols-3 gap-6 max-w-6xl mx-auto mb-16">
           {plans.map((plan) => (
             <div
               key={plan.name}
@@ -204,7 +224,7 @@ export default function PricingClient() {
                   onClick={handleFreeClick}
                   className="mt-8 w-full py-3 px-6 border-2 border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  {!isSignedIn ? t("common.getStarted") : plan.buttonText}
+                  {!isSignedIn ? tc("getStarted") : plan.buttonText}
                 </button>
               </div>
             </div>
@@ -261,9 +281,10 @@ export default function PricingClient() {
 
               <button
                 onClick={handleUpgrade}
-                className="mt-8 w-full py-3 px-6 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                disabled={!isPaymentEnabled}
+                className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
               >
-                {proPlan.buttonText}
+                {isPaymentEnabled ? proPlan.buttonText : t("comingSoon")}
               </button>
 
               <p className="text-center text-xs text-gray-500 mt-4">
@@ -334,13 +355,72 @@ export default function PricingClient() {
         </div>
       </div>
 
-      {/* Payment Modal */}
-      <PaymentModal
-        plan={planType}
-        amount={priceAmount}
-        isOpen={showModal}
-        onClose={() => setShowModal(false)}
-      />
+      {/* Pro+ Plan Card */}
+      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-200 relative">
+        {selectedBilling === "yearly" && (
+          <div className="absolute top-4 right-4">
+            <span className="px-3 py-1 bg-purple-500 text-white text-sm font-medium rounded-full">
+              {t("bestValue")}
+            </span>
+          </div>
+        )}
+        
+        <div className="bg-purple-500 text-white text-center py-2 text-sm font-medium">
+          {t("proPlus.badge")}
+        </div>
+        
+        <div className="p-8">
+          <h2 className="text-2xl font-bold text-gray-900">{proPlusPlan.name}</h2>
+          <p className="text-gray-500 mt-1">{proPlusPlan.description}</p>
+          
+          <div className="mt-6 flex items-baseline">
+            <span className="text-4xl font-bold text-gray-900">
+              {selectedBilling === "yearly" ? proPlusPlan.yearlyPrice : proPlusPlan.monthlyPrice}
+            </span>
+            <span className="text-gray-500 ml-1">
+              {selectedBilling === "yearly" ? proPlusPlan.yearlyPeriod : proPlusPlan.period}
+            </span>
+          </div>
+          {selectedBilling === "yearly" && (
+            <p className="text-sm text-green-600 mt-1 font-medium">
+              {t("proPlus.pricePerMonth")}
+            </p>
+          )}
+
+          <ul className="mt-8 space-y-4">
+            {proPlusPlan.features.map((feature, index) => (
+              <li key={index} className="flex items-start">
+                <svg className="h-6 w-6 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+                <span className="text-gray-700">{feature}</span>
+              </li>
+            ))}
+          </ul>
+
+          <button
+            onClick={handleUpgrade}
+            disabled={!isPaymentEnabled}
+            className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled ? "bg-purple-600 text-white hover:bg-purple-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+          >
+            {isPaymentEnabled ? proPlusPlan.buttonText : t("comingSoon")}
+          </button>
+
+          <p className="text-center text-xs text-gray-500 mt-4">
+            {t("securePayment")}
+          </p>
+        </div>
+      </div>
+
+      {/* Payment Modal — only rendered when payment is enabled */}
+      {isPaymentEnabled && (
+        <PaymentModal
+          plan={planType}
+          amount={priceAmount}
+          isOpen={showModal}
+          onClose={() => setShowModal(false)}
+        />
+      )}
     </main>
   );
 }

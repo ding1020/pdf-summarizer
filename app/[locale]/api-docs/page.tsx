@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "@/navigation";
 
@@ -21,7 +21,7 @@ export default function ApiDocsPage() {
   const [newKey, setNewKey] = useState<string | null>(null);
   const [copySuccess, setCopySuccess] = useState(false);
 
-  const fetchKeys = async () => {
+  const fetchKeys = useCallback(async () => {
     try {
       const res = await fetch("/api/v1/keys");
       if (res.ok) {
@@ -33,12 +33,18 @@ export default function ApiDocsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
+  const didFetchRef = useRef(false);
   useEffect(() => {
-    if (isSignedIn) fetchKeys();
-    else setLoading(false);
-  }, [isSignedIn]);
+    if (isSignedIn && !didFetchRef.current) {
+      didFetchRef.current = true;
+      void fetchKeys();
+    } else if (!isSignedIn && didFetchRef.current) {
+      didFetchRef.current = false;
+      setLoading(false);
+    }
+  }, [isSignedIn, fetchKeys]);
 
   const handleCreate = async () => {
     setCreating(true);

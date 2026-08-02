@@ -154,7 +154,7 @@ export async function POST(req: NextRequest) {
     // ── Record AI usage for cost tracking ──
     if (usage.model !== "cache") {
       const userType = await getUserType(userId);
-      saveUsageLog({
+      await saveUsageLog({
         userId,
         provider: usage.provider,
         model: usage.model,

@@ -122,11 +122,46 @@ export default async function PricingPage({
     },
   };
 
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "Is there a free plan?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes! You can summarize 3 PDFs per day as a guest without signing up, or 5 per day with a free account."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What payment methods do you accept?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "We accept all major credit cards through our secure payment provider, Creem. Subscriptions are billed automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I cancel my subscription anytime?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes, you can cancel your Pro subscription at any time from your dashboard. You'll keep Pro access until the end of your billing period."
+        }
+      }
+    ]
+  };
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
       <PricingClient />
     </>

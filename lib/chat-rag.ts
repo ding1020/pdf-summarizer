@@ -41,7 +41,7 @@ export interface ChatRAGResult {
 // ── System Prompt ──
 
 function getChatSystemPrompt(language: string): string {
-  const basePrompt = `You are an AI assistant helping a user understand their PDF document. 
+  const basePrompt = `You are an AI assistant helping a user understand their PDF document.
 Answer questions based ONLY on the provided context from the document.
 
 Rules:
@@ -107,13 +107,18 @@ export async function chatWithPDFStream(options: ChatRAGOptions): Promise<ChatRA
   // 5. Build LLM messages
   const systemPrompt = getChatSystemPrompt(language);
 
+  // Sanitize question to reduce prompt injection risk
+  const sanitizedQuestion = question
+    .replace(/```[\s\S]*?```/g, "") // Remove code blocks
+    .substring(0, 1000);
+
   const userMessage = `Based on the following excerpts from the document, answer the user's question.
 
 --- DOCUMENT CONTEXT ---
 ${contextText}
 --- END CONTEXT ---
 
-User question: ${question}`;
+User question: ${sanitizedQuestion}`;
 
   // Build message array: system + history (last 4 turns) + current question
   const recentHistory = history.slice(-4); // Keep last 4 messages for context

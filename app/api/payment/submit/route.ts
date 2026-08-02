@@ -6,6 +6,7 @@ import { z } from "zod";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier } from "@/lib/rate-limit";
 import { PLAN_AMOUNTS } from "@/lib/constants";
 import { sendEmail, adminPaymentAlertEmail } from "@/lib/email";
+import { validateCsrf } from "@/lib/csrf";
 
 const ADMIN_EMAIL = process.env.ADMIN_EMAIL || "";
 
@@ -17,6 +18,13 @@ const submitSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      return NextResponse.json(
+        { error: "Invalid security token. Please refresh the page and try again." },
+        { status: 403 },
+      );
+    }
     const userId = await getAuthUserId();
     if (!userId) {
       return NextResponse.json({ error: "请先登录" }, { status: 401 });

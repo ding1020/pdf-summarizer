@@ -7,13 +7,16 @@ const locales = ["en", "zh", "ja", "ko", "es", "fr", "de"];
 const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
 
 // Routes without locale prefix (handled by next-intl middleware)
-const routesWithoutLocale = ["/sign-in", "/sign-up"];
+const routesWithoutLocale: string[] = [];
 
 // Routes with locale prefix
-const localizedRoutes = ["", "/pricing", "/terms", "/privacy", "/refund", "/help", "/cookies", "/blog", "/changelog", "/alternatives"];
+const localizedRoutes = ["", "/pricing",
+    "/reviews",
+    "/dmca",
+    "/cookies", "/terms", "/privacy", "/refund", "/help", "/cookies", "/blog", "/changelog", "/alternatives"];
 
 // Build date — auto-generated on each deploy to reflect last modification
-const BUILD_DATE = new Date().toISOString().split("T")[0];
+const BUILD_DATE = process.env.BUILD_DATE || "2026-07-28";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapRoutes: MetadataRoute.Sitemap = [];

@@ -139,7 +139,7 @@ export async function POST(req: NextRequest) {
   // ── Summarize with automatic provider fallback ──
   let summaryText: string;
   let usedProvider: AIProvider;
-  let usage: { provider: string; model: string; inputTokens: number; outputTokens: number; totalTokens: number };
+  let usage: { provider: string; model: string; inputTokens: number; outputTokens: number; totalTokens: number; costUSD: number };
   try {
     const result = await summarizeWithFallback({
       content,
@@ -155,6 +155,7 @@ export async function POST(req: NextRequest) {
       inputTokens: result.usage.inputTokens,
       outputTokens: result.usage.outputTokens,
       totalTokens: result.usage.totalTokens,
+      costUSD: result.usage.costUSD,
     };
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
@@ -192,14 +193,14 @@ export async function POST(req: NextRequest) {
 
   // ── Record AI usage for cost tracking ──
   const userType = await getUserType(userId);
-  saveUsageLog({
+  await saveUsageLog({
     userId,
     provider: usage.provider,
     model: usage.model,
     inputTokens: usage.inputTokens,
     outputTokens: usage.outputTokens,
     totalTokens: usage.totalTokens,
-    costUSD: 0, // v1 doesn't pass cost through, estimate separately
+    costUSD: usage.costUSD,
     userType,
     route: "api",
     ip: getClientIP(req),

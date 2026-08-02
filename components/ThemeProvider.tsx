@@ -26,13 +26,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     // Read from localStorage or system preference
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    if (stored === "dark" || stored === "light") {
-      setTheme(stored);
-    } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
-      setTheme("dark");
-    }
-    setMounted(true);
+    queueMicrotask(() => {
+      const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
+      if (stored === "dark" || stored === "light") {
+        setTheme(stored);
+      } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+        setTheme("dark");
+      }
+      setMounted(true);
+    });
   }, []);
 
   useEffect(() => {

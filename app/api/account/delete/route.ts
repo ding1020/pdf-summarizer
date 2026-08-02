@@ -4,14 +4,24 @@ import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { recordAudit } from "@/lib/audit";
+import { validateCsrf } from "@/lib/csrf";
+import { clearAuthCache } from "@/lib/get-auth";
+import type { NextRequest } from "next/server";
 
 /**
  * DELETE /api/account/delete
  * GDPR Article 17 — Right to Erasure
  * Deletes all user data: documents, feedback, and user record.
  */
-export async function DELETE(req: Request) {
+export async function DELETE(req: NextRequest) {
   try {
+    // CSRF validation
+    if (!validateCsrf(req)) {
+      return NextResponse.json(
+        { error: "Invalid security token. Please refresh the page and try again." },
+        { status: 403 },
+      );
+    }
     const userId = await getAuthUserId();
     if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -41,6 +51,8 @@ export async function DELETE(req: Request) {
       prisma.user.delete({ where: { id: user.id } }),
     ]);
 
+    // Invalidate auth cache immediately so deleted user's token stops working
+    clearAuthCache(userId);
     logger.info("User account and data deleted", { userId });
 
     // Audit (record BEFORE wipe so we have the email)

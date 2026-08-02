@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { Inter } from "next/font/google";
 import Script from "next/script";
@@ -31,6 +31,12 @@ if (process.env.NODE_ENV === "production") {
 const inter = Inter({ subsets: ["latin"], display: "swap" });
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+
+export const viewport: Viewport = {
+  themeColor: "#2563eb",
+  width: "device-width",
+  initialScale: 1,
+};
 
 // Locale mapping for OG / hreflang
 const LOCALE_MAP: Record<string, string> = {
@@ -210,7 +216,6 @@ export default async function LocaleLayout({
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <link rel="alternate" type="application/rss+xml" title="PDF Summary AI Blog" href="/feed.xml" />
-        <meta name="theme-color" content="#2563eb" />
         <meta name="baidu-site-verification" content="codeva-xIqxE0gVLC" />
         <meta name="msvalidate.01" content="3AFF8524154433B8956FCD2CCFE1E5CB" />
         {process.env.NEXT_PUBLIC_YANDEX_SITE_VERIFICATION && (
@@ -265,7 +270,7 @@ export default async function LocaleLayout({
           {process.env.NEXT_PUBLIC_CLARITY_ID && (
             <Script
               id="clarity-analytics"
-              strategy="afterInteractive"
+              strategy="lazyOnload"
               nonce={nonce}
               dangerouslySetInnerHTML={{
                 __html: `(function(c,l,a,r,i,t,y){c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);})(window,document,"clarity","script","${process.env.NEXT_PUBLIC_CLARITY_ID}");`,
@@ -291,24 +296,13 @@ export default async function LocaleLayout({
               }}
             />
           )}
-          {/* Google Tag Manager — loaded only in production when ID is set */}
-          {process.env.NEXT_PUBLIC_GTM_ID && (
-            <Script
-              id="gtm-script"
-              strategy="afterInteractive"
-              nonce={nonce}
-              dangerouslySetInnerHTML={{
-                __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;var n=d.querySelector('[nonce]');n&&j.setAttribute('nonce',n.nonce||'');f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${process.env.NEXT_PUBLIC_GTM_ID}');`,
-              }}
-            />
-          )}
           <PwaRegister />
           <Script
             id="baidu-push"
-            strategy="afterInteractive"
+            strategy="lazyOnload"
             nonce={nonce}
             dangerouslySetInnerHTML={{
-              __html: `(function(){var bp=document.createElement('script');var curProtocol=window.location.protocol.split(':')[0];if(curProtocol==='https'){bp.src='https://zz.bdstatic.com/linksubmit/push.js';}else{bp.src='http://push.zhanzhang.baidu.com/push.js';}var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(bp,s);})();`,
+              __html: `(function(){var bp=document.createElement('script');var curProtocol=window.location.protocol.split(':')[0];if(curProtocol==='https'){bp.src='https://zz.bdstatic.com/linksubmit/push.js';}else{bp.src='https://push.zhanzhang.baidu.com/push.js';}var s=document.getElementsByTagName("script")[0];s.parentNode.insertBefore(bp,s);})();`,
             }}
           />
           </ThemeProvider>

@@ -11,6 +11,10 @@
     {
       "path": "/api/cron/send-winback",
       "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/cron/send-activation-reminder",
+      "schedule": "0 10 * * *"
     }
   ],
   "functions": {
@@ -41,7 +45,7 @@
       "headers": [
         {
           "key": "Access-Control-Allow-Origin",
-          "value": "*"
+          "value": "https://www.pdfsum.com"
         },
         {
           "key": "Access-Control-Allow-Methods",
@@ -49,7 +53,11 @@
         },
         {
           "key": "Access-Control-Allow-Headers",
-          "value": "Content-Type, Authorization"
+          "value": "Content-Type, Authorization, X-API-Key"
+        },
+        {
+          "key": "Access-Control-Max-Age",
+          "value": "86400"
         }
       ]
     },

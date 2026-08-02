@@ -44,4 +44,5 @@ export async function recordAudit(params: {
   }
 }
 
-export default { recordAudit };
+const audit = { recordAudit };
+export default audit;

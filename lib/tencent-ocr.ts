@@ -101,19 +101,27 @@ export async function ocrImage(imageBase64: string): Promise<string> {
     `SignedHeaders=${signedHeaders}, Signature=${signature}`;
 
   // ── Make request ──
-  const res = await fetch(ENDPOINT, {
-    method: "POST",
-    headers: {
-      Authorization: authorization,
-      "Content-Type": "application/json; charset=utf-8",
-      Host: HOST,
-      "X-TC-Action": action,
-      "X-TC-Timestamp": String(timestamp),
-      "X-TC-Version": VERSION,
-      "X-TC-Region": REGION,
-    },
-    body: payload,
-  });
+  const abortController = new AbortController();
+  const timeoutId = setTimeout(() => abortController.abort(), 30_000);
+  let res: Response;
+  try {
+    res = await fetch(ENDPOINT, {
+      method: "POST",
+      headers: {
+        Authorization: authorization,
+        "Content-Type": "application/json; charset=utf-8",
+        Host: HOST,
+        "X-TC-Action": action,
+        "X-TC-Timestamp": String(timestamp),
+        "X-TC-Version": VERSION,
+        "X-TC-Region": REGION,
+      },
+      body: payload,
+      signal: abortController.signal,
+    });
+  } finally {
+    clearTimeout(timeoutId);
+  }
 
   const data = (await res.json()) as OcrResponse;
 

@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/navigation";
 
-const COOKIE_CONSENT_KEY = "pdfsum_cookie_consent";
+const COOKIE_CONSENT_KEY = "pdfsum_cookie_consent_v2";
 
 /**
  * Blocks non-essential third-party scripts/cookies when consent is "essential".
@@ -60,7 +60,36 @@ export default function CookieConsent() {
     setVisible(false);
   }, []);
 
+  const withdrawConsent = useCallback(() => {
+    applyConsent("essential");
+    // Clear all analytics cookies/localStorage
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && (key.startsWith("sentry") || key.startsWith("_ga") || key.startsWith("_gid") || key.startsWith("_cl"))) {
+        keysToRemove.push(key);
+      }
+    }
+    keysToRemove.forEach(k => localStorage.removeItem(k));
+    // Revoke cookie consent to force re-prompt
+    localStorage.removeItem(COOKIE_CONSENT_KEY);
+    window.location.reload();
+  }, []);
+
   if (!visible) return null;
+
+  // Consent withdrawal widget (always accessible via footer link)
+  const consentWidget = (
+    <div className="fixed bottom-4 right-4 z-40">
+      <button
+        onClick={withdrawConsent}
+        className="px-3 py-1.5 text-xs text-gray-500 bg-white border border-gray-200 rounded-full shadow hover:text-gray-700 hover:bg-gray-50 transition-colors"
+        title="Manage cookie preferences"
+      >
+        🍪 Cookie Preferences
+      </button>
+    </div>
+  );
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-in" role="dialog" aria-modal="false" aria-label={t("title")}>
@@ -100,9 +129,15 @@ export default function CookieConsent() {
                 {t("acceptAll")}
               </button>
             </div>
+            <div className="mt-2 sm:mt-0 text-xs text-gray-400">
+              <button onClick={withdrawConsent} className="hover:text-gray-600 underline">
+                Manage preferences / Withdraw consent
+              </button>
+            </div>
           </div>
         </div>
       </div>
+      {consentWidget}
     </div>
   );
 }

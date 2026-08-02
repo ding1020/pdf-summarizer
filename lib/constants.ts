@@ -18,6 +18,8 @@ export const PRO_RATE_LIMIT = { windowMs: 60_000, maxRequests: 60 } as const;
 export const PLAN_AMOUNTS: Record<string, number> = {
   pro_monthly: 700,   // $7.00
   pro_yearly: 5900,   // $59.00
+  pro_plus_monthly: 1900,  // $19.00
+  pro_plus_yearly: 15900,  // $159.00
 };
 
 // ── Payment: Creem price ID whitelist ──
@@ -37,6 +39,11 @@ export const ALLOWED_CREEM_PRICE_IDS = new Set([
   ...DEFAULT_CREEM_PRICE_IDS,
   ...additionalWhitelist,
 ]);
+
+// ── Usage limits by plan ──
+export const PRO_MONTHLY_LIMIT = 200;     // summaries per month for Pro
+export const PRO_PLUS_MONTHLY_LIMIT = 500; // summaries per month for Pro+
+export const OVERAGE_PRICE_PER_SUMMARY = 3; // $0.03 per extra summary (in cents)
 
 // ── Content limits ──
 export const MAX_CONTENT_LENGTH = 15_000;
@@ -60,3 +67,12 @@ export const BILLING_CYCLE = {
 
 // ── Support ──
 export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@pdfsum.com";
+
+// ── Feature flags ──
+// Payment & paid plans are DISABLED in the free-tier deployment (方案A: ¥0/month).
+// They re-enable automatically once CREEM_SECRET_KEY is configured,
+// or when NEXT_PUBLIC_ENABLE_PAYMENT=true is set. No code changes required
+// to switch from free tier to paid tier — only environment variables.
+export const isPaymentEnabled =
+  process.env.NEXT_PUBLIC_ENABLE_PAYMENT === "true" ||
+  Boolean(process.env.CREEM_SECRET_KEY);

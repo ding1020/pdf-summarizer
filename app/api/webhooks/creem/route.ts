@@ -15,7 +15,7 @@ import * as Sentry from "@sentry/nextjs";
 import { prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync } from "@/lib/rate-limit";
-import { verifySignature, EVENT_HANDLERS } from "@/lib/creem-webhook";
+import { verifySignature, getEventHandler } from "@/lib/creem-webhook";
 
 export async function POST(req: NextRequest) {
   const webhookSecret = process.env.CREEM_WEBHOOK_SECRET;
@@ -87,13 +87,19 @@ export async function POST(req: NextRequest) {
       });
       return NextResponse.json({ received: true, duplicate: true });
     }
-    logger.warn("Failed to claim webhook idempotency slot, proceeding anyway", {
-      error: dbErr instanceof Error ? dbErr.message : String(dbErr),
-    });
+    // DB error — reject to let Creem retry, rather than risk duplicate processing
+    logger.error(
+      "Failed to claim webhook idempotency slot, rejecting",
+      dbErr instanceof Error ? dbErr : new Error(String(dbErr)),
+    );
+    return NextResponse.json(
+      { error: "Idempotency check failed" },
+      { status: 500 },
+    );
   }
 
   // Find handler
-  const handler = EVENT_HANDLERS[eventType || ""];
+  const handler = getEventHandler(eventType || "");
   if (!handler) {
     logger.info(`Unhandled event type: ${eventType}`, { eventId });
     return NextResponse.json({ received: true });

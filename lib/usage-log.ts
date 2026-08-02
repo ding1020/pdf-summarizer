@@ -15,12 +15,12 @@ export interface SaveUsageParams {
 }
 
 /** 将 AI 调用用量记录持久化到 UsageLog 表（fire-and-forget） */
-export function saveUsageLog(params: SaveUsageParams): void {
+export async function saveUsageLog(params: SaveUsageParams): Promise<void> {
   // 跳过 cache hits（无实际消费）
   if (params.model === "cache" || params.totalTokens <= 0) return;
 
-  prisma.usageLog
-    .create({
+  try {
+    await prisma.usageLog.create({
       data: {
         userId: params.userId ?? null,
         provider: params.provider,
@@ -33,19 +33,17 @@ export function saveUsageLog(params: SaveUsageParams): void {
         route: params.route,
         ip: params.ip ?? null,
       },
-    })
-    .then(() => {
-      logger.debug("Usage log saved", {
-        provider: params.provider,
-        tokens: params.totalTokens,
-        cost: params.costUSD.toFixed(6),
-      });
-    })
-    .catch((err: unknown) => {
-      logger.warn("Failed to save usage log", {
-        error: err instanceof Error ? err.message : String(err),
-      });
     });
+    logger.debug("Usage log saved", {
+      provider: params.provider,
+      tokens: params.totalTokens,
+      cost: params.costUSD.toFixed(6),
+    });
+  } catch (err: unknown) {
+    logger.warn("Failed to save usage log", {
+      error: err instanceof Error ? err.message : String(err),
+    });
+  }
 }
 
 /** 获取用户的订阅类型（用于 userType 字段） */

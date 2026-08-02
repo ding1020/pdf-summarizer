@@ -22,7 +22,7 @@ export function verifySignature(
   signature: string,
 ): boolean {
   const normalized = signature.toLowerCase();
-  if (!/^[a-f0-9]+$/.test(normalized) || normalized.length < 8) return false;
+  if (!/^[a-f0-9]+$/.test(normalized) || normalized.length < 64) return false;
 
   const expected = crypto
     .createHmac("sha256", secret)
@@ -268,7 +268,7 @@ async function handleSubscriptionGrant(data: Record<string, unknown>) {
 }
 
 // ── Event type handlers ──
-export const EVENT_HANDLERS: Record<
+const EVENT_HANDLERS: Record<
   string,
   (data: Record<string, unknown>) => Promise<void>
 > = {
@@ -366,6 +366,7 @@ export const EVENT_HANDLERS: Record<
 
     const userId = extractUserId(meta);
     const email = customer?.email as string | undefined;
+    const subId = sub.id as string | undefined;
 
     if (userId) {
       await prisma.user.update({
@@ -373,6 +374,13 @@ export const EVENT_HANDLERS: Record<
         data: { subscriptionStatus: "past_due" },
       });
       logger.info(`User ${userId} marked as past_due`);
+      await recordAudit({
+        userId,
+        action: "subscription_past_due",
+        resource: "User",
+        resourceId: userId,
+        details: { subId },
+      });
       await notifyUser(userId, null, "subscription.past_due");
     } else if (email) {
       await prisma.user.updateMany({
@@ -410,3 +418,13 @@ export const EVENT_HANDLERS: Record<
     }
   },
 };
+
+/**
+ * Look up the handler for a given event type.
+ * Exported as a function to avoid Next.js route type conflicts.
+ */
+export function getEventHandler(
+  eventType: string,
+): ((data: Record<string, unknown>) => Promise<void>) | undefined {
+  return EVENT_HANDLERS[eventType];
+}

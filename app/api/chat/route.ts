@@ -85,6 +85,23 @@ export async function POST(req: NextRequest) {
 
   const { content: bodyContent, documentId, question, history = [], language = "en" } = body;
 
+  // ── Validate and sanitize history ──
+  const sanitizedHistory: ChatMessage[] = [];
+  if (Array.isArray(history)) {
+    for (const msg of history.slice(-6)) { // Keep last 6 messages max
+      if (
+        msg &&
+        typeof msg.role === "string" &&
+        (msg.role === "user" || msg.role === "assistant") &&
+        typeof msg.content === "string" &&
+        msg.content.length > 0 &&
+        msg.content.length <= 4000
+      ) {
+        sanitizedHistory.push({ role: msg.role, content: msg.content });
+      }
+    }
+  }
+
   // ── Validate question ──
   if (!question || typeof question !== "string" || question.trim().length === 0) {
     return new Response(
@@ -152,7 +169,7 @@ export async function POST(req: NextRequest) {
     const result = await chatWithPDFStream({
       content: truncatedContent,
       question: question.trim(),
-      history,
+      history: sanitizedHistory,
       language,
     });
 

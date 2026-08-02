@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
+import { recordAudit } from "@/lib/audit";
 import { validateCsrf } from "@/lib/csrf";
 
 /**
@@ -91,6 +92,15 @@ export async function POST(req: NextRequest) {
     });
 
     logger.info("Password reset successful", { email: user.email });
+
+    // Record audit log for security compliance
+    await recordAudit({
+      userId: user.id,
+      action: "password_reset",
+      resource: "User",
+      resourceId: user.id,
+      details: { method: "email_reset" },
+    });
 
     return NextResponse.json({
       success: true,

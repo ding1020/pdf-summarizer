@@ -1,0 +1,100 @@
+﻿
+D:\VS\pdf-summarizer\app\[locale]\api-docs\page.tsx
+  24:9  warning  The 'fetchKeys' function makes the dependencies of useEffect Hook (at line 47) change on every render. To fix this, wrap the definition of 'fetchKeys' in its own useCallback() Hook  react-hooks/exhaustive-deps
+
+D:\VS\pdf-summarizer\app\[locale]\dashboard\AuthUI.tsx
+  58:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\VS\pdf-summarizer\app\[locale]\dashboard\AuthUI.tsx:58:7
+  56 |   useEffect(() => {
+  57 |     if (isSignedIn) {
+> 58 |       fetchUsage();
+     |       ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  59 |     } else {
+  60 |       setLoadingUsage(false);
+  61 |     }  react-hooks/set-state-in-effect
+
+D:\VS\pdf-summarizer\app\[locale]\dashboard\subscription\page.tsx
+  59:9  warning  Error: This value cannot be modified
+
+Modifying a variable defined outside a component or hook is not allowed. Consider using an effect.
+
+D:\VS\pdf-summarizer\app\[locale]\dashboard\subscription\page.tsx:59:9
+  57 |       const data = await res.json();
+  58 |       if (data.url) {
+> 59 |         window.location.href = data.url;
+     |         ^^^^^^^^^^^^^^^ value cannot be modified
+  60 |       } else {
+  61 |         // Map API error codes to localized messages
+  62 |         const localized = mapPortalError(t, data.code, data.error);  react-hooks/immutability
+
+D:\VS\pdf-summarizer\app\[locale]\privacy\page.tsx
+  196:45  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  196:67  error  `"` can be escaped with `&quot;`, `&ldquo;`, `&#34;`, `&rdquo;`  react/no-unescaped-entities
+  212:78  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+  221:74  error  `'` can be escaped with `&apos;`, `&lsquo;`, `&#39;`, `&rsquo;`  react/no-unescaped-entities
+
+D:\VS\pdf-summarizer\app\[locale]\sign-in\page.tsx
+  53:7  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\VS\pdf-summarizer\app\[locale]\sign-in\page.tsx:53:7
+  51 |         server_error: "A server error occurred during verification. Please try again.",
+  52 |       };
+> 53 |       setError(errorMessages[urlError] || "Something went wrong. Please try again.");
+     |       ^^^^^^^^ Avoid calling setState() directly within an effect
+  54 |     }
+  55 |   }, [searchParams]);
+  56 |  react-hooks/set-state-in-effect
+
+D:\VS\pdf-summarizer\app\[locale]\terms\page.tsx
+   98:263  error  'Link' is not defined  react/jsx-no-undef
+  106:24   error  'Link' is not defined  react/jsx-no-undef
+
+D:\VS\pdf-summarizer\components\ClientCookieConsent.tsx
+  10:5  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\VS\pdf-summarizer\components\ClientCookieConsent.tsx:10:5
+   8 |
+   9 |   useEffect(() => {
+> 10 |     setMounted(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  11 |   }, []);
+  12 |
+  13 |   if (!mounted) return null;  react-hooks/set-state-in-effect
+
+D:\VS\pdf-summarizer\components\DashboardUsageTracker.tsx
+  32:5  warning  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+D:\VS\pdf-summarizer\components\DashboardUsageTracker.tsx:32:5
+  30 |   useEffect(() => {
+  31 |     // Initial fetch
+> 32 |     fetchCount();
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  33 |
+  34 |     // Listen for custom "usage-refresh" events from FileUpload
+  35 |     const handler = () => {  react-hooks/set-state-in-effect
+

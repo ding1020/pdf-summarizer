@@ -3,7 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 import { useTranslations } from "next-intl";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useToast } from "@/hooks/useToast";
 
 interface SubscriptionData {
@@ -21,14 +21,7 @@ export default function SubscriptionPage() {
   const [loadingSubscription, setLoadingSubscription] = useState(true);
   const [managingPortal, setManagingPortal] = useState(false);
 
-  useEffect(() => {
-    if (isSignedIn) {
-      fetchSubscriptionStatus();
-    } else {
-      setLoadingSubscription(false);
-    }
-  }, [isSignedIn]);
-
+  const didFetchSubRef = useRef(false);
   const fetchSubscriptionStatus = async () => {
     try {
       const response = await fetch("/api/subscription");
@@ -43,6 +36,16 @@ export default function SubscriptionPage() {
     }
   };
 
+  useEffect(() => {
+    if (isSignedIn && !didFetchSubRef.current) {
+      didFetchSubRef.current = true;
+      void fetchSubscriptionStatus();
+    } else if (!isSignedIn && didFetchSubRef.current) {
+      didFetchSubRef.current = false;
+      setLoadingSubscription(false);
+    }
+  }, [isSignedIn]);
+
   const handleUpgrade = () => {
     router.push("/pricing");
   };
@@ -53,7 +56,7 @@ export default function SubscriptionPage() {
       const res = await fetch("/api/customer-portal");
       const data = await res.json();
       if (data.url) {
-        window.location.href = data.url;
+        window.location.assign(data.url);
       } else {
         // Map API error codes to localized messages
         const localized = mapPortalError(t, data.code, data.error);

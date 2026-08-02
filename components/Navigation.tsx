@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/navigation";
 import dynamic from "next/dynamic";
@@ -27,9 +27,13 @@ export default function Navigation() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Close mobile menu on route change
+  // Close mobile menu on route change (sync external state → React)
+  const prevPathRef = useRef<string | null>(null);
   useEffect(() => {
-    setMobileOpen(false);
+    if (prevPathRef.current !== null && prevPathRef.current !== pathname) {
+      setMobileOpen(false);
+    }
+    prevPathRef.current = pathname;
   }, [pathname]);
 
   // Close mobile menu on Escape key

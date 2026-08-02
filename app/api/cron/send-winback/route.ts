@@ -18,14 +18,16 @@ import { rateLimitAsync } from "@/lib/rate-limit";
 import { sendEmail, winBackEmail } from "@/lib/email";
 
 export async function POST(req: NextRequest) {
-  // ── Auth (support both Vercel Cron Bearer and legacy x-cron-secret) ──
-  const auth = req.headers.get("authorization") || "";
-  const bearer = auth.replace(/^Bearer\s+/i, "");
-  const cronSecret = req.headers.get("x-cron-secret");
-  const provided = cronSecret || bearer;
-  if (!process.env.CRON_SECRET || provided !== process.env.CRON_SECRET) {
-    logger.warn("Cron/send-winback: invalid or missing cron secret");
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // ── Auth (accept CRON_SECRET via Bearer token or x-vercel-cron-id header) ──
+  const authHeader = req.headers.get("authorization") || "";
+  const vercelCronId = req.headers.get("x-vercel-cron-id");
+
+  if (process.env.CRON_SECRET) {
+    const expected = `Bearer ${process.env.CRON_SECRET}`;
+    if (authHeader !== expected && !vercelCronId) {
+      logger.warn("Cron/send-winback: invalid or missing cron secret");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
   }
 
   // ── Rate limit ──

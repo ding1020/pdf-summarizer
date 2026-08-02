@@ -13,7 +13,7 @@ export default function CookiesPage() {
         <h1 className="text-3xl font-bold text-gray-900 mb-8">{t("title")}</h1>
         
         <div className="prose prose-gray max-w-none">
-          <p className="text-gray-600 mb-6">{t("updated")}: June 1, 2026</p>
+          <p className="text-gray-600 mb-6">{t("updated")}: July 29, 2026</p>
           
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">{t("whatAre")}</h2>
           <p className="text-gray-600 mb-4">{t("whatAreDesc")}</p>
@@ -49,6 +49,49 @@ export default function CookiesPage() {
 
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">{t("updates")}</h2>
           <p className="text-gray-600 mb-4">{t("updatesDesc")}</p>
+
+
+          <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">CCPA / CPRA — Do Not Sell or Share My Personal Information</h2>
+          <p className="text-gray-600 mb-4">
+            If you are a California resident, you have the right to opt out of the sale or sharing of your personal information
+            for cross-context behavioral advertising. We do not sell your personal information. We use analytics cookies
+            (Google Analytics, Microsoft Clarity) and error tracking (Sentry) to improve our service. You can opt out of
+            these non-essential tracking technologies by selecting &quot;Essential Only&quot; in the cookie consent banner, or by
+            clicking the &quot;Cookie Preferences&quot; button at the bottom of any page.
+          </p>
+
+          <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Consent Log & Withdrawal</h2>
+          <p className="text-gray-600 mb-4">
+            When you provide consent via our cookie banner, we record your choice in your browser&apos;s localStorage with a
+            timestamp. You can withdraw your consent at any time by clicking &quot;Cookie Preferences&quot; at the bottom of any page
+            and selecting &quot;Essential Only&quot;. This will immediately disable all non-essential cookies and tracking, and clear
+            any previously set analytics identifiers.
+          </p>
+
+          <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">Cookie Categories</h2>
+          <div className="space-y-4 mb-6">
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-900">Necessary (Always Active)</h3>
+                <span className="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded">Cannot be disabled</span>
+              </div>
+              <p className="text-gray-600 text-sm mt-1">Required for the website to function. Includes session cookies, CSRF tokens, and authentication.</p>
+            </div>
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-900">Analytics</h3>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Optional</span>
+              </div>
+              <p className="text-gray-600 text-sm mt-1">Google Analytics, Microsoft Clarity. Helps us understand how visitors use our site.</p>
+            </div>
+            <div className="border border-gray-200 rounded-lg p-4">
+              <div className="flex items-center justify-between">
+                <h3 className="font-medium text-gray-900">Error Monitoring</h3>
+                <span className="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded">Optional</span>
+              </div>
+              <p className="text-gray-600 text-sm mt-1">Sentry. Helps us identify and fix bugs and errors.</p>
+            </div>
+          </div>
 
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">{t("contact")}</h2>
           <p className="text-gray-600 mb-8">

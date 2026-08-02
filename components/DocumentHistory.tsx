@@ -154,7 +154,7 @@ export default function DocumentHistory() {
     } catch {
       // silent
     }
-  }, []);
+  }, [toast]);
 
   const fetchDocuments = useCallback(async () => {
     try {
@@ -175,7 +175,9 @@ export default function DocumentHistory() {
   }, [t]);
 
   useEffect(() => {
-    fetchDocuments();
+    queueMicrotask(() => {
+      void fetchDocuments();
+    });
   }, [fetchDocuments]);
 
   const handleDelete = useCallback(async (id: string) => {

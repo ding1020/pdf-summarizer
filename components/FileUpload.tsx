@@ -213,7 +213,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
       }
       abortControllerRef.current = null;
     }
-  }, [t]);
+  }, [t, isPro, locale]);
 
   // Cancel in-flight summary
   const cancelSummary = useCallback(() => {
@@ -288,7 +288,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
     } finally {
       setSharingDocumentId(null);
     }
-  }, [result, t]);
+  }, [result, t, toast]);
 
   const onDrop = useCallback(
     async (acceptedFiles: File[]) => {
@@ -348,7 +348,7 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         if (isMountedRef.current) setIsUploading(false);
       }
     },
-    [onUploadComplete, validateFile, generateSummary, t]
+    [onUploadComplete, validateFile, generateSummary, t, locale]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

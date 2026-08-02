@@ -79,17 +79,12 @@ export async function POST(req: NextRequest) {
         });
       }
 
-      // Already verified — allow password reset via re-registration
-      // since email-based password reset also depends on email delivery.
-      const passwordHash = await hashPassword(password);
-      await prisma.user.update({
-        where: { id: existing.id },
-        data: { passwordHash },
-      });
-
+      // Already verified — do NOT allow password reset via re-registration
+      // This prevents account takeover: anyone knowing an email could reset its password.
+      // Return same success message to prevent email enumeration.
       return NextResponse.json({
         success: true,
-        message: "Password has been updated. You can now sign in.",
+        message: "Account created! You can now sign in.",
         autoSignedIn: false,
       });
     }
