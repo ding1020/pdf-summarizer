@@ -613,7 +613,9 @@
       "4": "4 Étoiles",
       "3": "3 Étoiles",
       "2": "2 Étoiles",
-      "1": "1 Étoile"
+      "1": "1 Étoile",
+      "positive": "Positifs (4-5★)",
+      "critical": "Critiques (1-2★)"
     },
     "sort": {
       "newest": "Plus Récents",
