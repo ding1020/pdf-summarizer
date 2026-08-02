@@ -590,32 +590,36 @@
   },
   "reviews": {
     "meta": {
-      "title": "Reseñas - PDF Summary",
-      "description": "Vea lo que dicen nuestros usuarios"
+      "title": "Reseñas de Usuarios - PDF Summarizer",
+      "description": "Lee lo que nuestros usuarios dicen sobre PDF Summarizer AI."
     },
-    "title": "Reseñas",
-    "subtitle": "Feedback real de usuarios reales",
+    "title": "Reseñas de Usuarios",
+    "subtitle": "Mira lo que dicen nuestros clientes",
+    "adminReply": "Respuesta del equipo",
+    "thankYou": "¡Gracias por tu reseña!",
+    "reviewSubmitted": "Tu reseña ha sido enviada y está pendiente de aprobación.",
+    "writeReview": "Escribir una Reseña",
+    "yourRating": "Tu Calificación",
+    "titlePlaceholder": "Resume tu experiencia en pocas palabras",
+    "review": "Tu Reseña",
+    "reviewPlaceholder": "Cuéntanos tu experiencia usando PDF Summarizer...",
+    "submitting": "Enviando...",
+    "submitReview": "Enviar Reseña",
     "outOf5": "de 5",
     "reviews": "reseñas",
-    "writeReview": "Escribir reseña",
-    "yourRating": "Tu calificación",
-    "titlePlaceholder": "Resume tu experiencia",
-    "reviewPlaceholder": "Cuéntanos qué te gustó...",
-    "submitting": "Enviando...",
-    "submitReview": "Enviar reseña",
-    "thankYou": "¡Gracias!",
-    "reviewSubmitted": "Tu reseña ha sido enviada para aprobación.",
-    "adminReply": "Respuesta del equipo",
-    "noReviews": "Aún no hay reseñas. ¡Sé el primero!",
     "filter": {
-      "all": "Todas",
-      "positive": "Positivas",
-      "critical": "Críticas"
+      "all": "Todas las Reseñas",
+      "5": "5 Estrellas",
+      "4": "4 Estrellas",
+      "3": "3 Estrellas",
+      "2": "2 Estrellas",
+      "1": "1 Estrella"
     },
     "sort": {
-      "newest": "Más reciente",
-      "highest": "Más alto",
-      "lowest": "Más bajo"
-    }
+      "newest": "Más Recientes",
+      "highest": "Mayor Calificación",
+      "lowest": "Menor Calificación"
+    },
+    "noReviews": "Aún no hay reseñas. ¡Sé el primero en compartir tu experiencia!"
   }
 }

@@ -590,32 +590,36 @@
   },
   "reviews": {
     "meta": {
-      "title": "Avis Clients - PDF Summary",
-      "description": "Découvrez ce que nos utilisateurs disent"
+      "title": "Avis des Utilisateurs - PDF Summarizer",
+      "description": "Lisez ce que nos utilisateurs disent de PDF Summarizer AI."
     },
-    "title": "Avis Clients",
-    "subtitle": "Retours authentiques d'utilisateurs réels",
+    "title": "Avis des Utilisateurs",
+    "subtitle": "Découvrez ce que nos clients en pensent",
+    "adminReply": "Réponse de l'équipe",
+    "thankYou": "Merci pour votre avis !",
+    "reviewSubmitted": "Votre avis a été soumis et est en attente de validation.",
+    "writeReview": "Écrire un Avis",
+    "yourRating": "Votre Note",
+    "titlePlaceholder": "Résumez votre expérience en quelques mots",
+    "review": "Votre Avis",
+    "reviewPlaceholder": "Parlez-nous de votre expérience avec PDF Summarizer...",
+    "submitting": "Envoi...",
+    "submitReview": "Envoyer l'Avis",
     "outOf5": "sur 5",
     "reviews": "avis",
-    "writeReview": "Écrire un avis",
-    "yourRating": "Votre note",
-    "titlePlaceholder": "Résumez votre expérience",
-    "reviewPlaceholder": "Dites-nous ce que vous avez aimé...",
-    "submitting": "Envoi en cours...",
-    "submitReview": "Soumettre l'avis",
-    "thankYou": "Merci !",
-    "reviewSubmitted": "Votre avis a été soumis pour approbation.",
-    "adminReply": "Réponse de l'équipe",
-    "noReviews": "Pas encore d'avis. Soyez le premier !",
     "filter": {
-      "all": "Tous",
-      "positive": "Positif",
-      "critical": "Critique"
+      "all": "Tous les Avis",
+      "5": "5 Étoiles",
+      "4": "4 Étoiles",
+      "3": "3 Étoiles",
+      "2": "2 Étoiles",
+      "1": "1 Étoile"
     },
     "sort": {
-      "newest": "Plus récent",
-      "highest": "Mieux noté",
-      "lowest": "Moins bien noté"
-    }
+      "newest": "Plus Récents",
+      "highest": "Note la Plus Élevée",
+      "lowest": "Note la Plus Basse"
+    },
+    "noReviews": "Aucun avis pour le moment. Soyez le premier à partager votre expérience !"
   }
 }

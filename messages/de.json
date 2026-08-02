@@ -590,32 +590,36 @@
   },
   "reviews": {
     "meta": {
-      "title": "Kundenbewertungen - PDF Summary",
-      "description": "Sehen Sie, was unsere Nutzer sagen"
+      "title": "Nutzerbewertungen - PDF Summarizer",
+      "description": "Lesen Sie, was unsere Nutzer über PDF Summarizer AI sagen."
     },
-    "title": "Kundenbewertungen",
-    "subtitle": "Echtes Feedback von echten Nutzern",
+    "title": "Nutzerbewertungen",
+    "subtitle": "Sehen Sie, was unsere Kunden sagen",
+    "adminReply": "Antwort vom Team",
+    "thankYou": "Vielen Dank für Ihre Bewertung!",
+    "reviewSubmitted": "Ihre Bewertung wurde eingereicht und wartet auf Freigabe.",
+    "writeReview": "Bewertung Schreiben",
+    "yourRating": "Ihre Bewertung",
+    "titlePlaceholder": "Fassen Sie Ihre Erfahrung in wenigen Worten zusammen",
+    "review": "Ihre Bewertung",
+    "reviewPlaceholder": "Erzählen Sie uns von Ihrer Erfahrung mit PDF Summarizer...",
+    "submitting": "Wird gesendet...",
+    "submitReview": "Bewertung Senden",
     "outOf5": "von 5",
     "reviews": "Bewertungen",
-    "writeReview": "Bewertung schreiben",
-    "yourRating": "Ihre Bewertung",
-    "titlePlaceholder": "Fassen Sie Ihre Erfahrung zusammen",
-    "reviewPlaceholder": "Sagen Sie uns, was Ihnen gefallen hat...",
-    "submitting": "Wird gesendet...",
-    "submitReview": "Bewertung absenden",
-    "thankYou": "Vielen Dank!",
-    "reviewSubmitted": "Ihre Bewertung wurde zur Prüfung eingereicht.",
-    "adminReply": "Antwort vom Team",
-    "noReviews": "Noch keine Bewertungen. Seien Sie der Erste!",
     "filter": {
-      "all": "Alle",
-      "positive": "Positiv",
-      "critical": "Kritisch"
+      "all": "Alle Bewertungen",
+      "5": "5 Sterne",
+      "4": "4 Sterne",
+      "3": "3 Sterne",
+      "2": "2 Sterne",
+      "1": "1 Stern"
     },
     "sort": {
-      "newest": "Neueste",
-      "highest": "Höchste",
-      "lowest": "Niedrigste"
-    }
+      "newest": "Neueste zuerst",
+      "highest": "Höchste Bewertung",
+      "lowest": "Niedrigste Bewertung"
+    },
+    "noReviews": "Noch keine Bewertungen. Seien Sie der Erste, der seine Erfahrung teilt!"
   }
 }

@@ -590,32 +590,36 @@
   },
   "reviews": {
     "meta": {
-      "title": "カスタマーレビュー - PDF Summary",
-      "description": "実際のユーザーの声をご覧ください"
+      "title": "ユーザーレビュー - PDF Summarizer",
+      "description": "PDF Summarizer AIに対するユーザーのリアルなレビューをご覧ください。"
     },
-    "title": "カスタマーレビュー",
-    "subtitle": "実際のユーザーからのリアルなフィードバック",
-    "outOf5": "5点満点",
-    "reviews": "件のレビュー",
+    "title": "ユーザーレビュー",
+    "subtitle": "お客様の声をご紹介します",
+    "adminReply": "チームからの返信",
+    "thankYou": "レビューありがとうございます！",
+    "reviewSubmitted": "レビューが送信されました。承認待ちです。",
     "writeReview": "レビューを書く",
     "yourRating": "あなたの評価",
-    "titlePlaceholder": "体験を簡潔にまとめてください",
-    "reviewPlaceholder": "気に入った点や改善点を教えてください...",
+    "titlePlaceholder": "体験を数語でまとめてください",
+    "review": "あなたのレビュー",
+    "reviewPlaceholder": "PDF Summarizerの使用体験をお聞かせください...",
     "submitting": "送信中...",
-    "submitReview": "レビューを投稿",
-    "thankYou": "ありがとうございます！",
-    "reviewSubmitted": "レビューは承認待ちです。",
-    "adminReply": "チームからの返信",
-    "noReviews": "まだレビューがありません。最初のレビュアーになりましょう！",
+    "submitReview": "レビューを送信",
+    "outOf5": "5点満点中",
+    "reviews": "件のレビュー",
     "filter": {
-      "all": "すべて",
-      "positive": "高評価",
-      "critical": "低評価"
+      "all": "すべてのレビュー",
+      "5": "5つ星",
+      "4": "4つ星",
+      "3": "3つ星",
+      "2": "2つ星",
+      "1": "1つ星"
     },
     "sort": {
-      "newest": "最新",
-      "highest": "評価の高い順",
-      "lowest": "評価の低い順"
-    }
+      "newest": "新着順",
+      "highest": "評価が高い順",
+      "lowest": "評価が低い順"
+    },
+    "noReviews": "まだレビューがありません。最初のレビューを書いてみませんか？"
   }
 }

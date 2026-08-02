@@ -590,32 +590,36 @@
   },
   "reviews": {
     "meta": {
-      "title": "고객 리뷰 - PDF Summary",
-      "description": "실제 사용자들의 평가를 확인하세요"
+      "title": "사용자 리뷰 - PDF Summarizer",
+      "description": "PDF Summarizer AI에 대한 실제 사용자 리뷰를 확인하세요."
     },
-    "title": "고객 리뷰",
-    "subtitle": "실제 사용자들의 진솔한 피드백",
-    "outOf5": "5점 만점",
-    "reviews": "개의 리뷰",
+    "title": "사용자 리뷰",
+    "subtitle": "고객님들의 이용 후기를 확인해보세요",
+    "adminReply": "팀 답변",
+    "thankYou": "리뷰를 작성해주셔서 감사합니다!",
+    "reviewSubmitted": "리뷰가 제출되었으며 승인 대기 중입니다.",
     "writeReview": "리뷰 작성",
     "yourRating": "별점",
-    "titlePlaceholder": "경험을 간략히 요약해주세요",
-    "reviewPlaceholder": "좋았던 점이나 개선점을 알려주세요...",
+    "titlePlaceholder": "경험을 몇 마디로 요약해주세요",
+    "review": "리뷰 내용",
+    "reviewPlaceholder": "PDF Summarizer 사용 경험을 알려주세요...",
     "submitting": "제출 중...",
     "submitReview": "리뷰 제출",
-    "thankYou": "감사합니다!",
-    "reviewSubmitted": "리뷰가 승인 대기 중입니다.",
-    "adminReply": "팀 답변",
-    "noReviews": "아직 리뷰가 없습니다. 첫 번째 리뷰어가 되어보세요!",
+    "outOf5": "5점 만점",
+    "reviews": "개 리뷰",
     "filter": {
-      "all": "전체",
-      "positive": "긍정",
-      "critical": "비판"
+      "all": "전체 리뷰",
+      "5": "5점",
+      "4": "4점",
+      "3": "3점",
+      "2": "2점",
+      "1": "1점"
     },
     "sort": {
-      "newest": "최신",
-      "highest": "높은 평점",
-      "lowest": "낮은 평점"
-    }
+      "newest": "최신순",
+      "highest": "평점 높은순",
+      "lowest": "평점 낮은순"
+    },
+    "noReviews": "아직 리뷰가 없습니다. 첫 리뷰를 작성해보세요!"
   }
 }

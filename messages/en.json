@@ -696,32 +696,36 @@
   },
   "reviews": {
     "meta": {
-      "title": "Customer Reviews - PDF Summary",
-      "description": "See what our users say about PDF Summary"
+      "title": "User Reviews - PDF Summarizer",
+      "description": "Read what our users say about PDF Summarizer AI. Real reviews from real customers."
     },
-    "title": "Customer Reviews",
-    "subtitle": "Real feedback from real users",
-    "outOf5": "out of 5",
-    "reviews": "reviews",
+    "title": "User Reviews",
+    "subtitle": "See what our customers say about their experience",
+    "adminReply": "Reply from team",
+    "thankYou": "Thank you for your review!",
+    "reviewSubmitted": "Your review has been submitted and is pending approval.",
     "writeReview": "Write a Review",
     "yourRating": "Your Rating",
-    "titlePlaceholder": "Summarize your experience",
-    "reviewPlaceholder": "Tell us what you liked or how we can improve...",
+    "titlePlaceholder": "Summarize your experience in a few words",
+    "review": "Your Review",
+    "reviewPlaceholder": "Tell us about your experience using PDF Summarizer...",
     "submitting": "Submitting...",
     "submitReview": "Submit Review",
-    "thankYou": "Thank you!",
-    "reviewSubmitted": "Your review has been submitted for approval.",
-    "adminReply": "Response from team",
-    "noReviews": "No reviews yet. Be the first to share your experience!",
+    "outOf5": "out of 5",
+    "reviews": "reviews",
     "filter": {
-      "all": "All",
-      "positive": "Positive",
-      "critical": "Critical"
+      "all": "All Reviews",
+      "5": "5 Stars",
+      "4": "4 Stars",
+      "3": "3 Stars",
+      "2": "2 Stars",
+      "1": "1 Star"
     },
     "sort": {
-      "newest": "Newest",
-      "highest": "Highest Rated",
-      "lowest": "Lowest Rated"
-    }
+      "newest": "Newest First",
+      "highest": "Highest Rating",
+      "lowest": "Lowest Rating"
+    },
+    "noReviews": "No reviews yet. Be the first to share your experience!"
   }
 }
