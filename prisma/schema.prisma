@@ -170,12 +170,14 @@ model UsageLog {
   costUSD      Float    @default(0)
   userType     String   @default("free") // guest, free, trial, pro
   route        String   @default("web")  // web, stream, api
+  status       String   @default("success") // success, error
   ip           String?
   createdAt    DateTime @default(now())
 
   @@index([userId])
   @@index([createdAt])
   @@index([provider])
+  @@index([status])
 }
 
 

@@ -11,13 +11,15 @@ export interface SaveUsageParams {
   costUSD: number;
   userType: "guest" | "free" | "trial" | "pro";
   route: "web" | "stream" | "api";
+  status?: "success" | "error";
   ip?: string;
 }
 
 /** 将 AI 调用用量记录持久化到 UsageLog 表（fire-and-forget） */
 export async function saveUsageLog(params: SaveUsageParams): Promise<void> {
-  // 跳过 cache hits（无实际消费）
-  if (params.model === "cache" || params.totalTokens <= 0) return;
+  // Skip cache hits (no actual cost) — but still log errors with 0 tokens
+  if (params.model === "cache") return;
+  if (params.status !== "error" && params.totalTokens <= 0) return;
 
   try {
     await prisma.usageLog.create({
@@ -31,6 +33,7 @@ export async function saveUsageLog(params: SaveUsageParams): Promise<void> {
         costUSD: params.costUSD,
         userType: params.userType,
         route: params.route,
+        status: params.status ?? "success",
         ip: params.ip ?? null,
       },
     });

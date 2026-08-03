@@ -1,6 +1,11 @@
 /**
  * Alert Webhook Notifications
+ *
+ * Includes cooldown mechanism to prevent alert spam.
+ * Uses rate-limit utility with Redis (production) / in-memory (fallback).
  */
+
+import { rateLimitAsync } from "./rate-limit";
 
 export interface WebhookConfig {
   url: string;
@@ -20,7 +25,19 @@ function parseWebhookUrls(): WebhookConfig[] {
 export async function sendAlertNotification(params: {
   ruleId: string; ruleName: string; severity: "warning" | "critical";
   metric: string; current: number; threshold: number; message: string;
+  cooldownMinutes: number;
 }): Promise<void> {
+  // Cooldown check: only 1 alert per cooldown window per rule
+  const cooldownResult = await rateLimitAsync(`alert:${params.ruleId}`, {
+    windowMs: params.cooldownMinutes * 60 * 1000,
+    maxRequests: 1,
+  });
+
+  if (!cooldownResult.success) {
+    console.log(`[ALERT] ${params.ruleId} in cooldown (${params.cooldownMinutes}min), skipping`);
+    return;
+  }
+
   const configs = parseWebhookUrls();
   if (configs.length === 0) { console.log("[ALERT]", params.message); return; }
   await Promise.allSettled(configs.map((c) => sendToWebhook(c, params)));
@@ -29,7 +46,7 @@ export async function sendAlertNotification(params: {
 async function sendToWebhook(config: WebhookConfig, params: {
   severity: string; ruleName: string; metric: string; current: number; threshold: number; message: string;
 }): Promise<void> {
-  const emoji = params.severity === "critical" ? "🚨" : "⚠️";
+  const emoji = params.severity === "critical" ? "\xf0¨" : "\xe2 ï¸";
   const color = params.severity === "critical" ? 0xef4444 : 0xf59e0b;
   let payload: Record<string, unknown>;
 

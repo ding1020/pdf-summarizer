@@ -161,6 +161,22 @@ export async function POST(req: NextRequest) {
     const errMsg = err instanceof Error ? err.message : String(err);
     logger.error("[API v1] All providers failed", err instanceof Error ? err : new Error(errMsg));
 
+    // Log error for real error rate tracking
+    const errUserType = await getUserType(userId);
+    await saveUsageLog({
+      userId,
+      provider: provider as string,
+      model: "unknown",
+      inputTokens: 0,
+      outputTokens: 0,
+      totalTokens: 0,
+      costUSD: 0,
+      userType: errUserType,
+      route: "api",
+      status: "error",
+      ip: getClientIP(req) ?? undefined,
+    });
+
     // Refund the daily usage quota — AI failure shouldn't consume user's allowance
     try {
       const tier = await getUserTier(userId);

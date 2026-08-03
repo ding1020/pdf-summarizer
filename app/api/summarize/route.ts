@@ -188,6 +188,21 @@ export async function POST(req: NextRequest) {
         aiError instanceof Error ? aiError : new Error(errMsg),
         { isGuest, contentLength: truncatedContent.length },
       );
+      // Log error for real error rate tracking
+      const errUserType = await getUserType(userId);
+      await saveUsageLog({
+        userId,
+        provider: provider as string,
+        model: "unknown",
+        inputTokens: 0,
+        outputTokens: 0,
+        totalTokens: 0,
+        costUSD: 0,
+        userType: errUserType,
+        route: "web",
+        status: "error",
+        ip: clientIp ?? undefined,
+      });
       return NextResponse.json(
         {
           error: "AI service is temporarily unavailable. Please try again in a moment.",

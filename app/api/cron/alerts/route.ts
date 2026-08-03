@@ -41,8 +41,11 @@ async function checkAllAlerts() {
   const todayCalls = await prisma.usageLog.count({
     where: { createdAt: { gte: today } },
   });
-  // Simulate error count (would need error tracking table)
-  const errorRate = todayCalls > 0 ? 0.01 : 0; // 1% assumed for demo
+  // Real error rate from UsageLog status field
+  const errorCalls = await prisma.usageLog.count({
+    where: { createdAt: { gte: today }, status: "error" },
+  });
+  const errorRate = todayCalls > 0 ? errorCalls / todayCalls : 0;
 
   // 2. Conversion rate
   const newUsersToday = await prisma.user.count({
@@ -92,6 +95,7 @@ async function checkAllAlerts() {
         metric: rule.metric,
         current: value,
         threshold: rule.threshold,
+        cooldownMinutes: rule.cooldownMinutes,
         message: `${rule.name}: ${rule.metric} = ${value.toFixed(4)} (threshold: ${rule.threshold})`,
       });
     }
