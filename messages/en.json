@@ -223,7 +223,8 @@
     "tryForFree": "You're using the free trial. No account needed.",
     "signUpToSave": "Sign up to save your history and unlock more features.",
     "createAccountTitle": "Want to save your summaries?",
-    "createAccountDesc": "Create a free account to track your history, get 5 summaries daily, and unlock Pro features."
+    "createAccountDesc": "Create a free account to track your history, get 5 summaries daily, and unlock Pro features.",
+    "signUpCta": "Sign Up Free"
   },
   "dashboard": {
     "welcome": "Welcome back",

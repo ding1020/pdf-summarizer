@@ -15,8 +15,8 @@ const localizedRoutes = ["", "/pricing",
     "/dmca",
     "/cookies", "/terms", "/privacy", "/refund", "/help", "/cookies", "/blog", "/changelog", "/alternatives"];
 
-// Build date — auto-generated on each deploy to reflect last modification
-const BUILD_DATE = process.env.BUILD_DATE || "2026-07-28";
+// Use current date for lastModified — reflects latest deployment
+const NOW = new Date();
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const sitemapRoutes: MetadataRoute.Sitemap = [];
@@ -25,7 +25,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   routesWithoutLocale.forEach((route) => {
     sitemapRoutes.push({
       url: `${baseUrl}${route}`,
-      lastModified: new Date(BUILD_DATE),
+      lastModified: NOW,
       changeFrequency: "weekly" as const,
       priority: 0.6,
     });
@@ -36,7 +36,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.forEach((locale) => {
       sitemapRoutes.push({
         url: `${baseUrl}/${locale}${route}`,
-        lastModified: new Date(BUILD_DATE),
+        lastModified: NOW,
         changeFrequency: "weekly" as const,
         priority: route === "" ? 1 : route === "/blog" ? 0.9 : 0.8,
         alternates: {
@@ -53,7 +53,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.forEach((locale) => {
       sitemapRoutes.push({
         url: `${baseUrl}/${locale}/blog/${slug}`,
-        lastModified: new Date(BUILD_DATE),
+        lastModified: NOW,
         changeFrequency: "monthly" as const,
         priority: 0.7,
         alternates: {
@@ -71,7 +71,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     locales.forEach((locale) => {
       sitemapRoutes.push({
         url: `${baseUrl}/${locale}/alternatives/${slug}`,
-        lastModified: new Date(BUILD_DATE),
+        lastModified: NOW,
         changeFrequency: "monthly" as const,
         priority: 0.8,
         alternates: {

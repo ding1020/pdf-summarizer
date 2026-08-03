@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useDropzone } from "react-dropzone";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "@/navigation";
@@ -8,7 +9,11 @@ import { useToast } from "@/hooks/useToast";
 import UploadDropzone from "./UploadDropzone";
 import FileInfoCard from "./FileInfoCard";
 import SummaryDisplay from "./SummaryDisplay";
-import ChatWithPDF from "./ChatWithPDF";
+// Lazy load ChatWithPDF - heavy component with markdown rendering
+const ChatWithPDF = dynamic(() => import("./ChatWithPDF"), {
+  ssr: false,
+  loading: () => <div className="h-32 animate-pulse bg-gray-100 rounded-lg" />,
+});
 import ErrorMessage from "./ErrorMessage";
 import { UploadSkeleton, SummarySkeleton } from "./Skeleton";
 import { trackPdfUpload, trackSummaryCompleted } from "@/lib/analytics";

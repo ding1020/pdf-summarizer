@@ -206,7 +206,8 @@
     "tryForFree": "Sie nutzen die kostenlose Testversion. Kein Konto erforderlich.",
     "signUpToSave": "Registrieren Sie sich, um Ihren Verlauf zu speichern und mehr Funktionen freizuschalten.",
     "createAccountTitle": "Möchten Sie Ihre Zusammenfassungen speichern?",
-    "createAccountDesc": "Erstellen Sie ein kostenloses Konto, um Ihren Verlauf zu verfolgen, 5 tägliche Zusammenfassungen zu erhalten und Pro-Funktionen freizuschalten."
+    "createAccountDesc": "Erstellen Sie ein kostenloses Konto, um Ihren Verlauf zu verfolgen, 5 tägliche Zusammenfassungen zu erhalten und Pro-Funktionen freizuschalten.",
+    "signUpCta": "Kostenlos registrieren"
   },
   "dashboard": {
     "welcome": "Willkommen zurück",

@@ -1,19 +1,24 @@
 "use client";
 
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "@/navigation";
 import FileUpload from "@/components/FileUpload";
+import RegistrationPrompt from "@/components/RegistrationPrompt";
 
 /**
  * Home page upload zone — renders a real FileUpload component
  * on the landing page so users can try without creating an account.
  * Guests get the preview experience; signed-in users get full functionality.
+ * After a guest upload completes, a registration prompt appears to
+ * convert them into registered users.
  */
 export default function HomeUploadWrapper() {
   const t = useTranslations("home");
   const { isLoaded, isSignedIn } = useAuth();
   const router = useRouter();
+  const [showRegPrompt, setShowRegPrompt] = useState(false);
 
   if (!isLoaded) {
     return (
@@ -41,17 +46,23 @@ export default function HomeUploadWrapper() {
           <FileUpload
             onUploadComplete={(result) => {
               if (result.documentId) {
-                // For guests: after preview, prompt to sign up for full features
+                // For guests: show registration prompt after preview
                 if (!isSignedIn) {
-                  // Show a brief delay then redirect to sign-up after preview
+                  setShowRegPrompt(true);
+                } else {
+                  // For signed-in users: navigate to dashboard
+                  router.push("/dashboard");
                 }
               }
             }}
           />
         </div>
 
-        <p className="text-center text-xs text-gray-400 mt-4">
-          {t("uploadHint") || "PDF files only · Max 20MB · Files are encrypted and auto-deleted after processing"}
+        {/* Registration prompt for guests after upload */}
+        {!isSignedIn && <RegistrationPrompt show={showRegPrompt} />}
+
+        <p className="text-center text-xs text-gray-500 mt-4">
+          {t("uploadHint") || "PDF files only \u00b7 Max 20MB \u00b7 Files are encrypted and auto-deleted after processing"}
         </p>
       </div>
     </section>

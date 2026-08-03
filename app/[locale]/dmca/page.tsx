@@ -1,6 +1,9 @@
 import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
+// ISR — legal pages rarely change, revalidate every 24 hours
+export const revalidate = 86400;
+
 const DMCA_EMAIL = process.env.NEXT_PUBLIC_DMCA_EMAIL || "dmca@pdfsum.com";
 
 export async function generateMetadata({

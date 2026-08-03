@@ -206,7 +206,8 @@
     "tryForFree": "Vous utilisez l'essai gratuit. Aucun compte nécessaire.",
     "signUpToSave": "Inscrivez-vous pour sauvegarder votre historique et débloquer plus de fonctionnalités.",
     "createAccountTitle": "Vous voulez sauvegarder vos résumés ?",
-    "createAccountDesc": "Créez un compte gratuit pour suivre votre historique, obtenir 5 résumés par jour et débloquer les fonctionnalités Pro."
+    "createAccountDesc": "Créez un compte gratuit pour suivre votre historique, obtenir 5 résumés par jour et débloquer les fonctionnalités Pro.",
+    "signUpCta": "S'inscrire gratuitement"
   },
   "dashboard": {
     "welcome": "Bon retour",

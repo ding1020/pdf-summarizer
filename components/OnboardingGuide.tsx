@@ -91,7 +91,7 @@ export default function OnboardingGuide({ visible }: OnboardingGuideProps) {
         {/* Close */}
         <button
           onClick={dismiss}
-          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
+          className="absolute top-3 right-3 p-1 text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition"
           aria-label="Close"
         >
           <X className="w-5 h-5" />

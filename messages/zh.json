@@ -208,7 +208,8 @@
     "tryForFree": "您正在使用免费试用，无需账户。",
     "signUpToSave": "注册账户以保存历史记录并解锁更多功能。",
     "createAccountTitle": "想要保存您的摘要吗？",
-    "createAccountDesc": "创建免费账户以追踪使用历史，每天5次摘要，并解锁专业版功能。"
+    "createAccountDesc": "创建免费账户以追踪使用历史，每天5次摘要，并解锁专业版功能。",
+    "signUpCta": "免费注册"
   },
   "dashboard": {
     "welcome": "欢迎回来",

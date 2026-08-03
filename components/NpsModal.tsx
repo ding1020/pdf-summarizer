@@ -102,7 +102,7 @@ export default function NpsModal({ usageCount }: NpsModalProps) {
               ))}
             </div>
 
-            <div className="flex justify-between text-xs text-gray-400 mb-6 px-1">
+            <div className="flex justify-between text-xs text-gray-500 mb-6 px-1">
               <span>Not likely</span>
               <span>Very likely</span>
             </div>

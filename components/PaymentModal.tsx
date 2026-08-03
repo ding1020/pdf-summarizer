@@ -81,7 +81,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
         <div className="flex justify-end p-4">
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className="text-gray-500 hover:text-gray-600"
             aria-label="Close payment modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -163,7 +163,7 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
             )}
           </button>
 
-          <p className="text-center text-xs text-gray-400 mt-4">
+          <p className="text-center text-xs text-gray-500 mt-4">
             Powered by Creem. Visa, Mastercard, Amex & more.
           </p>
         </div>

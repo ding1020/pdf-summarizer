@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import NpsModal from "@/components/NpsModal";
+import dynamic from "next/dynamic";
+// Lazy load NpsModal - only shown after 7 summaries
+const NpsModal = dynamic(() => import("@/components/NpsModal"), {
+  ssr: false,
+});
 
 /**
  * Tracks user's summary usage count by listening to "usage-refresh"

@@ -206,7 +206,8 @@
     "tryForFree": "Estás usando la prueba gratuita. No se requiere cuenta.",
     "signUpToSave": "Regístrate para guardar tu historial y desbloquear más funciones.",
     "createAccountTitle": "¿Quieres guardar tus resúmenes?",
-    "createAccountDesc": "Crea una cuenta gratuita para seguir tu historial, obtener 5 resúmenes diarios y desbloquear funciones Pro."
+    "createAccountDesc": "Crea una cuenta gratuita para seguir tu historial, obtener 5 resúmenes diarios y desbloquear funciones Pro.",
+    "signUpCta": "Registrarse gratis"
   },
   "dashboard": {
     "welcome": "Bienvenido de nuevo",

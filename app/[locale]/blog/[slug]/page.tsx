@@ -127,6 +127,7 @@ export default async function BlogPostPage({
     "@type": "Article",
     headline: post.title,
     description: post.excerpt,
+    image: `${BASE_URL}/screenshots/blog-article.png`,
     datePublished: post.date,
     dateModified: post.date,
     author: {
@@ -137,7 +138,7 @@ export default async function BlogPostPage({
     publisher: {
       "@type": "Organization",
       name: "PDF Summary AI",
-      logo: { "@type": "ImageObject", url: `${BASE_URL}/logo.png` },
+      logo: { "@type": "ImageObject", url: `${BASE_URL}/logo.svg` },
     },
     mainEntityOfPage: `${BASE_URL}/en/blog/${slug}`,
     keywords: post.keywords?.join(", "),
@@ -158,7 +159,7 @@ export default async function BlogPostPage({
         </Link>
 
         <header className="mb-8">
-          <time className="text-sm text-gray-400">{post.date}</time>
+          <time className="text-sm text-gray-500">{post.date}</time>
           <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mt-2 mb-4 leading-tight">
             {post.title}
           </h1>

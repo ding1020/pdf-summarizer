@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
 import { blogPostsMeta } from "@/lib/blog-posts";
 
+// ISR — blog listing updates when new posts are added, revalidate every 1 hour
+export const revalidate = 3600;
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Blog | PDF Summary AI",
@@ -25,7 +28,7 @@ export default async function BlogPage() {
         </div>
 
         {blogPostsMeta.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
+          <div className="text-center py-16 text-gray-500">
             <p className="text-lg">No posts yet. Check back soon!</p>
           </div>
         ) : (
@@ -42,7 +45,7 @@ export default async function BlogPage() {
                       {tag}
                     </span>
                   ))}
-                  <time className="text-xs text-gray-400 ml-auto">{post.date}</time>
+                  <time className="text-xs text-gray-500 ml-auto">{post.date}</time>
                 </div>
                 <h2 className="text-lg font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
                   {post.title}

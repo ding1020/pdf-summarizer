@@ -80,7 +80,7 @@ export default function NewsletterSignup({ locale }: { locale: string }) {
           <p className="mt-3 text-red-600 dark:text-red-400 text-sm">{message}</p>
         )}
 
-        <p className="mt-4 text-xs text-gray-400">{t("privacyNote")}</p>
+        <p className="mt-4 text-xs text-gray-500">{t("privacyNote")}</p>
       </div>
     </section>
   );

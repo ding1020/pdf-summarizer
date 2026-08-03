@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
 
+// ISR — changelog updates with each release, revalidate every 1 hour
+export const revalidate = 3600;
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Changelog | PDF Summary AI",
@@ -96,7 +99,7 @@ export default async function ChangelogPage() {
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 text-sm font-medium rounded-full">
                   {entry.version}
                 </span>
-                <time className="text-sm text-gray-400">{entry.date}</time>
+                <time className="text-sm text-gray-500">{entry.date}</time>
               </div>
               <h2 className="text-xl font-bold text-gray-900 mb-4">{entry.title}</h2>
               <ul className="space-y-2">

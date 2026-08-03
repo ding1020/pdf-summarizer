@@ -3,6 +3,9 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/navigation";
 import { alternatives } from "@/lib/alternatives";
 
+// ISR — comparison data is semi-static, revalidate every 6 hours
+export const revalidate = 21600;
+
 export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "PDF Summarizer Alternatives | PDFSum — Free, 7 Languages, No Credit Card",

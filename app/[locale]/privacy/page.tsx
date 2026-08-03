@@ -2,6 +2,9 @@ import { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import Link from "next/link";
 
+// ISR — legal pages rarely change, revalidate every 24 hours
+export const revalidate = 86400;
+
 const PRIVACY_EMAIL = process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "privacy@pdfsum.com";
 
 export async function generateMetadata({

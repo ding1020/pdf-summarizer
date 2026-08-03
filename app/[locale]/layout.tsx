@@ -116,12 +116,15 @@ export async function generateMetadata({
     robots: { index: true, follow: true },
     alternates: {
       canonical: `${BASE_URL}/${locale}`,
-      languages: Object.fromEntries(
-        Object.entries(HREFLANG_MAP).map(([key, lang]) => [
-          key,
-          `${BASE_URL}/${key}`,
-        ])
-      ),
+      languages: {
+        "x-default": `${BASE_URL}/en`,
+        ...Object.fromEntries(
+          Object.entries(HREFLANG_MAP).map(([key, lang]) => [
+            key,
+            `${BASE_URL}/${key}`,
+          ])
+        ),
+      },
     },
     manifest: "/manifest.json",
   };
@@ -192,7 +195,7 @@ export default async function LocaleLayout({
     "@type": "Organization",
     name: "PDF Summary AI",
     url: BASE_URL,
-    logo: `${BASE_URL}/logo.png`,
+    logo: `${BASE_URL}/logo.svg`,
     description: "AI-powered PDF summarizer with multi-language support, Chat with PDF, and developer API.",
     contactPoint: {
       "@type": "ContactPoint",

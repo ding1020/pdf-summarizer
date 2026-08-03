@@ -2,9 +2,13 @@
 
 import { useTranslations, useLocale } from "next-intl";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, Link } from "@/navigation";
-import PaymentModal from "@/components/PaymentModal";
+// Lazy load PaymentModal - only needed when payment is enabled
+const PaymentModal = dynamic(() => import("@/components/PaymentModal"), {
+  ssr: false,
+});
 import { trackPricingViewed, trackCheckoutClicked } from "@/lib/analytics";
 import { isPaymentEnabled } from "@/lib/constants";
 

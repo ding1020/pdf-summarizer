@@ -39,14 +39,14 @@ export default function FeedbackButtons({ documentId, className = "" }: Feedback
 
   return (
     <div className={`flex items-center gap-1 ${className}`}>
-      <span className="text-xs text-gray-400 mr-1">{t("wasThisHelpful") || "Helpful?"}</span>
+      <span className="text-xs text-gray-500 mr-1">{t("wasThisHelpful") || "Helpful?"}</span>
       <button
         onClick={() => handleFeedback("up")}
         disabled={!!sent || sending}
         className={`p-1.5 rounded-lg transition-colors ${
           sent === "up"
             ? "bg-green-100 text-green-600"
-            : "text-gray-400 hover:text-green-600 hover:bg-green-50"
+            : "text-gray-500 hover:text-green-600 hover:bg-green-50"
         }`}
         aria-label={t("thumbsUp") || "Thumbs up"}
         title={t("thumbsUp") || "Thumbs up"}
@@ -61,7 +61,7 @@ export default function FeedbackButtons({ documentId, className = "" }: Feedback
         className={`p-1.5 rounded-lg transition-colors ${
           sent === "down"
             ? "bg-red-100 text-red-600"
-            : "text-gray-400 hover:text-red-600 hover:bg-red-50"
+            : "text-gray-500 hover:text-red-600 hover:bg-red-50"
         }`}
         aria-label={t("thumbsDown") || "Thumbs down"}
         title={t("thumbsDown") || "Thumbs down"}
@@ -71,7 +71,7 @@ export default function FeedbackButtons({ documentId, className = "" }: Feedback
         </svg>
       </button>
       {sent && (
-        <span className="text-xs text-gray-400 ml-1">{t("thanks") || "Thanks!"}</span>
+        <span className="text-xs text-gray-500 ml-1">{t("thanks") || "Thanks!"}</span>
       )}
     </div>
   );

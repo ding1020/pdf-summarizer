@@ -114,10 +114,10 @@ export default function FeedbackForm() {
           required
         />
         <div className="flex justify-between mt-1">
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-500">
             {t("minChars")}
           </span>
-          <span className="text-xs text-gray-400">
+          <span className="text-xs text-gray-500">
             {message.length}/2000
           </span>
         </div>
