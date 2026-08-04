@@ -5,7 +5,7 @@
 
 // ── Usage limits ──
 export const FREE_DAILY_LIMIT = 5;
-export const TRIAL_TOTAL_LIMIT = 20; // Total summaries during entire 3-day trial
+export const TRIAL_TOTAL_LIMIT = 20; // Total summaries during entire 14-day trial
 
 // ── Rate limits (single source: lib/rate-limit.ts RATE_LIMITS) ──
 // ⚠️  These are maintained as convenience re-exports. Any changes should
@@ -28,6 +28,8 @@ export const PLAN_AMOUNTS: Record<string, number> = {
 const DEFAULT_CREEM_PRICE_IDS = [
   process.env.NEXT_PUBLIC_CREEM_PRICE_MONTHLY,
   process.env.NEXT_PUBLIC_CREEM_PRICE_YEARLY,
+  process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_MONTHLY,
+  process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_YEARLY,
 ].filter((id): id is string => Boolean(id));
 
 const additionalWhitelist = (process.env.CREEM_PRICE_ID_WHITELIST || "")

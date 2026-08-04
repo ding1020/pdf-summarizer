@@ -118,6 +118,7 @@ async function updateUserPro(
   opts: {
     sourceId?: string;
     productId?: string;
+    customerId?: string;
     billingCycle?: string | null;
     endDate?: Date | null;
     eventType: string;
@@ -131,6 +132,7 @@ async function updateUserPro(
           subscriptionStatus: "pro",
           creemSubscriptionId: opts.sourceId,
           creemPriceId: opts.productId,
+          creemCustomerId: opts.customerId ?? undefined,
           billingCycle: opts.billingCycle ?? undefined,
           subscriptionEndDate: opts.endDate,
         },
@@ -160,6 +162,7 @@ async function updateUserPro(
           subscriptionStatus: "pro",
           creemSubscriptionId: opts.sourceId,
           creemPriceId: opts.productId,
+          creemCustomerId: opts.customerId ?? undefined,
           billingCycle: opts.billingCycle ?? undefined,
           subscriptionEndDate: opts.endDate,
         },
@@ -241,6 +244,7 @@ async function handleSubscriptionGrant(data: Record<string, unknown>) {
   const email = customer?.email as string | undefined;
   const subId = sub.id as string | undefined;
   const productId = product?.id as string | undefined;
+  const customerId = customer?.id as string | undefined;
 
   const period = product?.billing_period as string | undefined;
   const billingCycle =
@@ -256,6 +260,7 @@ async function handleSubscriptionGrant(data: Record<string, unknown>) {
   await updateUserPro(userId ?? null, email ?? null, {
     sourceId: subId,
     productId,
+    customerId,
     billingCycle,
     endDate,
     eventType: "subscription_paid",
@@ -313,8 +318,11 @@ const EVENT_HANDLERS: Record<
       return;
     }
 
+    const customerId = customer?.id as string | undefined;
+
     await updateUserPro(userId ?? null, email ?? null, {
       sourceId: String(sub?.id ?? object.id),
+      customerId,
       eventType: "checkout_completed",
     });
 

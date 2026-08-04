@@ -26,6 +26,7 @@ export default function PricingClient() {
   const router = useRouter();
   const [selectedBilling, setSelectedBilling] = useState<"monthly" | "yearly">("monthly");
   const [showModal, setShowModal] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<"pro" | "pro_plus">("pro");
   const [toasts, setToasts] = useState<Toast[]>([]);
 
   // Analytics: track pricing page view
@@ -85,7 +86,7 @@ export default function PricingClient() {
     highlighted: false,
   };
 
-  const handleUpgrade = () => {
+  const handleUpgrade = (plan: "pro" | "pro_plus") => {
     if (!isSignedIn) {
       router.push("/sign-in");
       return;
@@ -95,6 +96,7 @@ export default function PricingClient() {
       showToast(t("paymentComingSoon"), "info");
       return;
     }
+    setSelectedPlan(plan);
     trackCheckoutClicked(selectedBilling, locale);
     setShowModal(true);
   };
@@ -106,8 +108,8 @@ export default function PricingClient() {
     }
   };
 
-  const priceAmount = selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice;
-  const planType = selectedBilling === "yearly" ? "pro_yearly" : "pro_monthly";
+  const priceAmount = selectedPlan === "pro_plus" ? (selectedBilling === "yearly" ? proPlusPlan.yearlyPrice : proPlusPlan.monthlyPrice) : (selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice);
+  const planType = selectedPlan === "pro_plus" ? (selectedBilling === "yearly" ? "pro_plus_yearly" : "pro_plus_monthly") : (selectedBilling === "yearly" ? "pro_yearly" : "pro_monthly");
 
   if (!isLoaded) {
     return (
@@ -197,7 +199,7 @@ export default function PricingClient() {
               <div className="p-8">
                 <h2 className="text-2xl font-bold text-gray-900">{plan.name}</h2>
                 <p className="text-gray-500 mt-1">{plan.description}</p>
-                
+
                 <div className="mt-6 flex items-baseline">
                   <span className="text-4xl font-bold text-gray-900">
                     {plan.price}
@@ -243,15 +245,15 @@ export default function PricingClient() {
                 </span>
               </div>
             )}
-            
+
             <div className="bg-blue-500 text-white text-center py-2 text-sm font-medium">
               {t("mostPopular")}
             </div>
-            
+
             <div className="p-8">
               <h2 className="text-2xl font-bold text-gray-900">{proPlan.name}</h2>
               <p className="text-gray-500 mt-1">{proPlan.description}</p>
-              
+
               <div className="mt-6 flex items-baseline">
                 <span className="text-4xl font-bold text-gray-900">
                   {selectedBilling === "yearly" ? proPlan.yearlyPrice : proPlan.monthlyPrice}
@@ -284,7 +286,7 @@ export default function PricingClient() {
               </ul>
 
               <button
-                onClick={handleUpgrade}
+                onClick={() => handleUpgrade("pro")}
                 disabled={!isPaymentEnabled}
                 className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled ? "bg-blue-600 text-white hover:bg-blue-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
               >
@@ -301,12 +303,69 @@ export default function PricingClient() {
               </p>
             </div>
           </div>
+
+          {/* Pro+ Plan Card */}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-200 relative">
+            {selectedBilling === "yearly" && (
+              <div className="absolute top-4 right-4">
+                <span className="px-3 py-1 bg-purple-500 text-white text-sm font-medium rounded-full">
+                  {t("bestValue")}
+                </span>
+              </div>
+            )}
+
+            <div className="bg-purple-500 text-white text-center py-2 text-sm font-medium">
+              {t("proPlus.badge")}
+            </div>
+
+            <div className="p-8">
+              <h2 className="text-2xl font-bold text-gray-900">{proPlusPlan.name}</h2>
+              <p className="text-gray-500 mt-1">{proPlusPlan.description}</p>
+
+              <div className="mt-6 flex items-baseline">
+                <span className="text-4xl font-bold text-gray-900">
+                  {selectedBilling === "yearly" ? proPlusPlan.yearlyPrice : proPlusPlan.monthlyPrice}
+                </span>
+                <span className="text-gray-500 ml-1">
+                  {selectedBilling === "yearly" ? proPlusPlan.yearlyPeriod : proPlusPlan.period}
+                </span>
+              </div>
+              {selectedBilling === "yearly" && (
+                <p className="text-sm text-green-600 mt-1 font-medium">
+                  {t("proPlus.pricePerMonth")}
+                </p>
+              )}
+
+              <ul className="mt-8 space-y-4">
+                {proPlusPlan.features.map((feature, index) => (
+                  <li key={index} className="flex items-start">
+                    <svg className="h-6 w-6 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span className="text-gray-700">{feature}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <button
+                onClick={() => handleUpgrade("pro_plus")}
+                disabled={!isPaymentEnabled}
+                className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled ? "bg-purple-600 text-white hover:bg-purple-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+              >
+                {isPaymentEnabled ? proPlusPlan.buttonText : t("comingSoon")}
+              </button>
+
+              <p className="text-center text-xs text-gray-500 mt-4">
+                {t("securePayment")}
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* FAQ */}
         <div className="mt-16 max-w-3xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-8">{t("faq.title")}</h2>
-          
+
           <div className="space-y-6">
             <div>
               <h3 className="font-semibold text-gray-900">{t("faq.cancel")}</h3>
@@ -356,63 +415,6 @@ export default function PricingClient() {
               </button>
             </div>
           ))}
-        </div>
-      </div>
-
-      {/* Pro+ Plan Card */}
-      <div className="bg-white rounded-2xl shadow-lg overflow-hidden border border-purple-200 relative">
-        {selectedBilling === "yearly" && (
-          <div className="absolute top-4 right-4">
-            <span className="px-3 py-1 bg-purple-500 text-white text-sm font-medium rounded-full">
-              {t("bestValue")}
-            </span>
-          </div>
-        )}
-        
-        <div className="bg-purple-500 text-white text-center py-2 text-sm font-medium">
-          {t("proPlus.badge")}
-        </div>
-        
-        <div className="p-8">
-          <h2 className="text-2xl font-bold text-gray-900">{proPlusPlan.name}</h2>
-          <p className="text-gray-500 mt-1">{proPlusPlan.description}</p>
-          
-          <div className="mt-6 flex items-baseline">
-            <span className="text-4xl font-bold text-gray-900">
-              {selectedBilling === "yearly" ? proPlusPlan.yearlyPrice : proPlusPlan.monthlyPrice}
-            </span>
-            <span className="text-gray-500 ml-1">
-              {selectedBilling === "yearly" ? proPlusPlan.yearlyPeriod : proPlusPlan.period}
-            </span>
-          </div>
-          {selectedBilling === "yearly" && (
-            <p className="text-sm text-green-600 mt-1 font-medium">
-              {t("proPlus.pricePerMonth")}
-            </p>
-          )}
-
-          <ul className="mt-8 space-y-4">
-            {proPlusPlan.features.map((feature, index) => (
-              <li key={index} className="flex items-start">
-                <svg className="h-6 w-6 text-purple-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                </svg>
-                <span className="text-gray-700">{feature}</span>
-              </li>
-            ))}
-          </ul>
-
-          <button
-            onClick={handleUpgrade}
-            disabled={!isPaymentEnabled}
-            className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled ? "bg-purple-600 text-white hover:bg-purple-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
-          >
-            {isPaymentEnabled ? proPlusPlan.buttonText : t("comingSoon")}
-          </button>
-
-          <p className="text-center text-xs text-gray-500 mt-4">
-            {t("securePayment")}
-          </p>
         </div>
       </div>
 

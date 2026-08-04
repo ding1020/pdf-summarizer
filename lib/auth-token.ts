@@ -20,7 +20,7 @@ export function createToken(user: { id: string; email: string; firstName?: strin
     firstName: user.firstName || null,
     lastName: user.lastName || null,
     iat: Math.floor(Date.now() / 1000),
-    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 1, // 1 day (reduced from 7 days for security)
+    exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days — must match cookie maxAge in sign-in route
   };
   
   const secret = getSecret();
