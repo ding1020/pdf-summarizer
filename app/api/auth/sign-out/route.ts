@@ -1,8 +1,17 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { getAuthUserId } from "@/lib/get-auth";
+import { validateCsrf } from "@/lib/csrf";
 
-export async function POST() {
+export async function POST(req: NextRequest) {
+  // CSRF validation
+  if (!validateCsrf(req)) {
+    return NextResponse.json(
+      { error: "Invalid security token. Please refresh the page and try again." },
+      { status: 403 },
+    );
+  }
+
   // Rate limiting — prevent abuse
   const userId = await getAuthUserId();
   const identifier = getClientIdentifier(userId);

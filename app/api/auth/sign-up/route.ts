@@ -1,4 +1,4 @@
-﻿import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
@@ -8,7 +8,7 @@ import { logger } from "@/lib/logger";
 import { recordAudit } from "@/lib/audit";
 import { TRIAL_DURATION_DAYS } from "@/lib/subscription";
 import { validateCsrf } from "@/lib/csrf";
-
+import { createToken } from "@/lib/auth-token";
 import { getClientIP } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
@@ -60,7 +60,7 @@ export async function POST(req: NextRequest) {
       if (!existing.emailVerified) {
         const passwordHash = await hashPassword(password);
         const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
-        await prisma.user.update({
+        const reactivatedUser = await prisma.user.update({
           where: { id: existing.id },
           data: {
             emailVerified: true,
@@ -72,11 +72,29 @@ export async function POST(req: NextRequest) {
           },
         });
 
-        return NextResponse.json({
-          success: true,
-          message: "Account has been activated. You can now sign in.",
-          autoSignedIn: false,
+        // Auto sign-in
+        const token = createToken({
+          id: reactivatedUser.id,
+          email: reactivatedUser.email,
+          firstName: reactivatedUser.firstName,
+          lastName: reactivatedUser.lastName,
         });
+
+        const response = NextResponse.json({
+          success: true,
+          message: "Account has been activated.",
+          autoSignedIn: true,
+        });
+
+        response.cookies.set("__auth_token", token, {
+          path: "/",
+          httpOnly: true,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+          maxAge: 60 * 60 * 24 * 7,
+        });
+
+        return response;
       }
 
       // Already verified — do NOT allow password reset via re-registration
@@ -138,11 +156,29 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    return NextResponse.json({
-      success: true,
-      message: "Account created! You can now sign in.",
-      autoSignedIn: false,
+    // Auto sign-in: issue auth token immediately after registration
+    const token = createToken({
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
     });
+
+    const response = NextResponse.json({
+      success: true,
+      message: "Account created!",
+      autoSignedIn: true,
+    });
+
+    response.cookies.set("__auth_token", token, {
+      path: "/",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 60 * 60 * 24 * 7,
+    });
+
+    return response;
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     logger.error("Sign-up error:", err);

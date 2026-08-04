@@ -16,6 +16,7 @@ function SignUpForm() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
+  // Auto-redirect to dashboard when signed in (after auto sign-in from registration)
   useEffect(() => {
     if (isLoaded && isSignedIn) {
       router.push("/dashboard");
@@ -37,13 +38,12 @@ function SignUpForm() {
     }
 
     setLoading(true);
-    const result = await signUp(email, password, name || undefined);
+    // Normalize email before sending (matches server-side normalization)
+    const normalizedEmail = email.trim().toLowerCase();
+    const result = await signUp(normalizedEmail, password, name || undefined);
     if (result.success) {
       setSuccess(true);
-      // Redirect to sign-in after 2s
-      setTimeout(() => {
-        router.push("/sign-in");
-      }, 2000);
+      // Auto sign-in is handled by the API - useEffect will redirect to dashboard
     } else {
       setError(result.error || "Sign up failed");
     }
@@ -77,7 +77,7 @@ function SignUpForm() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {success && (
               <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm">
-                Account created successfully! Redirecting to sign in...
+                Account created successfully! Redirecting to dashboard...
               </div>
             )}
             {error && (
@@ -132,7 +132,7 @@ function SignUpForm() {
                 autoComplete="new-password"
                 minLength={8}
               />
-              <p className="text-xs text-gray-400 mt-1">At least 8 characters</p>
+              <p className="text-xs text-gray-400 mt-1">At least 8 characters with uppercase, lowercase, and a number</p>
             </div>
 
             <button
