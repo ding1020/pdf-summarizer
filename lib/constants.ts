@@ -77,4 +77,4 @@ export const SUPPORT_EMAIL = process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "support@p
 // to switch from free tier to paid tier — only environment variables.
 export const isPaymentEnabled =
   process.env.NEXT_PUBLIC_ENABLE_PAYMENT === "true" ||
-  Boolean(process.env.CREEM_SECRET_KEY);
+  Boolean(process.env.CREEM_SECRET_KEY) || Boolean(process.env.NEXT_PUBLIC_CREEM_PRICE_MONTHLY);
