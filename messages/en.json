@@ -158,7 +158,8 @@
     "genericError": "Something went wrong. Please try again.",
     "loading": "Loading...",
     "errors": {
-      "generic": "Something went wrong. Please try again."
+      "generic": "Something went wrong. Please try again.",
+      "notConfigured": "Payment system is being configured. Please contact support for upgrade assistance."
     },
     "processing": "Processing...",
     "securePayment": "Secure checkout powered by Creem",
