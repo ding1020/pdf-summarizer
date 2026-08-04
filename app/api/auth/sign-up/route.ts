@@ -144,7 +144,8 @@ export async function POST(req: NextRequest) {
       autoSignedIn: false,
     });
   } catch (error) {
-    logger.error("Sign-up error:", error instanceof Error ? error : new Error(String(error)));
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error("Sign-up error:", err);
 
     // Unique constraint violation
     if (
@@ -158,7 +159,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Sign-up failed. Please try again." },
+      { error: "Sign-up failed. Please try again.", debug: err.message, stack: err.stack?.split('\n').slice(0, 5) },
       { status: 500 }
     );
   }
