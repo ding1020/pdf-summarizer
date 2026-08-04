@@ -10,10 +10,30 @@ interface PaymentModalProps {
   onClose: () => void;
 }
 
+interface RuntimePriceIds {
+  monthly: string | null;
+  yearly: string | null;
+  proPlusMonthly: string | null;
+  proPlusYearly: string | null;
+}
+
 export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentModalProps) {
   const t = useTranslations("pricing");
   const [creemLoading, setCreemLoading] = useState(false);
   const [error, setError] = useState("");
+  const [runtimePriceIds, setRuntimePriceIds] = useState<RuntimePriceIds | null>(null);
+
+  // Fetch runtime price IDs from /api/config
+  useEffect(() => {
+    fetch("/api/config")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.priceIds) {
+          setRuntimePriceIds(data.priceIds);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -45,9 +65,14 @@ export default function PaymentModal({ plan, amount, isOpen, onClose }: PaymentM
     setError("");
 
     try {
+      // Use runtime price IDs from /api/config (falls back to build-time env vars)
       const priceId = isProPlus
-        ? (isYearly ? process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_YEARLY : process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_MONTHLY)
-        : (isYearly ? process.env.NEXT_PUBLIC_CREEM_PRICE_YEARLY : process.env.NEXT_PUBLIC_CREEM_PRICE_MONTHLY);
+        ? (isYearly
+            ? (runtimePriceIds?.proPlusYearly || process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_YEARLY)
+            : (runtimePriceIds?.proPlusMonthly || process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_MONTHLY))
+        : (isYearly
+            ? (runtimePriceIds?.yearly || process.env.NEXT_PUBLIC_CREEM_PRICE_YEARLY)
+            : (runtimePriceIds?.monthly || process.env.NEXT_PUBLIC_CREEM_PRICE_MONTHLY));
 
       if (!priceId) {
         setError(t("errors.notConfigured"));

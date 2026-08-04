@@ -29,11 +29,13 @@ export default function PricingClient() {
   const [selectedPlan, setSelectedPlan] = useState<"pro" | "pro_plus">("pro");
   const [toasts, setToasts] = useState<Toast[]>([]);
   const [isPaymentEnabled, setIsPaymentEnabled] = useState(isPaymentEnabledBuildTime);
+  const [hasProPlusPriceIds, setHasProPlusPriceIds] = useState(false);
 
   // Fetch runtime payment config — bypasses Vercel NEXT_PUBLIC_ build-time inlining issues
   useEffect(() => {
     fetch("/api/config").then(r => r.json()).then(data => {
       if (data.paymentEnabled) setIsPaymentEnabled(true);
+      if (data.priceIds?.proPlusMonthly || data.priceIds?.proPlusYearly) setHasProPlusPriceIds(true);
     }).catch(() => {});
   }, []);
 
@@ -357,10 +359,10 @@ export default function PricingClient() {
 
               <button
                 onClick={() => handleUpgrade("pro_plus")}
-                disabled={!isPaymentEnabled}
-                className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled ? "bg-purple-600 text-white hover:bg-purple-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
+                disabled={!isPaymentEnabled || !hasProPlusPriceIds}
+                className={`mt-8 w-full py-3 px-6 font-medium rounded-lg transition-colors ${isPaymentEnabled && hasProPlusPriceIds ? "bg-purple-600 text-white hover:bg-purple-700" : "bg-gray-200 text-gray-500 cursor-not-allowed"}`}
               >
-                {isPaymentEnabled ? proPlusPlan.buttonText : t("comingSoon")}
+                {isPaymentEnabled && hasProPlusPriceIds ? proPlusPlan.buttonText : t("comingSoon")}
               </button>
 
               <p className="text-center text-xs text-gray-500 mt-4">
