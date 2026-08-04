@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+﻿import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // Create user with hashed password AND 3-day Pro trial
+    // Create user with hashed password AND 14-day Pro trial
     // Email verification is skipped: new users can sign in immediately.
     // Welcome emails are sent but failures are non-blocking.
     const passwordHash = await hashPassword(password);
