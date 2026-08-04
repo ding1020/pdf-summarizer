@@ -10,7 +10,7 @@ const PaymentModal = dynamic(() => import("@/components/PaymentModal"), {
   ssr: false,
 });
 import { trackPricingViewed, trackCheckoutClicked } from "@/lib/analytics";
-import { isPaymentEnabled } from "@/lib/constants";
+import { isPaymentEnabled as isPaymentEnabledBuildTime } from "@/lib/constants";
 
 interface Toast {
   id: string;
@@ -28,6 +28,14 @@ export default function PricingClient() {
   const [showModal, setShowModal] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<"pro" | "pro_plus">("pro");
   const [toasts, setToasts] = useState<Toast[]>([]);
+  const [isPaymentEnabled, setIsPaymentEnabled] = useState(isPaymentEnabledBuildTime);
+
+  // Fetch runtime payment config — bypasses Vercel NEXT_PUBLIC_ build-time inlining issues
+  useEffect(() => {
+    fetch("/api/config").then(r => r.json()).then(data => {
+      if (data.paymentEnabled) setIsPaymentEnabled(true);
+    }).catch(() => {});
+  }, []);
 
   // Analytics: track pricing page view
   useEffect(() => {
