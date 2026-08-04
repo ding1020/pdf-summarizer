@@ -1,4 +1,4 @@
-﻿-- Add planTier and usageOverage columns to User table
+-- Add planTier and usageOverage columns to User table
 -- These columns support usage-based billing (Pro+ plan tier and overage tracking)
 -- Uses IF NOT EXISTS for idempotency (columns were initially added via runtime migration endpoint)
 
