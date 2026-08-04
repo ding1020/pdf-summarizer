@@ -23,7 +23,7 @@ export function generateCsrfToken(): string {
 export function generateCsrfCookie(): { token: string; cookie: string } {
   const token = generateCsrfToken();
   const isProd = process.env.NODE_ENV === "production";
-  const cookie = `__csrf_token=${token}; Path=/; SameSite=Strict; ${isProd ? "Secure; " : ""}Max-Age=86400`;
+  const cookie = `__csrf_token=${token}; Path=/; SameSite=Lax; ${isProd ? "Secure; " : ""}Max-Age=86400`;
   return { token, cookie };
 }
 

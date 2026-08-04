@@ -176,7 +176,7 @@ export default async function middleware(request: NextRequest): Promise<NextResp
     const csrfToken = request.cookies.get("__csrf_token")?.value || generateCsrfToken();
     response.cookies.set("__csrf_token", csrfToken, {
       httpOnly: false, // Must be readable by client JS
-      sameSite: "strict",
+      sameSite: "lax",
       maxAge: 86400, // 24h
       path: "/",
       secure: process.env.NODE_ENV === "production",
