@@ -50,6 +50,16 @@ export async function POST(req: NextRequest) {
     // Find user by normalized email (must match sign-up → trim + lowercase)
     const user = await prisma.user.findUnique({
       where: { email: normalizedEmail },
+      select: {
+        id: true,
+        email: true,
+        passwordHash: true,
+        firstName: true,
+        lastName: true,
+        emailVerified: true,
+        verifyToken: true,
+        verifyExpires: true,
+      },
     });
 
     if (!user?.passwordHash) {
@@ -109,7 +119,7 @@ export async function POST(req: NextRequest) {
       message: err.message,
     });
     return NextResponse.json(
-      { error: "Sign-in failed. Please try again.", debug: err.message, stack: err.stack?.split('\n').slice(0, 5) },
+      { error: "Sign-in failed. Please try again." },
       { status: 500 }
     );
   }

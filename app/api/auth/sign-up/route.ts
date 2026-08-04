@@ -159,7 +159,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { error: "Sign-up failed. Please try again.", debug: err.message, stack: err.stack?.split('\n').slice(0, 5) },
+      { error: "Sign-up failed. Please try again." },
       { status: 500 }
     );
   }
