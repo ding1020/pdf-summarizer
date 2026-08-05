@@ -1,4 +1,4 @@
-import type { Metadata, Viewport } from "next";
+﻿import type { Metadata, Viewport } from "next";
 import { cookies } from "next/headers";
 import { Inter } from "next/font/google";
 import Script from "next/script";
@@ -14,6 +14,7 @@ import AuthProvider from "@/components/AuthProvider";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { PwaRegister } from "@/components/PwaRegister";
+import { WebVitals } from "@/components/WebVitals";
 import { ToastProvider } from "@/hooks/useToast";
 import { ConfirmProvider } from "@/hooks/useConfirm";
 import { ToastContainer } from "@/components/Toast";
@@ -299,6 +300,7 @@ export default async function LocaleLayout({
               }}
             />
           )}
+          <WebVitals />
           <PwaRegister />
           <Script
             id="baidu-push"

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Creem webhook handlers and helpers.
  * Extracted from the route handler to avoid Next.js 16 route type conflicts.
  */
@@ -124,12 +124,21 @@ async function updateUserPro(
     eventType: string;
   },
 ) {
+  // Determine plan tier based on product ID
+  const proPlusPriceIds = [
+    process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_MONTHLY,
+    process.env.NEXT_PUBLIC_CREEM_PRICE_PRO_PLUS_YEARLY,
+  ].filter(Boolean) as string[];
+  const isProPlus = opts.productId ? proPlusPriceIds.includes(opts.productId) : false;
+  const planTier = isProPlus ? "pro_plus" : "pro";
+
   try {
     if (userId) {
       await prisma.user.update({
         where: { id: userId },
         data: {
           subscriptionStatus: "pro",
+          planTier,
           creemSubscriptionId: opts.sourceId,
           creemPriceId: opts.productId,
           creemCustomerId: opts.customerId ?? undefined,
@@ -160,6 +169,7 @@ async function updateUserPro(
         where: { email },
         data: {
           subscriptionStatus: "pro",
+          planTier,
           creemSubscriptionId: opts.sourceId,
           creemPriceId: opts.productId,
           creemCustomerId: opts.customerId ?? undefined,
