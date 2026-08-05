@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useReportWebVitals } from "next/web-vitals";
-import { logger } from "@/lib/logger";
+
 
 /**
  * Web Vitals Monitor
@@ -43,7 +43,7 @@ export function WebVitals() {
 
     // Log warnings for poor metrics
     if (metric.rating === "poor") {
-      logger.warn(`[Web Vitals] Poor ${metric.name}: ${metric.value}`, {
+      console.warn(`[Web Vitals] Poor ${metric.name}: ${metric.value}`, {
         name: metric.name,
         value: metric.value,
         rating: metric.rating,
