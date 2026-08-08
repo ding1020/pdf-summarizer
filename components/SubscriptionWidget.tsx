@@ -9,6 +9,7 @@ interface SubscriptionData {
   subscriptionStatus: string;
   subscriptionEndDate: string | null;
   billingCycle: string | null;
+  planTier: string | null;
   usageCount: number;
   usageLimit: number;
 }
@@ -64,6 +65,7 @@ export default function SubscriptionWidget() {
           subscriptionStatus: sub?.subscriptionStatus || "free",
           subscriptionEndDate: sub?.subscriptionEndDate || null,
           billingCycle: sub?.billingCycle || null,
+          planTier: sub?.planTier || null,
           usageCount: usage?.used || 0,
           usageLimit: sub?.subscriptionStatus === "pro" || sub?.subscriptionStatus === "pro_trial" ? -1 : (usage?.limit || 5),
         });
@@ -89,7 +91,7 @@ export default function SubscriptionWidget() {
   const planLabel = isTrial
     ? "🕒 Pro Trial"
     : isPro
-    ? `Pro ${data.billingCycle === "yearly" ? "Yearly" : "Monthly"}`
+    ? `${data.planTier === "pro_plus" ? "Pro+" : "Pro"} ${data.billingCycle === "yearly" ? "Yearly" : "Monthly"}`
     : "Free";
   const statusColor = isTrial
     ? "bg-purple-100 text-purple-700 border-purple-200"

@@ -17,7 +17,11 @@ export function isProStatus(status: string | null | undefined): boolean {
 }
 
 /** Returns human-readable label for display */
-export function subscriptionLabel(status: string | null | undefined): string {
+export function subscriptionLabel(
+  status: string | null | undefined,
+  planTier?: string | null,
+): string {
+  if (status === "pro" && planTier === "pro_plus") return "Pro+";
   switch (status) {
     case "pro":
       return "Pro";
@@ -33,7 +37,11 @@ export function subscriptionLabel(status: string | null | undefined): string {
 }
 
 /** Returns a badge variant name for UI */
-export function subscriptionBadgeVariant(status: string | null | undefined): string {
+export function subscriptionBadgeVariant(
+  status: string | null | undefined,
+  planTier?: string | null,
+): string {
+  if (status === "pro" && planTier === "pro_plus") return "pro_plus";
   switch (status) {
     case "pro":
       return "pro";

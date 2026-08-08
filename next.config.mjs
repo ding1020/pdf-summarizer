@@ -1,4 +1,4 @@
-import { withSentryConfig } from "@sentry/nextjs";
+﻿import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n.ts");
@@ -44,10 +44,9 @@ const nextConfig = {
   // 📸 Image optimization
   images: {
     formats: ["image/avif", "image/webp"],
-    minimumCacheTTL: 86400, // 1 day
+    minimumCacheTTL: 604800, // 1 day
     remotePatterns: [
-      { protocol: "https", hostname: "img.clerk.com" },
-    ],
+          ],
   },
 
   // 📦 Transpile external packages — handled by next-intl plugin via createNextIntlPlugin

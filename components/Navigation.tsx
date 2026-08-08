@@ -6,7 +6,7 @@ import { Link, usePathname } from "@/navigation";
 import dynamic from "next/dynamic";
 import { Suspense } from "react";
 
-// ── Dynamic import: Clerk auth buttons (client-only, no SSR) ──
+// ── Dynamic import: auth buttons (client-only, no SSR) ──
 const AuthButtonsClient = dynamic(
   () => import("./AuthButtonsClient"),
   { ssr: false }

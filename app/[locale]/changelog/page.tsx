@@ -49,7 +49,7 @@ const changelog = [
       "8-language support (EN, ZH, JA, KO, ES, FR, DE, RU)",
       "Creem payment integration for international users",
       "Alipay & WeChat Pay manual verification for Chinese users",
-      "3-day Pro trial with automatic downgrade",
+      "14-day Pro trial with automatic downgrade",
       "Win-back email sequence for churned users",
     ],
   },

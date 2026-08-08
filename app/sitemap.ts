@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next/types";
+﻿import { MetadataRoute } from "next/types";
 import { blogSlugs } from "@/lib/blog-posts";
 import { alternatives } from "@/lib/alternatives";
 
@@ -13,7 +13,7 @@ const routesWithoutLocale: string[] = [];
 const localizedRoutes = ["", "/pricing",
     "/reviews",
     "/dmca",
-    "/cookies", "/terms", "/privacy", "/refund", "/help", "/cookies", "/blog", "/changelog", "/alternatives"];
+    "/cookies", "/terms", "/privacy", "/refund", "/help", "/blog", "/changelog", "/alternatives"];
 
 // Use current date for lastModified — reflects latest deployment
 const NOW = new Date();

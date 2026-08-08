@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Centralized application constants.
  * Single source of truth — import from here, never hardcode values.
  */
@@ -43,9 +43,11 @@ export const ALLOWED_CREEM_PRICE_IDS = new Set([
 ]);
 
 // ── Usage limits by plan ──
-export const PRO_MONTHLY_LIMIT = 200;     // summaries per month for Pro
-export const PRO_PLUS_MONTHLY_LIMIT = 500; // summaries per month for Pro+
-export const OVERAGE_PRICE_PER_SUMMARY = 3; // $0.03 per extra summary (in cents)
+// NOTE: Pro and Pro+ are currently UNLIMITED (see checkAndIncrementDailyUsage in lib/ai.ts).
+// These constants are reserved for future tier-based usage limits and overage billing.
+export const PRO_MONTHLY_LIMIT = 200;     // Reserved: future Pro monthly cap
+export const PRO_PLUS_MONTHLY_LIMIT = 500; // Reserved: future Pro+ monthly cap
+export const OVERAGE_PRICE_PER_SUMMARY = 3; // Reserved: future $0.03 per extra summary (cents)
 
 // ── Content limits ──
 export const MAX_CONTENT_LENGTH = 15_000;

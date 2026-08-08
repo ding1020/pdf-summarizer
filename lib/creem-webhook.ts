@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Creem webhook handlers and helpers.
  * Extracted from the route handler to avoid Next.js 16 route type conflicts.
  */
@@ -330,14 +330,10 @@ const EVENT_HANDLERS: Record<
 
     const customerId = customer?.id as string | undefined;
 
-    await updateUserPro(userId ?? null, email ?? null, {
-      sourceId: String(sub?.id ?? object.id),
-      customerId,
-      eventType: "checkout_completed",
-    });
-
-    const planBilling = (sub?.product as Record<string, unknown>)
-      ?.billing_period as string | undefined;
+    // Extract productId from subscription to determine plan tier (Pro vs Pro+)
+    const subProduct = sub?.product as Record<string, unknown> | undefined;
+    const productId = subProduct?.id as string | undefined;
+    const planBilling = subProduct?.billing_period as string | undefined;
     const cycle =
       planBilling === "every-year"
         ? "yearly"
@@ -345,6 +341,16 @@ const EVENT_HANDLERS: Record<
           ? "monthly"
           : null;
     const chkEnd = sub?.current_period_end_date as string | undefined;
+
+    await updateUserPro(userId ?? null, email ?? null, {
+      sourceId: String(sub?.id ?? object.id),
+      productId,
+      customerId,
+      billingCycle: cycle,
+      endDate: chkEnd ? new Date(chkEnd) : null,
+      eventType: "checkout_completed",
+    });
+
     await notifyUser(userId ?? null, email ?? null, "checkout_completed", {
       billingCycle: cycle,
       endDate: chkEnd ? new Date(chkEnd) : null,

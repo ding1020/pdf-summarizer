@@ -39,8 +39,8 @@ export default function CookiesPage() {
           <h2 className="text-xl font-semibold text-gray-900 mt-8 mb-4">{t("thirdParty")}</h2>
           <p className="text-gray-600 mb-4">{t("thirdPartyDesc")}</p>
           <ul className="list-disc list-inside text-gray-600 mb-6 space-y-2">
-            <li><strong>Clerk:</strong> {t("clerk")}</li>
-            <li><strong>Creem:</strong> {t("paddle")}</li>
+            <li><strong>Native Auth:</strong> {t("nativeAuth")}</li>
+            <li><strong>Creem:</strong> {t("creem")}</li>
             <li><strong>Vercel:</strong> {t("vercel")}</li>
           </ul>
 

@@ -2,7 +2,7 @@
 export async function GET() {
   return Response.json({
     commit: "19bac35",
-    message: "Zero-Clerk middleware + passthrough ClientClerkProvider",
+    message: "Native auth middleware + passthrough AuthProvider",
     timestamp: Date.now(),
     deployTime: new Date().toISOString(),
   });

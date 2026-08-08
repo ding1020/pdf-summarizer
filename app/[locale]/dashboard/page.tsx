@@ -7,7 +7,7 @@ import SubscriptionWidget from "@/components/SubscriptionWidget";
 import OnboardingGuideWrapper from "./OnboardingGuideWrapper";
 import DashboardUsageTracker from "@/components/DashboardUsageTracker";
 
-// ── Auth UI Skeleton (shown while Clerk loads) ──
+// ── Auth UI Skeleton (shown while auth loads) ──
 function AuthUISkeleton() {
   return (
     <div className="flex items-center gap-3">

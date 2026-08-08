@@ -36,6 +36,7 @@ export async function GET(req: NextRequest) {
         creemSubscriptionId: true,
         creemCustomerId: true,
         creemPriceId: true,
+        planTier: true,
       },
     });
 
@@ -46,6 +47,7 @@ export async function GET(req: NextRequest) {
         creemSubscriptionId: null,
         creemCustomerId: null,
         creemPriceId: null,
+        planTier: "free",
         billingCycle: null,
       });
     }
@@ -56,6 +58,7 @@ export async function GET(req: NextRequest) {
       creemSubscriptionId: user.creemSubscriptionId || null,
       creemCustomerId: user.creemCustomerId || null,
       creemPriceId: user.creemPriceId || null,
+      planTier: user.planTier || "free",
       billingCycle: user.billingCycle || null,
     });
   } catch (error) {

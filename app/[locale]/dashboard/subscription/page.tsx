@@ -10,6 +10,7 @@ interface SubscriptionData {
   subscriptionStatus: string;
   subscriptionEndDate: string | null;
   billingCycle: string | null;
+  planTier: string | null;
 }
 
 export default function SubscriptionPage() {
@@ -123,11 +124,11 @@ export default function SubscriptionPage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-2xl font-bold text-gray-900">
-                      {isTrial ? t("planTrial") || "Pro Trial" : isPro ? t("planPro") : t("planFree")}
+                      {isTrial ? t("planTrial") || "Pro Trial" : isPro ? (subscription?.planTier === "pro_plus" ? "Pro+" : t("planPro")) : t("planFree")}
                     </p>
                     <p className="text-gray-500 text-sm mt-1">
                       {isTrial
-                        ? t("trialDesc") || "3-day unlimited access"
+                        ? t("trialDesc") || "14-day unlimited access"
                         : isPro
                         ? subscription?.billingCycle === "yearly"
                           ? t("billedAnnually")
