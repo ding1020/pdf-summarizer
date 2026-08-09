@@ -19,7 +19,8 @@
     "help": "ヘルプ",
     "howItWorks": "使い方",
     "dashboard": "ダッシュボード",
-    "logout": "ログアウト"
+    "logout": "ログアウト",
+    "api": "API"
   },
   "hero": {
     "badge": "最先端AI技術で駆動",
@@ -133,10 +134,6 @@
       "savePercent": "27%節約"
     },
     "errors": {
-      "paymentFailed": "支払いに失敗しました。カード情報を確認して再試行してください。",
-      "cardDeclined": "カードが拒否されました。別の支払い方法をお試しください。",
-      "insufficientFunds": "残高不足です。別のカードをお試しください。",
-      "configError": "決済システムが一時的に利用できません。後でもう一度お試しください。",
       "generic": "問題が発生しました。再試行してください。",
       "notConfigured": "決済システムを設定中です。アップグレードのサポートについてはサポートにお問い合わせください。"
     },
@@ -246,7 +243,14 @@
     },
     "skip": "スキップ",
     "next": "次へ",
-    "getStarted": "了解！"
+    "getStarted": "了解！",
+    "renewsIn": "更新日: {date}",
+    "daysLeft": "残り{days}日",
+    "manageSubscription": "サブスクリプション管理",
+    "pastDueTitle": "⚠️ 支払い失敗",
+    "pastDueDesc": "前回の支払いが完了しませんでした。Proアクセスを維持するには、お支払い方法を更新してください。",
+    "proYearly": "プロ · 年額",
+    "proMonthly": "プロ · 月額"
   },
   "documents": {
     "historyTitle": "ドキュメント履歴",
@@ -280,7 +284,13 @@
     "streamFailed": "ストリームの読み取りに失敗しました",
     "needHelp": "PDFアップロードについてヘルプが必要ですか？",
     "errorTitle": "エラー",
-    "downloadProOnly": "Pro機能 — クリックしてアップグレード"
+    "downloadProOnly": "Pro機能 — クリックしてアップグレード",
+    "copySummary": "コピー",
+    "downloadSummary": ".mdとしてダウンロード",
+    "shareSummary": "共有",
+    "copied": "コピーしました！",
+    "shareEnabled": "共有リンクをコピーしました！",
+    "shareDisabled": "共有"
   },
   "footer": {
     "brand": "PDF Summary",
@@ -372,14 +382,14 @@
       "thirdParty": "サードパーティクッキー",
       "thirdPartyDesc": "当社が使用するサードパーティサービスもクッキーを設定する場合があります：",
       "nativeAuth": "認証とセッション管理",
-      "paddle": "決済処理",
       "vercel": "ウェブサイトホスティングと分析",
       "managing": "クッキーの管理",
       "managingDesc": "ほとんどのウェブブラウザでは設定からクッキーを制御できます。ただし、クッキーを無効にするとウェブサイトの機能に影響する場合があります。",
       "updates": "本ポリシーの更新",
       "updatesDesc": "当社はこのクッキーポリシーを随時更新することがあります。変更はこのページに掲載されます。",
       "contact": "お問い合わせ",
-      "contactDesc": "クッキーの使用に関するご質問は、こちらまでご連絡ください："
+      "contactDesc": "クッキーの使用に関するご質問は、こちらまでご連絡ください：",
+      "creem": "決済処理"
     },
     "privacy": {
       "title": "プライバシーポリシー",
@@ -413,7 +423,6 @@
       "s5Title": "5. サードパーティサービス",
       "s5Intro": "以下のサードパーティサービスを使用しています：",
       "s5Auth": "認証とユーザー管理",
-      "s5Paddle": "決済処理",
       "s5AI": "DeepSeek、Groq、SiliconFlow（サマリー生成用）",
       "s5Note": "これらのサービスには、お客様の情報の使用に関する独自のプライバシーポリシーがあります。",
       "s6Title": "6. データ保持",
@@ -430,7 +439,8 @@
       "s9Title": "9. 本ポリシーの変更",
       "s9Body": "当社はこのプライバシーポリシーを随時更新することがあります。重要な変更はメールまたはサービスを通じて通知します。",
       "s10Title": "10. お問い合わせ",
-      "s10Body1": "プライバシーに関するご質問は、こちらまでご連絡ください："
+      "s10Body1": "プライバシーに関するご質問は、こちらまでご連絡ください：",
+      "s5Creem": "決済処理"
     },
     "terms": {
       "title": "利用規約",
@@ -613,12 +623,12 @@
     "outOf5": "5点満点中",
     "reviews": "件のレビュー",
     "filter": {
-      "all": "すべてのレビュー",
-      "5": "5つ星",
-      "4": "4つ星",
-      "3": "3つ星",
-      "2": "2つ星",
       "1": "1つ星",
+      "2": "2つ星",
+      "3": "3つ星",
+      "4": "4つ星",
+      "5": "5つ星",
+      "all": "すべてのレビュー",
       "positive": "高評価 (4-5★)",
       "critical": "低評価 (1-2★)"
     },
@@ -628,5 +638,102 @@
       "lowest": "評価が低い順"
     },
     "noReviews": "まだレビューがありません。最初のレビューを書いてみませんか？"
+  },
+  "home": {
+    "uploadTitle": "今すぐ試す — 無料",
+    "uploadSubtitleGuest": "登録不要。PDFをアップロードしてAIの魔法を体験。",
+    "uploadSubtitleSigned": "PDFをアップロードして即座にAI要約を取得。",
+    "uploadHint": "PDFファイルのみ · 最大20MB · ファイルは暗号化され、処理後に自動削除されます"
+  },
+  "stats": {
+    "documents": "処理済みドキュメント",
+    "uptime": "稼働率",
+    "languages": "対応言語",
+    "speed": "平均要約時間"
+  },
+  "testimonial1": "毎週何時間も節約できました。要約の精度と構成が素晴らしいです。",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "リサーチアナリスト",
+  "testimonial2": "契約書レビューに使っています。見落としがちな詳細をAIがキャッチします。画期的です。",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "法務コンサルタント",
+  "testimonial3": "使った中で最高のPDF要約ツール。高速、正確、多言語サポートも素晴らしい。",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "プロジェクトマネージャー",
+  "onboarding": {
+    "step1Title": "PDFをアップロード",
+    "step1Desc": "レポート、契約書、研究論文など、あらゆるPDFをドラッグ＆ドロップ。50MBまで対応。",
+    "step2Title": "AI分析",
+    "step2Desc": "AIがドキュメントを読んで理解し、要点を抽出し、要約を生成して重要なインサイトを自動的に特定します。",
+    "step3Title": "要約を取得",
+    "step3Desc": "要約をMarkdownとしてダウンロード、リンクで共有、クリップボードにコピー。ワンクリックで完了。",
+    "back": "戻る",
+    "next": "次へ",
+    "gotIt": "了解！"
+  },
+  "auth": {
+    "forgotTitle": "パスワードをお忘れですか？",
+    "forgotSubtitle": "メールアドレスを入力すると、リセットリンクを送信します",
+    "sendResetLink": "リセットリンクを送信",
+    "sending": "送信中...",
+    "emailSent": "そのメールアドレスが登録されている場合、パスワードリセットリンクがまもなく届きます。",
+    "checkSpam": "届かない場合は、迷惑メールフォルダをご確認ください。",
+    "sendAgain": "再送信",
+    "backToSignIn": "サインインに戻る",
+    "resetTitle": "新しいパスワードを設定",
+    "resetSubtitle": "以下に新しいパスワードを入力してください",
+    "newPassword": "新しいパスワード",
+    "resetPassword": "パスワードをリセット",
+    "resetting": "リセット中...",
+    "resetSuccess": "パスワードをリセットしました！サインインへリダイレクト中...",
+    "redirecting": "リダイレクト中...",
+    "resetError": "リセットに失敗しました。リンクの有効期限が切れている可能性があります。新しいリンクを申請してください。",
+    "invalidLink": "無効なリンク",
+    "invalidLinkDesc": "このリセットリンクは無効または期限切れです。",
+    "requestNewLink": "新しいリセットリンクを申請",
+    "passwordMinLength": "パスワードは8文字以上である必要があります",
+    "networkError": "ネットワークエラー。もう一度お試しください。"
+  },
+  "admin": {
+    "title": "管理パネル",
+    "subtitle": "使用統計 · 支払い承認",
+    "refresh": "更新",
+    "empty": "保留中の支払いはありません",
+    "forbidden": "アクセス拒否",
+    "loadError": "読み込みに失敗しました",
+    "approve": "承認",
+    "reject": "却下",
+    "planMonthly": "月額",
+    "planYearly": "年額",
+    "alipay": "Alipay",
+    "wechat": "WeChat",
+    "txnRef": "参照番号",
+    "tabStats": "使用統計",
+    "tabPayments": "支払い",
+    "tabCalls": "コールログ",
+    "todayCalls": "本日のコール数",
+    "todayTokens": "本日のトークン数",
+    "todayCost": "本日のコスト",
+    "todayUsers": "本日のアクティブユーザー",
+    "yesterday": "昨日",
+    "totalUsers": "総ユーザー数",
+    "allTimeCalls": "全期間コール数",
+    "allTimeTokens": "全期間トークン数",
+    "allTimeCost": "全期間コスト",
+    "totalDocs": "総ドキュメント数",
+    "weekChart": "過去7日間のコール数",
+    "recentCalls": "最近のコールログ",
+    "time": "時間",
+    "provider": "プロバイダー",
+    "type": "タイプ",
+    "tokens": "トークン",
+    "cost": "コスト",
+    "providerBreakdown": "プロバイダー別内訳（今月）",
+    "inputOutput": "入力 {input} / 出力 {output}",
+    "tabReviews": "レビュー",
+    "tabAlerts": "アラート",
+    "mrr": "MRR",
+    "thisMonth": "今月",
+    "lastMonthRevenue": "先月"
   }
 }

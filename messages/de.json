@@ -19,7 +19,8 @@
     "help": "Hilfe",
     "howItWorks": "So Funktioniert's",
     "dashboard": "Dashboard",
-    "logout": "Abmelden"
+    "logout": "Abmelden",
+    "api": "API"
   },
   "hero": {
     "badge": "Angetrieben von fortschrittlicher KI",
@@ -133,10 +134,6 @@
       "savePercent": "27 % sparen"
     },
     "errors": {
-      "paymentFailed": "Zahlung fehlgeschlagen. Bitte überprüfen Sie Ihre Kartendaten und versuchen Sie es erneut.",
-      "cardDeclined": "Ihre Karte wurde abgelehnt. Bitte versuchen Sie eine andere Zahlungsmethode.",
-      "insufficientFunds": "Unzureichendes Guthaben. Bitte versuchen Sie eine andere Karte.",
-      "configError": "Zahlungssystem ist vorübergehend nicht verfügbar. Bitte versuchen Sie es später erneut.",
       "generic": "Etwas ist schief gelaufen. Bitte versuchen Sie es erneut.",
       "notConfigured": "Zahlungssystem wird konfiguriert. Bitte kontaktieren Sie den Support für Upgrade-Unterstützung."
     },
@@ -246,7 +243,14 @@
     },
     "skip": "Überspringen",
     "next": "Weiter",
-    "getStarted": "Verstanden!"
+    "getStarted": "Verstanden!",
+    "renewsIn": "Verlängerung: {date}",
+    "daysLeft": "{days} Tage verbleibend",
+    "manageSubscription": "Abonnement verwalten",
+    "pastDueTitle": "⚠️ Zahlung fehlgeschlagen",
+    "pastDueDesc": "Ihre letzte Zahlung war nicht erfolgreich. Bitte aktualisieren Sie Ihre Zahlungsmethode, um den Pro-Zugriff zu behalten.",
+    "proYearly": "Pro · Jährlich",
+    "proMonthly": "Pro · Monatlich"
   },
   "documents": {
     "historyTitle": "Dokumentverlauf",
@@ -280,7 +284,13 @@
     "streamFailed": "Stream konnte nicht gelesen werden",
     "needHelp": "Brauchen Sie Hilfe beim PDF-Upload?",
     "errorTitle": "Fehler",
-    "downloadProOnly": "Pro-Funktion — Klicken zum Upgraden"
+    "downloadProOnly": "Pro-Funktion — Klicken zum Upgraden",
+    "copySummary": "Kopieren",
+    "downloadSummary": "Als .md herunterladen",
+    "shareSummary": "Teilen",
+    "copied": "Kopiert!",
+    "shareEnabled": "Freigabelink kopiert!",
+    "shareDisabled": "Teilen"
   },
   "footer": {
     "brand": "PDF Summary",
@@ -372,14 +382,14 @@
       "thirdParty": "Drittanbieter-Cookies",
       "thirdPartyDesc": "Wir nutzen Dienste von Drittanbietern, die ebenfalls Cookies setzen können:",
       "nativeAuth": "Authentifizierung und Sitzungsverwaltung",
-      "paddle": "Zahlungsabwicklung",
       "vercel": "Website-Hosting und Analyse",
       "managing": "Cookies verwalten",
       "managingDesc": "Die meisten Webbrowser ermöglichen Ihnen die Kontrolle von Cookies über ihre Einstellungen. Die Deaktivierung von Cookies kann jedoch die Funktionalität unserer Website beeinträchtigen.",
       "updates": "Aktualisierungen dieser Richtlinie",
       "updatesDesc": "Wir können diese Cookie-Richtlinie von Zeit zu Zeit aktualisieren. Änderungen werden auf dieser Seite veröffentlicht.",
       "contact": "Kontaktieren Sie uns",
-      "contactDesc": "Wenn Sie Fragen zu unserer Verwendung von Cookies haben, kontaktieren Sie uns bitte unter"
+      "contactDesc": "Wenn Sie Fragen zu unserer Verwendung von Cookies haben, kontaktieren Sie uns bitte unter",
+      "creem": "Zahlungsabwicklung"
     },
     "privacy": {
       "title": "Datenschutzerklärung",
@@ -413,7 +423,6 @@
       "s5Title": "5. Drittanbieter-Dienste",
       "s5Intro": "Wir nutzen folgende Drittanbieter-Dienste:",
       "s5Auth": "Authentifizierung und Benutzerverwaltung",
-      "s5Paddle": "Zahlungsabwicklung",
       "s5AI": "DeepSeek, Groq, SiliconFlow für Zusammenfassungen",
       "s5Note": "Diese Dienste haben eigene Datenschutzrichtlinien für die Nutzung Ihrer Informationen.",
       "s6Title": "6. Datenspeicherung",
@@ -430,7 +439,8 @@
       "s9Title": "9. Änderungen dieser Richtlinie",
       "s9Body": "Wir können diese Datenschutzerklärung von Zeit zu Zeit aktualisieren. Wir werden Sie über wesentliche Änderungen per E-Mail oder über den Service benachrichtigen.",
       "s10Title": "10. Kontakt",
-      "s10Body1": "Bei Fragen zum Datenschutz kontaktieren Sie uns per E-Mail unter"
+      "s10Body1": "Bei Fragen zum Datenschutz kontaktieren Sie uns per E-Mail unter",
+      "s5Creem": "Zahlungsabwicklung"
     },
     "terms": {
       "title": "Nutzungsbedingungen",
@@ -613,12 +623,12 @@
     "outOf5": "von 5",
     "reviews": "Bewertungen",
     "filter": {
-      "all": "Alle Bewertungen",
-      "5": "5 Sterne",
-      "4": "4 Sterne",
-      "3": "3 Sterne",
-      "2": "2 Sterne",
       "1": "1 Stern",
+      "2": "2 Sterne",
+      "3": "3 Sterne",
+      "4": "4 Sterne",
+      "5": "5 Sterne",
+      "all": "Alle Bewertungen",
       "positive": "Positiv (4-5★)",
       "critical": "Kritisch (1-2★)"
     },
@@ -628,5 +638,102 @@
       "lowest": "Niedrigste Bewertung"
     },
     "noReviews": "Noch keine Bewertungen. Seien Sie der Erste, der seine Erfahrung teilt!"
+  },
+  "home": {
+    "uploadTitle": "Jetzt testen — Kostenlos",
+    "uploadSubtitleGuest": "Keine Anmeldung erforderlich. Laden Sie ein PDF hoch und erleben Sie die KI-Magie.",
+    "uploadSubtitleSigned": "Laden Sie ein PDF hoch und erhalten Sie sofort eine KI-Zusammenfassung.",
+    "uploadHint": "Nur PDF-Dateien · Max 20MB · Dateien werden verschlüsselt und nach der Verarbeitung automatisch gelöscht"
+  },
+  "stats": {
+    "documents": "Verarbeitete Dokumente",
+    "uptime": "Verfügbarkeit",
+    "languages": "Sprachen",
+    "speed": "Ø Zusammenfassungszeit"
+  },
+  "testimonial1": "Dieses Tool spart mir jede Woche Stunden. Die Zusammenfassungen sind unglaublich präzise und gut strukturiert.",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "Forschungsanalyst",
+  "testimonial2": "Ich nutze es für Vertragsprüfungen. Die KI erfasst Details, die ich übersehen hätte. Ein echter Gamechanger.",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "Juristische Beraterin",
+  "testimonial3": "Der beste PDF-Summarizer, den ich ausprobiert habe. Schnell, präzise und der Mehrsprachigkeits-Support ist fantastisch.",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "Projektmanager",
+  "onboarding": {
+    "step1Title": "PDF hochladen",
+    "step1Desc": "Ziehen Sie ein beliebiges PDF-Dokument per Drag & Drop — Berichte, Verträge, Forschungsarbeiten. Wir unterstützen Dateien bis zu 50MB.",
+    "step2Title": "KI-Analyse",
+    "step2Desc": "Unsere KI liest und versteht Ihr Dokument. Sie extrahiert wichtige Punkte, erstellt Zusammenfassungen und identifiziert automatisch wichtige Erkenntnisse.",
+    "step3Title": "Zusammenfassung abrufen",
+    "step3Desc": "Laden Sie Ihre Zusammenfassung als Markdown herunter, teilen Sie sie per Link oder kopieren Sie sie in die Zwischenablage. Alles mit einem Klick.",
+    "back": "Zurück",
+    "next": "Weiter",
+    "gotIt": "Verstanden!"
+  },
+  "auth": {
+    "forgotTitle": "Passwort vergessen?",
+    "forgotSubtitle": "Geben Sie Ihre E-Mail-Adresse ein und wir senden Ihnen einen Link zum Zurücksetzen",
+    "sendResetLink": "Link senden",
+    "sending": "Wird gesendet...",
+    "emailSent": "Falls diese E-Mail registriert ist, erhalten Sie in Kürze einen Link zum Zurücksetzen Ihres Passworts.",
+    "checkSpam": "Nicht erhalten? Überprüfen Sie Ihren Spam-Ordner.",
+    "sendAgain": "Erneut senden",
+    "backToSignIn": "Zurück zur Anmeldung",
+    "resetTitle": "Neues Passwort festlegen",
+    "resetSubtitle": "Geben Sie unten Ihr neues Passwort ein",
+    "newPassword": "Neues Passwort",
+    "resetPassword": "Passwort zurücksetzen",
+    "resetting": "Wird zurückgesetzt...",
+    "resetSuccess": "Passwort zurückgesetzt! Weiterleitung zur Anmeldung...",
+    "redirecting": "Weiterleitung...",
+    "resetError": "Zurücksetzen fehlgeschlagen. Der Link ist möglicherweise abgelaufen. Bitte fordern Sie einen neuen an.",
+    "invalidLink": "Ungültiger Link",
+    "invalidLinkDesc": "Dieser Link zum Zurücksetzen ist ungültig oder abgelaufen.",
+    "requestNewLink": "Neuen Link anfordern",
+    "passwordMinLength": "Das Passwort muss mindestens 8 Zeichen lang sein",
+    "networkError": "Netzwerkfehler. Bitte versuchen Sie es erneut."
+  },
+  "admin": {
+    "title": "Admin-Panel",
+    "subtitle": "Nutzungsstatistik · Zahlungsbestätigungen",
+    "refresh": "Aktualisieren",
+    "empty": "Keine ausstehenden Zahlungen",
+    "forbidden": "Zugriff verweigert",
+    "loadError": "Laden fehlgeschlagen",
+    "approve": "Genehmigen",
+    "reject": "Ablehnen",
+    "planMonthly": "Monatlich",
+    "planYearly": "Jährlich",
+    "alipay": "Alipay",
+    "wechat": "WeChat",
+    "txnRef": "Ref",
+    "tabStats": "Nutzungsstatistik",
+    "tabPayments": "Zahlungen",
+    "tabCalls": "Aufrufprotokoll",
+    "todayCalls": "Heutige Aufrufe",
+    "todayTokens": "Heutige Tokens",
+    "todayCost": "Heutige Kosten",
+    "todayUsers": "Heute aktive Nutzer",
+    "yesterday": "Gestern",
+    "totalUsers": "Nutzer gesamt",
+    "allTimeCalls": "Aufrufe gesamt",
+    "allTimeTokens": "Tokens gesamt",
+    "allTimeCost": "Kosten gesamt",
+    "totalDocs": "Dokumente gesamt",
+    "weekChart": "Aufrufe der letzten 7 Tage",
+    "recentCalls": "Aktuelles Aufrufprotokoll",
+    "time": "Zeit",
+    "provider": "Anbieter",
+    "type": "Typ",
+    "tokens": "Tokens",
+    "cost": "Kosten",
+    "providerBreakdown": "Anbieteraufschlüsselung (dieser Monat)",
+    "inputOutput": "Eingang {input} / Ausgang {output}",
+    "tabReviews": "Bewertungen",
+    "tabAlerts": "Warnungen",
+    "mrr": "MRR",
+    "thisMonth": "Diesen Monat",
+    "lastMonthRevenue": "Letzter Monat"
   }
 }

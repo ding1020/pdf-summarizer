@@ -19,7 +19,8 @@
     "help": "도움말",
     "howItWorks": "사용법",
     "dashboard": "대시보드",
-    "logout": "로그아웃"
+    "logout": "로그아웃",
+    "api": "API"
   },
   "hero": {
     "badge": "최첨단 AI 기술 지원",
@@ -133,10 +134,6 @@
       "savePercent": "27% 절약"
     },
     "errors": {
-      "paymentFailed": "결제에 실패했습니다. 카드 정보를 확인하고 다시 시도해 주세요.",
-      "cardDeclined": "카드가 거부되었습니다. 다른 결제 수단을 시도해 주세요.",
-      "insufficientFunds": "잔액이 부족합니다. 다른 카드를 시도해 주세요.",
-      "configError": "결제 시스템을 일시적으로 사용할 수 없습니다. 나중에 다시 시도해 주세요.",
       "generic": "문제가 발생했습니다. 다시 시도해 주세요.",
       "notConfigured": "결제 시스템을 구성 중입니다. 업그레이드 지원이 필요하시면 지원팀에 문의해 주세요."
     },
@@ -246,7 +243,14 @@
     },
     "skip": "건너뛰기",
     "next": "다음",
-    "getStarted": "확인!"
+    "getStarted": "확인!",
+    "renewsIn": "갱신: {date}",
+    "daysLeft": "{days}일 남음",
+    "manageSubscription": "구독 관리",
+    "pastDueTitle": "⚠️ 결제 실패",
+    "pastDueDesc": "마지막 결제가 성공하지 못했습니다. Pro 액세스를 유지하려면 결제 수단을 업데이트해 주세요.",
+    "proYearly": "프로 · 연간",
+    "proMonthly": "프로 · 월간"
   },
   "documents": {
     "historyTitle": "문서 기록",
@@ -280,7 +284,13 @@
     "streamFailed": "스트림 읽기 실패",
     "needHelp": "PDF 업로드에 도움이 필요하신가요?",
     "errorTitle": "오류",
-    "downloadProOnly": "Pro 기능 — 클릭하여 업그레이드"
+    "downloadProOnly": "Pro 기능 — 클릭하여 업그레이드",
+    "copySummary": "복사",
+    "downloadSummary": ".md로 다운로드",
+    "shareSummary": "공유",
+    "copied": "복사됨!",
+    "shareEnabled": "공유 링크가 복사되었습니다!",
+    "shareDisabled": "공유"
   },
   "footer": {
     "brand": "PDF Summary",
@@ -372,14 +382,14 @@
       "thirdParty": "제3자 쿠키",
       "thirdPartyDesc": "당사가 사용하는 제3자 서비스도 쿠키를 설정할 수 있습니다:",
       "nativeAuth": "인증 및 세션 관리",
-      "paddle": "결제 처리",
       "vercel": "웹사이트 호스팅 및 분석",
       "managing": "쿠키 관리",
       "managingDesc": "대부분의 웹 브라우저에서 설정을 통해 쿠키를 제어할 수 있습니다. 그러나 쿠키를 비활성화하면 웹사이트 기능에 영향을 줄 수 있습니다.",
       "updates": "본 정책 업데이트",
       "updatesDesc": "당사는 이 쿠키 정책을 수시로 업데이트할 수 있습니다. 변경 사항은 이 페이지에 게시됩니다.",
       "contact": "문의하기",
-      "contactDesc": "쿠키 사용에 관한 질문이 있으시면 다음으로 연락해 주세요:"
+      "contactDesc": "쿠키 사용에 관한 질문이 있으시면 다음으로 연락해 주세요:",
+      "creem": "결제 처리"
     },
     "privacy": {
       "title": "개인정보처리방침",
@@ -413,7 +423,6 @@
       "s5Title": "5. 제3자 서비스",
       "s5Intro": "다음 제3자 서비스를 사용합니다:",
       "s5Auth": "인증 및 사용자 관리",
-      "s5Paddle": "결제 처리",
       "s5AI": "DeepSeek, Groq, SiliconFlow (요약 생성용)",
       "s5Note": "이러한 서비스는 귀하의 정보 사용에 관한 자체 개인정보처리방침이 있습니다.",
       "s6Title": "6. 데이터 보존",
@@ -430,7 +439,8 @@
       "s9Title": "9. 본 방침 변경",
       "s9Body": "당사는 이 개인정보처리방침을 수시로 업데이트할 수 있습니다. 중요한 변경 사항은 이메일 또는 서비스를 통해 알려드립니다.",
       "s10Title": "10. 문의",
-      "s10Body1": "개인정보 관련 문의사항은 다음으로 연락해 주세요:"
+      "s10Body1": "개인정보 관련 문의사항은 다음으로 연락해 주세요:",
+      "s5Creem": "결제 처리"
     },
     "terms": {
       "title": "이용약관",
@@ -613,12 +623,12 @@
     "outOf5": "5점 만점",
     "reviews": "개 리뷰",
     "filter": {
-      "all": "전체 리뷰",
-      "5": "5점",
-      "4": "4점",
-      "3": "3점",
-      "2": "2점",
       "1": "1점",
+      "2": "2점",
+      "3": "3점",
+      "4": "4점",
+      "5": "5점",
+      "all": "전체 리뷰",
       "positive": "긍정적 (4-5★)",
       "critical": "비판적 (1-2★)"
     },
@@ -628,5 +638,102 @@
       "lowest": "평점 낮은순"
     },
     "noReviews": "아직 리뷰가 없습니다. 첫 리뷰를 작성해보세요!"
+  },
+  "home": {
+    "uploadTitle": "지금 바로 체험 — 무료",
+    "uploadSubtitleGuest": "가입 불필요. PDF를 업로드하고 AI 마법을 경험하세요.",
+    "uploadSubtitleSigned": "PDF를 업로드하고 즉시 AI 요약을 받아보세요.",
+    "uploadHint": "PDF 파일만 · 최대 20MB · 파일은 암호화되며 처리 후 자동 삭제됩니다"
+  },
+  "stats": {
+    "documents": "처리된 문서",
+    "uptime": "가동률",
+    "languages": "지원 언어",
+    "speed": "평균 요약 시간"
+  },
+  "testimonial1": "매주 수 시간을 절약했습니다. 요약이 놀라울 정도로 정확하고 체계적입니다.",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "리서치 애널리스트",
+  "testimonial2": "계약서 검토에 사용합니다. 놓칠 수 있는 세부사항을 AI가 잡아냅니다. 게임 체인저예요.",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "법률 컨설턴트",
+  "testimonial3": "사용해 본 것 중 최고의 PDF 요약 도구입니다. 빠르고 정확하며 다국어 지원이 훌륭합니다.",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "프로젝트 매니저",
+  "onboarding": {
+    "step1Title": "PDF 업로드",
+    "step1Desc": "보고서, 계약서, 연구 논문 등 모든 PDF를 드래그 앤 드롭하세요. 50MB까지 지원.",
+    "step2Title": "AI 분석",
+    "step2Desc": "AI가 문서를 읽고 이해하여 핵심 포인트를 추출하고 요약을 생성하며 중요한 인사이트를 자동으로 식별합니다.",
+    "step3Title": "요약 받기",
+    "step3Desc": "요약을 Markdown으로 다운로드하거나 링크로 공유, 클립보드에 복사하세요. 한 번의 클릭으로 완료.",
+    "back": "뒤로",
+    "next": "다음",
+    "gotIt": "확인!"
+  },
+  "auth": {
+    "forgotTitle": "비밀번호를 잊으셨나요?",
+    "forgotSubtitle": "이메일을 입력하시면 재설정 링크를 보내드립니다",
+    "sendResetLink": "재설정 링크 보내기",
+    "sending": "전송 중...",
+    "emailSent": "해당 이메일이 등록된 경우, 곧 비밀번호 재설정 링크를 받으실 수 있습니다.",
+    "checkSpam": "받지 못하셨나요? 스팸 폴더를 확인하세요.",
+    "sendAgain": "다시 보내기",
+    "backToSignIn": "로그인으로 돌아가기",
+    "resetTitle": "새 비밀번호 설정",
+    "resetSubtitle": "아래에 새 비밀번호를 입력하세요",
+    "newPassword": "새 비밀번호",
+    "resetPassword": "비밀번호 재설정",
+    "resetting": "재설정 중...",
+    "resetSuccess": "비밀번호 재설정 완료! 로그인으로 이동 중...",
+    "redirecting": "이동 중...",
+    "resetError": "재설정 실패. 링크가 만료되었을 수 있습니다. 새 링크를 요청하세요.",
+    "invalidLink": "잘못된 링크",
+    "invalidLinkDesc": "이 재설정 링크는 잘못되었거나 만료되었습니다.",
+    "requestNewLink": "새 재설정 링크 요청",
+    "passwordMinLength": "비밀번호는 최소 8자 이상이어야 합니다",
+    "networkError": "네트워크 오류. 다시 시도해 주세요."
+  },
+  "admin": {
+    "title": "관리 패널",
+    "subtitle": "사용 통계 · 결제 승인",
+    "refresh": "새로고침",
+    "empty": "대기 중인 결제 없음",
+    "forbidden": "접근 거부됨",
+    "loadError": "로드 실패",
+    "approve": "승인",
+    "reject": "거부",
+    "planMonthly": "월간",
+    "planYearly": "연간",
+    "alipay": "Alipay",
+    "wechat": "WeChat",
+    "txnRef": "참조",
+    "tabStats": "사용 통계",
+    "tabPayments": "결제",
+    "tabCalls": "호출 로그",
+    "todayCalls": "오늘 호출 수",
+    "todayTokens": "오늘 토큰 수",
+    "todayCost": "오늘 비용",
+    "todayUsers": "오늘 활성 사용자",
+    "yesterday": "어제",
+    "totalUsers": "전체 사용자",
+    "allTimeCalls": "전체 호출 수",
+    "allTimeTokens": "전체 토큰 수",
+    "allTimeCost": "전체 비용",
+    "totalDocs": "전체 문서",
+    "weekChart": "최근 7일 호출 수",
+    "recentCalls": "최근 호출 로그",
+    "time": "시간",
+    "provider": "제공자",
+    "type": "유형",
+    "tokens": "토큰",
+    "cost": "비용",
+    "providerBreakdown": "제공자별 내역 (이번 달)",
+    "inputOutput": "입력 {input} / 출력 {output}",
+    "tabReviews": "리뷰",
+    "tabAlerts": "알림",
+    "mrr": "MRR",
+    "thisMonth": "이번 달",
+    "lastMonthRevenue": "지난달"
   }
 }

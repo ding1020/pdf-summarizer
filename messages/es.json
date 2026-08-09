@@ -19,7 +19,8 @@
     "help": "Ayuda",
     "howItWorks": "Cómo Funciona",
     "dashboard": "Panel",
-    "logout": "Cerrar Sesión"
+    "logout": "Cerrar Sesión",
+    "api": "API"
   },
   "hero": {
     "badge": "Potenciado por IA Avanzada",
@@ -133,10 +134,6 @@
       "savePercent": "Ahorra 27%"
     },
     "errors": {
-      "paymentFailed": "Pago fallido. Verifica los datos de tu tarjeta e intenta de nuevo.",
-      "cardDeclined": "Tu tarjeta fue rechazada. Prueba con otro método de pago.",
-      "insufficientFunds": "Fondos insuficientes. Prueba con otra tarjeta.",
-      "configError": "El sistema de pago no está disponible temporalmente. Intenta más tarde.",
       "generic": "Algo salió mal. Intenta de nuevo.",
       "notConfigured": "El sistema de pago está en configuración. Contacta al soporte para asistencia."
     },
@@ -246,7 +243,14 @@
     },
     "skip": "Saltar",
     "next": "Siguiente",
-    "getStarted": "¡Entendido!"
+    "getStarted": "¡Entendido!",
+    "renewsIn": "Se renueva: {date}",
+    "daysLeft": "{days} días restantes",
+    "manageSubscription": "Gestionar Suscripción",
+    "pastDueTitle": "⚠️ Pago Fallido",
+    "pastDueDesc": "Tu último pago no fue exitoso. Actualiza tu método de pago para mantener el acceso Pro.",
+    "proYearly": "Pro · Anual",
+    "proMonthly": "Pro · Mensual"
   },
   "documents": {
     "historyTitle": "Historial de Documentos",
@@ -280,7 +284,13 @@
     "streamFailed": "Error al leer el flujo de datos",
     "needHelp": "¿Necesitas ayuda con la carga de PDF?",
     "errorTitle": "Error",
-    "downloadProOnly": "Función Pro — Haz clic para mejorar"
+    "downloadProOnly": "Función Pro — Haz clic para mejorar",
+    "copySummary": "Copiar",
+    "downloadSummary": "Descargar como .md",
+    "shareSummary": "Compartir",
+    "copied": "¡Copiado!",
+    "shareEnabled": "¡Enlace de compartir copiado!",
+    "shareDisabled": "Compartir"
   },
   "footer": {
     "brand": "PDF Summary",
@@ -372,14 +382,14 @@
       "thirdParty": "Cookies de Terceros",
       "thirdPartyDesc": "Utilizamos servicios de terceros que también pueden establecer cookies:",
       "nativeAuth": "Autenticación y gestión de sesiones",
-      "paddle": "Procesamiento de pagos",
       "vercel": "Alojamiento web y análisis",
       "managing": "Gestionar Cookies",
       "managingDesc": "La mayoría de los navegadores web te permiten controlar las cookies a través de su configuración. Sin embargo, deshabilitar las cookies puede afectar la funcionalidad de nuestro sitio web.",
       "updates": "Actualizaciones de esta Política",
       "updatesDesc": "Podemos actualizar esta Política de Cookies ocasionalmente. Cualquier cambio se publicará en esta página.",
       "contact": "Contáctanos",
-      "contactDesc": "Si tienes preguntas sobre nuestro uso de cookies, contáctanos en"
+      "contactDesc": "Si tienes preguntas sobre nuestro uso de cookies, contáctanos en",
+      "creem": "Procesamiento de pagos"
     },
     "privacy": {
       "title": "Política de Privacidad",
@@ -413,7 +423,6 @@
       "s5Title": "5. Servicios de Terceros",
       "s5Intro": "Utilizamos servicios de terceros:",
       "s5Auth": "Autenticación y gestión de usuarios",
-      "s5Paddle": "Procesamiento de pagos",
       "s5AI": "DeepSeek, Groq, SiliconFlow para resúmenes",
       "s5Note": "Estos servicios tienen sus propias políticas de privacidad que rigen el uso de tu información.",
       "s6Title": "6. Retención de Datos",
@@ -430,7 +439,8 @@
       "s9Title": "9. Cambios en esta Política",
       "s9Body": "Podemos actualizar esta Política de Privacidad ocasionalmente. Te notificaremos cambios significativos por correo electrónico o a través del Servicio.",
       "s10Title": "10. Contacto",
-      "s10Body1": "Para preguntas relacionadas con la privacidad, contáctanos por correo electrónico en"
+      "s10Body1": "Para preguntas relacionadas con la privacidad, contáctanos por correo electrónico en",
+      "s5Creem": "Procesamiento de pagos"
     },
     "terms": {
       "title": "Términos del Servicio",
@@ -613,12 +623,12 @@
     "outOf5": "de 5",
     "reviews": "reseñas",
     "filter": {
-      "all": "Todas las Reseñas",
-      "5": "5 Estrellas",
-      "4": "4 Estrellas",
-      "3": "3 Estrellas",
-      "2": "2 Estrellas",
       "1": "1 Estrella",
+      "2": "2 Estrellas",
+      "3": "3 Estrellas",
+      "4": "4 Estrellas",
+      "5": "5 Estrellas",
+      "all": "Todas las Reseñas",
       "positive": "Positivas (4-5★)",
       "critical": "Críticas (1-2★)"
     },
@@ -628,5 +638,102 @@
       "lowest": "Menor Calificación"
     },
     "noReviews": "Aún no hay reseñas. ¡Sé el primero en compartir tu experiencia!"
+  },
+  "home": {
+    "uploadTitle": "Pruébalo Ahora — Gratis",
+    "uploadSubtitleGuest": "No requiere registro. Sube un PDF y descubre la magia de la IA.",
+    "uploadSubtitleSigned": "Sube un PDF y obtén un resumen con IA al instante.",
+    "uploadHint": "Solo archivos PDF · Máx 20MB · Los archivos se cifran y eliminan automáticamente tras el procesamiento"
+  },
+  "stats": {
+    "documents": "Documentos procesados",
+    "uptime": "Disponibilidad",
+    "languages": "Idiomas",
+    "speed": "Tiempo promedio de resumen"
+  },
+  "testimonial1": "Esta herramienta me ahorra horas cada semana. Los resúmenes son increíblemente precisos y bien estructurados.",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "Analista de Investigación",
+  "testimonial2": "Lo uso para revisar contratos. La IA detecta detalles que yo habría pasado por alto. Cambió las reglas del juego.",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "Asesora Legal",
+  "testimonial3": "El mejor resumidor de PDF que he probado. Rápido, preciso y el soporte multi-idioma es fantástico.",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "Gerente de Proyectos",
+  "onboarding": {
+    "step1Title": "Sube tu PDF",
+    "step1Desc": "Arrastra y suelta cualquier documento PDF: informes, contratos, artículos de investigación. Soportamos archivos de hasta 50MB.",
+    "step2Title": "Análisis con IA",
+    "step2Desc": "Nuestra IA lee y comprende tu documento. Extrae los puntos clave, genera resúmenes e identifica información importante automáticamente.",
+    "step3Title": "Obtén tu Resumen",
+    "step3Desc": "Descarga tu resumen como Markdown, compártelo por enlace o cópialo al portapapeles. Todo en un clic.",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "gotIt": "¡Entendido!"
+  },
+  "auth": {
+    "forgotTitle": "¿Olvidaste tu Contraseña?",
+    "forgotSubtitle": "Ingresa tu correo y te enviaremos un enlace para restablecerla",
+    "sendResetLink": "Enviar Enlace de Restablecimiento",
+    "sending": "Enviando...",
+    "emailSent": "Si ese correo está registrado, recibirás un enlace de restablecimiento de contraseña en breve.",
+    "checkSpam": "¿No lo recibiste? Revisa tu carpeta de spam.",
+    "sendAgain": "Enviar de nuevo",
+    "backToSignIn": "Volver a iniciar sesión",
+    "resetTitle": "Establecer Nueva Contraseña",
+    "resetSubtitle": "Ingresa tu nueva contraseña a continuación",
+    "newPassword": "Nueva Contraseña",
+    "resetPassword": "Restablecer Contraseña",
+    "resetting": "Restableciendo...",
+    "resetSuccess": "¡Contraseña restablecida! Redirigiendo al inicio de sesión...",
+    "redirecting": "Redirigiendo...",
+    "resetError": "El restablecimiento falló. El enlace podría haber expirado. Solicita uno nuevo.",
+    "invalidLink": "Enlace Inválido",
+    "invalidLinkDesc": "Este enlace de restablecimiento es inválido o ha expirado.",
+    "requestNewLink": "Solicitar un nuevo enlace de restablecimiento",
+    "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+    "networkError": "Error de red. Inténtalo de nuevo."
+  },
+  "admin": {
+    "title": "Panel de Administración",
+    "subtitle": "Estadísticas de Uso · Aprobaciones de Pago",
+    "refresh": "Actualizar",
+    "empty": "Sin pagos pendientes",
+    "forbidden": "Acceso denegado",
+    "loadError": "Error al cargar",
+    "approve": "Aprobar",
+    "reject": "Rechazar",
+    "planMonthly": "Mensual",
+    "planYearly": "Anual",
+    "alipay": "Alipay",
+    "wechat": "WeChat",
+    "txnRef": "Ref",
+    "tabStats": "Estadísticas de Uso",
+    "tabPayments": "Pagos",
+    "tabCalls": "Registro de Llamadas",
+    "todayCalls": "Llamadas de Hoy",
+    "todayTokens": "Tokens de Hoy",
+    "todayCost": "Costo de Hoy",
+    "todayUsers": "Usuarios Activos Hoy",
+    "yesterday": "Ayer",
+    "totalUsers": "Total de Usuarios",
+    "allTimeCalls": "Llamadas Totales",
+    "allTimeTokens": "Tokens Totales",
+    "allTimeCost": "Costo Total",
+    "totalDocs": "Total de Documentos",
+    "weekChart": "Llamadas de los Últimos 7 Días",
+    "recentCalls": "Registro de Llamadas Recientes",
+    "time": "Hora",
+    "provider": "Proveedor",
+    "type": "Tipo",
+    "tokens": "Tokens",
+    "cost": "Costo",
+    "providerBreakdown": "Desglose por Proveedor (Este Mes)",
+    "inputOutput": "Entrada {input} / Salida {output}",
+    "tabReviews": "Reseñas",
+    "tabAlerts": "Alertas",
+    "mrr": "MRR",
+    "thisMonth": "Este Mes",
+    "lastMonthRevenue": "Mes Pasado"
   }
 }

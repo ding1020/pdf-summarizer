@@ -694,12 +694,12 @@
     "outOf5": "满分5分",
     "reviews": "条评价",
     "filter": {
-      "all": "全部评价",
-      "5": "5星",
-      "4": "4星",
-      "3": "3星",
-      "2": "2星",
       "1": "1星",
+      "2": "2星",
+      "3": "3星",
+      "4": "4星",
+      "5": "5星",
+      "all": "全部评价",
       "positive": "好评 (4-5星)",
       "critical": "差评 (1-2星)"
     },
@@ -709,5 +709,31 @@
       "lowest": "评分最低"
     },
     "noReviews": "暂无评价。快来分享您的体验吧！"
+  },
+  "stats": {
+    "documents": "已处理文档",
+    "uptime": "正常运行时间",
+    "languages": "支持语言",
+    "speed": "平均摘要时间"
+  },
+  "testimonial1": "这个工具每周为我节省了好几个小时。摘要非常准确且结构清晰。",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "研究分析师",
+  "testimonial2": "我用它来审查合同。AI 能捕捉到我可能遗漏的细节。颠覆性工具。",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "法律顾问",
+  "testimonial3": "我用过最好的 PDF 摘要工具。快速、准确、多语言支持出色。",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "项目经理",
+  "onboarding": {
+    "step1Title": "上传您的 PDF",
+    "step1Desc": "拖放任意 PDF 文档——报告、合同、研究论文。支持最大 50MB 文件。",
+    "step2Title": "AI 分析",
+    "step2Desc": "AI 会阅读并理解您的文档，自动提取要点、生成摘要并识别重要洞察。",
+    "step3Title": "获取摘要",
+    "step3Desc": "将摘要下载为 Markdown、通过链接分享或复制到剪贴板。一键完成。",
+    "back": "返回",
+    "next": "下一步",
+    "gotIt": "明白了！"
   }
 }

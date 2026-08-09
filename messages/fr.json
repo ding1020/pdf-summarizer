@@ -19,7 +19,8 @@
     "help": "Aide",
     "howItWorks": "Comment Ça Marche",
     "dashboard": "Tableau de Bord",
-    "logout": "Déconnexion"
+    "logout": "Déconnexion",
+    "api": "API"
   },
   "hero": {
     "badge": "Propulsé par l'IA Avancée",
@@ -133,10 +134,6 @@
       "savePercent": "Économisez 27%"
     },
     "errors": {
-      "paymentFailed": "Paiement échoué. Vérifiez les détails de votre carte et réessayez.",
-      "cardDeclined": "Votre carte a été refusée. Essayez un autre moyen de paiement.",
-      "insufficientFunds": "Fonds insuffisants. Essayez une autre carte.",
-      "configError": "Le système de paiement est temporairement indisponible. Veuillez réessayer plus tard.",
       "generic": "Quelque chose s'est mal passé. Veuillez réessayer.",
       "notConfigured": "Le système de paiement est en cours de configuration. Veuillez contacter le support pour une assistance de mise à niveau."
     },
@@ -246,7 +243,14 @@
     },
     "skip": "Passer",
     "next": "Suivant",
-    "getStarted": "J'ai compris !"
+    "getStarted": "J'ai compris !",
+    "renewsIn": "Renouvellement : {date}",
+    "daysLeft": "{days} jours restants",
+    "manageSubscription": "Gérer l'Abonnement",
+    "pastDueTitle": "⚠️ Paiement Échoué",
+    "pastDueDesc": "Votre dernier paiement a échoué. Veuillez mettre à jour votre moyen de paiement pour conserver l'accès Pro.",
+    "proYearly": "Pro · Annuel",
+    "proMonthly": "Pro · Mensuel"
   },
   "documents": {
     "historyTitle": "Historique des Documents",
@@ -280,7 +284,13 @@
     "streamFailed": "Échec de la lecture du flux",
     "needHelp": "Besoin d'aide pour le téléchargement de PDF ?",
     "errorTitle": "Erreur",
-    "downloadProOnly": "Fonctionnalité Pro — Cliquez pour mettre à niveau"
+    "downloadProOnly": "Fonctionnalité Pro — Cliquez pour mettre à niveau",
+    "copySummary": "Copier",
+    "downloadSummary": "Télécharger en .md",
+    "shareSummary": "Partager",
+    "copied": "Copié !",
+    "shareEnabled": "Lien de partage copié !",
+    "shareDisabled": "Partager"
   },
   "footer": {
     "brand": "PDF Summary",
@@ -372,14 +382,14 @@
       "thirdParty": "Cookies Tiers",
       "thirdPartyDesc": "Nous utilisons des services tiers qui peuvent également définir des cookies :",
       "nativeAuth": "Authentification et gestion de session",
-      "paddle": "Traitement des paiements",
       "vercel": "Hébergement web et analytique",
       "managing": "Gérer les Cookies",
       "managingDesc": "La plupart des navigateurs web vous permettent de contrôler les cookies via leurs paramètres. Cependant, désactiver les cookies peut affecter la fonctionnalité de notre site web.",
       "updates": "Mises à Jour de cette Politique",
       "updatesDesc": "Nous pouvons mettre à jour cette Politique de Cookies de temps en temps. Tout changement sera publié sur cette page.",
       "contact": "Contactez-Nous",
-      "contactDesc": "Si vous avez des questions sur notre utilisation des cookies, veuillez nous contacter à"
+      "contactDesc": "Si vous avez des questions sur notre utilisation des cookies, veuillez nous contacter à",
+      "creem": "Traitement des paiements"
     },
     "privacy": {
       "title": "Politique de Confidentialité",
@@ -413,7 +423,6 @@
       "s5Title": "5. Services Tiers",
       "s5Intro": "Nous utilisons des services tiers :",
       "s5Auth": "Authentification et gestion des utilisateurs",
-      "s5Paddle": "Traitement des paiements",
       "s5AI": "DeepSeek, Groq, SiliconFlow pour la synthèse",
       "s5Note": "Ces services ont leurs propres politiques de confidentialité régissant leur utilisation de vos informations.",
       "s6Title": "6. Conservation des Données",
@@ -430,7 +439,8 @@
       "s9Title": "9. Modifications de cette Politique",
       "s9Body": "Nous pouvons mettre à jour cette Politique de Confidentialité de temps en temps. Nous vous informerons des changements importants par email ou via le Service.",
       "s10Title": "10. Contact",
-      "s10Body1": "Pour les questions relatives à la confidentialité, contactez-nous par email à"
+      "s10Body1": "Pour les questions relatives à la confidentialité, contactez-nous par email à",
+      "s5Creem": "Traitement des paiements"
     },
     "terms": {
       "title": "Conditions d'Utilisation",
@@ -613,12 +623,12 @@
     "outOf5": "sur 5",
     "reviews": "avis",
     "filter": {
-      "all": "Tous les Avis",
-      "5": "5 Étoiles",
-      "4": "4 Étoiles",
-      "3": "3 Étoiles",
-      "2": "2 Étoiles",
       "1": "1 Étoile",
+      "2": "2 Étoiles",
+      "3": "3 Étoiles",
+      "4": "4 Étoiles",
+      "5": "5 Étoiles",
+      "all": "Tous les Avis",
       "positive": "Positifs (4-5★)",
       "critical": "Critiques (1-2★)"
     },
@@ -628,5 +638,102 @@
       "lowest": "Note la Plus Basse"
     },
     "noReviews": "Aucun avis pour le moment. Soyez le premier à partager votre expérience !"
+  },
+  "home": {
+    "uploadTitle": "Essayez Maintenant — Gratuit",
+    "uploadSubtitleGuest": "Aucune inscription requise. Téléchargez un PDF et voyez la magie de l'IA.",
+    "uploadSubtitleSigned": "Téléchargez un PDF et obtenez un résumé IA instantanément.",
+    "uploadHint": "Fichiers PDF uniquement · Max 20 Mo · Les fichiers sont chiffrés et supprimés automatiquement après traitement"
+  },
+  "stats": {
+    "documents": "Documents traités",
+    "uptime": "Disponibilité",
+    "languages": "Langues",
+    "speed": "Temps moyen de résumé"
+  },
+  "testimonial1": "Cet outil m'a fait gagner des heures chaque semaine. Les résumés sont incroyablement précis et bien structurés.",
+  "testimonial1Name": "Alex K.",
+  "testimonial1Role": "Analyste de Recherche",
+  "testimonial2": "Je l'utilise pour l'examen des contrats. L'IA repère des détails que j'aurais manqués. Une véritable révolution.",
+  "testimonial2Name": "Maria L.",
+  "testimonial2Role": "Consultante Juridique",
+  "testimonial3": "Le meilleur outil de résumé PDF que j'ai essayé. Rapide, précis, et le support multilingue est fantastique.",
+  "testimonial3Name": "Sam W.",
+  "testimonial3Role": "Chef de Projet",
+  "onboarding": {
+    "step1Title": "Téléchargez votre PDF",
+    "step1Desc": "Glissez-déposez n'importe quel document PDF — rapports, contrats, articles de recherche. Nous supportons les fichiers jusqu'à 50 Mo.",
+    "step2Title": "Analyse IA",
+    "step2Desc": "Notre IA lit et comprend votre document. Elle extrait les points clés, génère des résumés et identifie automatiquement les informations importantes.",
+    "step3Title": "Obtenez votre résumé",
+    "step3Desc": "Téléchargez votre résumé en Markdown, partagez-le par lien ou copiez-le dans le presse-papiers. Le tout en un clic.",
+    "back": "Retour",
+    "next": "Suivant",
+    "gotIt": "J'ai compris !"
+  },
+  "auth": {
+    "forgotTitle": "Mot de passe oublié ?",
+    "forgotSubtitle": "Entrez votre email et nous vous enverrons un lien de réinitialisation",
+    "sendResetLink": "Envoyer le lien de réinitialisation",
+    "sending": "Envoi...",
+    "emailSent": "Si cet email est enregistré, vous recevrez un lien de réinitialisation de mot de passe sous peu.",
+    "checkSpam": "Vous ne l'avez pas reçu ? Vérifiez votre dossier spam.",
+    "sendAgain": "Renvoyer",
+    "backToSignIn": "Retour à la connexion",
+    "resetTitle": "Définir un nouveau mot de passe",
+    "resetSubtitle": "Saisissez votre nouveau mot de passe ci-dessous",
+    "newPassword": "Nouveau mot de passe",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetting": "Réinitialisation...",
+    "resetSuccess": "Mot de passe réinitialisé ! Redirection vers la connexion...",
+    "redirecting": "Redirection...",
+    "resetError": "Échec de la réinitialisation. Le lien a peut-être expiré. Veuillez en demander un nouveau.",
+    "invalidLink": "Lien invalide",
+    "invalidLinkDesc": "Ce lien de réinitialisation est invalide ou a expiré.",
+    "requestNewLink": "Demander un nouveau lien de réinitialisation",
+    "passwordMinLength": "Le mot de passe doit comporter au moins 8 caractères",
+    "networkError": "Erreur réseau. Veuillez réessayer."
+  },
+  "admin": {
+    "title": "Panneau d'Administration",
+    "subtitle": "Statistiques d'Utilisation · Approbations de Paiement",
+    "refresh": "Actualiser",
+    "empty": "Aucun paiement en attente",
+    "forbidden": "Accès refusé",
+    "loadError": "Échec du chargement",
+    "approve": "Approuver",
+    "reject": "Rejeter",
+    "planMonthly": "Mensuel",
+    "planYearly": "Annuel",
+    "alipay": "Alipay",
+    "wechat": "WeChat",
+    "txnRef": "Réf.",
+    "tabStats": "Statistiques d'Utilisation",
+    "tabPayments": "Paiements",
+    "tabCalls": "Journal des Appels",
+    "todayCalls": "Appels du jour",
+    "todayTokens": "Tokens du jour",
+    "todayCost": "Coût du jour",
+    "todayUsers": "Utilisateurs actifs du jour",
+    "yesterday": "Hier",
+    "totalUsers": "Utilisateurs totaux",
+    "allTimeCalls": "Appels (total)",
+    "allTimeTokens": "Tokens (total)",
+    "allTimeCost": "Coût (total)",
+    "totalDocs": "Documents totaux",
+    "weekChart": "Appels des 7 derniers jours",
+    "recentCalls": "Journal d'appels récents",
+    "time": "Heure",
+    "provider": "Fournisseur",
+    "type": "Type",
+    "tokens": "Tokens",
+    "cost": "Coût",
+    "providerBreakdown": "Répartition par fournisseur (ce mois-ci)",
+    "inputOutput": "Entrée {input} / Sortie {output}",
+    "tabReviews": "Avis",
+    "tabAlerts": "Alertes",
+    "mrr": "MRR",
+    "thisMonth": "Ce Mois",
+    "lastMonthRevenue": "Mois Dernier"
   }
 }
