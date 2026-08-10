@@ -1,0 +1,27 @@
+name: i18n Coverage Check
+
+on:
+  push:
+    branches: [master, develop]
+  pull_request:
+    branches: [master, develop]
+
+env:
+  NODE_VERSION: "22"
+
+jobs:
+  i18n-coverage:
+    name: i18n Coverage Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Run i18n coverage check
+        run: node scripts/check-i18n.mjs
