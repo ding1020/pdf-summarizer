@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import {
   estimateTokens,
   getProviderFallbackChain,
@@ -7,6 +7,13 @@ import {
   getSystemPrompt,
   type AIProvider,
 } from "@/lib/ai";
+
+// Set mock API keys so getProviderFallbackChain returns all providers in tests
+beforeAll(() => {
+  process.env.DEEPSEEK_API_KEY = "test-key-deepseek";
+  process.env.GROQ_API_KEY = "test-key-groq";
+  process.env.SILICONFLOW_API_KEY = "test-key-siliconflow";
+});
 
 // ── estimateTokens ──
 describe("estimateTokens", () => {

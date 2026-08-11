@@ -36,6 +36,26 @@ interface AdminStats {
   providerBreakdown: Array<{ provider: string; calls: number; tokens: number; cost: number }>;
 }
 
+// ── Stats Card macro (declared at module level to avoid re-creation on each render) ──
+const colorStyles: Record<string, { border: string; text: string }> = {
+  blue:    { border: "border-blue-100",    text: "text-blue-600" },
+  green:   { border: "border-green-100",   text: "text-green-600" },
+  purple:  { border: "border-purple-100",  text: "text-purple-600" },
+  red:     { border: "border-red-100",     text: "text-red-600" },
+  gray:    { border: "border-gray-100",    text: "text-gray-600" },
+};
+
+function StatCard({ label, value, sub, color = "blue" }: { label: string; value: string; sub?: string; color?: string }) {
+  const cs = colorStyles[color] || colorStyles.blue;
+  return (
+    <div className={`bg-white rounded-lg border ${cs.border} p-4`}>
+      <p className="text-xs text-gray-500 mb-1">{label}</p>
+      <p className={`text-2xl font-bold ${cs.text}`}>{value}</p>
+      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
+    </div>
+  );
+}
+
 export default function AdminClient({
   manualPaymentEnabled = false,
 }: {
@@ -140,24 +160,7 @@ export default function AdminClient({
 
   if (!isSignedIn) return null;
 
-  // ── Stats Card macro ──
-  const colorStyles: Record<string, { border: string; text: string }> = {
-    blue:    { border: "border-blue-100",    text: "text-blue-600" },
-    green:   { border: "border-green-100",   text: "text-green-600" },
-    purple:  { border: "border-purple-100",  text: "text-purple-600" },
-    red:     { border: "border-red-100",     text: "text-red-600" },
-    gray:    { border: "border-gray-100",    text: "text-gray-600" },
-  };
-  const StatCard = ({ label, value, sub, color = "blue" }: { label: string; value: string; sub?: string; color?: string }) => {
-    const cs = colorStyles[color] || colorStyles.blue;
-    return (
-    <div className={`bg-white rounded-lg border ${cs.border} p-4`}>
-      <p className="text-xs text-gray-500 mb-1">{label}</p>
-      <p className={`text-2xl font-bold ${cs.text}`}>{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
-    </div>
-    );
-  };
+  // StatCard moved to module level (see below)
 
   return (
     <main className="min-h-[80vh] py-8 px-4 max-w-5xl mx-auto" id="main-content">
