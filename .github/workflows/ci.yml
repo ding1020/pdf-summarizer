@@ -34,7 +34,7 @@ jobs:
         run: npx tsc --noEmit
 
       - name: Check formatting (Prettier)
-        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" --ignore-path .gitignore || true
+        run: npx prettier --check "**/*.{ts,tsx,js,jsx,json,css,md}" --ignore-path .gitignore
 
   security-audit:
     name: Security Audit

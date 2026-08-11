@@ -62,3 +62,8 @@ test-*.ps1
 !next-env.d.ts
 
 .vercel
+
+# database files
+dev.db
+*.db
+*.db-journal

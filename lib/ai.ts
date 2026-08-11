@@ -40,6 +40,9 @@ export function isProviderAvailable(provider: AIProvider): boolean {
   return Boolean(key);
 }
 
+// Cache OpenAI client instances to avoid repeated construction
+const clientCache = new Map<string, OpenAI>();
+
 export function getAIProvider(provider: AIProvider) {
   const config = providerConfigs[provider];
 
