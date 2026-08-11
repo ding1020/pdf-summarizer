@@ -107,6 +107,7 @@ export default function AdminClient({
     }
   }, []);
 
+  // Auth redirect: standard pattern for protecting admin pages
   useEffect(() => {
     if (isSignedIn) {
       fetchPayments();
