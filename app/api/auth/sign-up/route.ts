@@ -3,12 +3,11 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { hashPassword } from "@/lib/password";
 import { rateLimitAsync, RATE_LIMITS, getRateLimitHeaders } from "@/lib/rate-limit";
-import { sendEmail, trialWelcomeEmail } from "@/lib/email";
+import { sendEmail, verifyEmailEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { recordAudit } from "@/lib/audit";
 import { TRIAL_DURATION_DAYS } from "@/lib/subscription";
 import { validateCsrf } from "@/lib/csrf";
-import { createToken } from "@/lib/auth-token";
 import { getClientIP } from "@/lib/api-utils";
 
 export async function POST(req: NextRequest) {
@@ -55,46 +54,47 @@ export async function POST(req: NextRequest) {
     });
 
     if (existing) {
-      // If user exists but not verified, auto-verify and update password
-      // so they can sign in immediately (email verification is skipped entirely).
+      // If user exists but not verified, generate a new verification token and resend email.
+      // Do NOT auto-verify — user must click the verification link.
       if (!existing.emailVerified) {
         const passwordHash = await hashPassword(password);
         const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
-        const reactivatedUser = await prisma.user.update({
+        const rawToken = crypto.randomBytes(32).toString("hex");
+        const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+        const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
+        await prisma.user.update({
           where: { id: existing.id },
           data: {
-            emailVerified: true,
-            verifyToken: null,
-            verifyExpires: null,
+            emailVerified: false,
+            verifyToken: tokenHash,
+            verifyExpires,
             passwordHash,
             subscriptionStatus: "pro_trial",
             subscriptionEndDate: trialEnd,
           },
         });
 
-        // Auto sign-in
-        const token = createToken({
-          id: reactivatedUser.id,
-          email: reactivatedUser.email,
-          firstName: reactivatedUser.firstName,
-          lastName: reactivatedUser.lastName,
-        });
+        // Send verification email
+        const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+        const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
+        const name = firstName || "there";
+        try {
+          const { subject, html } = verifyEmailEmail(name, verifyUrl);
+          await sendEmail({ to: normalizedEmail, subject, html });
+        } catch (emailErr) {
+          logger.warn("Verification email send failed, but account updated", {
+            email: normalizedEmail,
+            error: emailErr instanceof Error ? emailErr.message : String(emailErr),
+          });
+        }
 
-        const response = NextResponse.json({
+        return NextResponse.json({
           success: true,
-          message: "Account has been activated.",
-          autoSignedIn: true,
+          message: "A verification email has been sent. Please check your inbox to activate your account.",
+          autoSignedIn: false,
+          requiresVerification: true,
         });
-
-        response.cookies.set("__auth_token", token, {
-          path: "/",
-          httpOnly: true,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "lax",
-          maxAge: 60 * 60 * 24 * 7,
-        });
-
-        return response;
       }
 
       // Already verified — do NOT allow password reset via re-registration
@@ -108,19 +108,25 @@ export async function POST(req: NextRequest) {
     }
 
     // Create user with hashed password AND 14-day Pro trial
-    // Email verification is skipped: new users can sign in immediately.
-    // Welcome emails are sent but failures are non-blocking.
+    // Email verification is required: user must click the verification link
+    // before they can sign in.
     const passwordHash = await hashPassword(password);
     const trialEnd = new Date(Date.now() + TRIAL_DURATION_DAYS * 24 * 60 * 60 * 1000);
+
+    // Generate email verification token
+    const rawToken = crypto.randomBytes(32).toString("hex");
+    const tokenHash = crypto.createHash("sha256").update(rawToken).digest("hex");
+    const verifyExpires = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24h
+
     const user = await prisma.user.create({
       data: {
         email: normalizedEmail,
         passwordHash,
         firstName: firstName || null,
         lastName: lastName || null,
-        emailVerified: true,
-        verifyToken: null,
-        verifyExpires: null,
+        emailVerified: false,
+        verifyToken: tokenHash,
+        verifyExpires,
         internalId: `native_${Date.now()}_${crypto.randomBytes(8).toString("hex")}`,
         subscriptionStatus: "pro_trial",
         subscriptionEndDate: trialEnd,
@@ -141,44 +147,27 @@ export async function POST(req: NextRequest) {
       ip: clientIp,
     });
 
-    // Send trial welcome email (non-blocking)
+    // Send verification email (non-blocking)
     const name = firstName || "there";
+    const base = process.env.NEXT_PUBLIC_APP_URL || "https://www.pdfsum.com";
+    const verifyUrl = `${base}/api/auth/verify-email?token=${rawToken}`;
     try {
-      const trialEndStr = trialEnd.toLocaleDateString("en-US", {
-        year: "numeric", month: "long", day: "numeric",
-      });
-      const trial = trialWelcomeEmail(name, trialEndStr);
-      await sendEmail({ to: normalizedEmail, subject: trial.subject, html: trial.html });
+      const { subject, html } = verifyEmailEmail(name, verifyUrl);
+      await sendEmail({ to: normalizedEmail, subject, html });
     } catch (emailErr) {
-      logger.warn("Trial welcome email send failed, but account created", {
+      logger.warn("Verification email send failed, but account created", {
         email: normalizedEmail,
         error: emailErr instanceof Error ? emailErr.message : String(emailErr),
       });
     }
 
-    // Auto sign-in: issue auth token immediately after registration
-    const token = createToken({
-      id: user.id,
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-    });
-
-    const response = NextResponse.json({
+    // Do NOT auto sign-in — user must verify their email first
+    return NextResponse.json({
       success: true,
-      message: "Account created!",
-      autoSignedIn: true,
+      message: "Account created! Please check your email to verify your account.",
+      autoSignedIn: false,
+      requiresVerification: true,
     });
-
-    response.cookies.set("__auth_token", token, {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 7,
-    });
-
-    return response;
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     logger.error("Sign-up error:", err);

@@ -1,145 +1,78 @@
 import { NextRequest } from "next/server";
-import { getAuthUserId } from "@/lib/get-auth";
 import {
   summarizeStreamWithFallback,
-  checkAndIncrementDailyUsage,
   type AIProvider,
 } from "@/lib/ai";
-import { prisma } from "@/lib/db";
-import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH, PRO_MAX_CONTENT_LENGTH } from "@/lib/constants";
-import { getClientIP, getUserTier } from "@/lib/api-utils";
-import { saveUsageLog, getUserType } from "@/lib/usage-log";
+import { getRateLimitHeaders } from "@/lib/rate-limit";
+import {
+  extractAuthContext,
+  applyRateLimitGuard,
+  resolveDocumentContent,
+  checkDailyUsageLimit,
+  refundUsageQuota,
+  logAIUsage,
+  getMaxContentLength,
+  createJsonResponse,
+  createAIUnavailableError,
+} from "@/lib/summarize-helpers";
 
 export async function POST(req: NextRequest) {
   // ── Auth (required) ──
-  const userId = await getAuthUserId();
-  const clientIp = getClientIP(req);
+  const { userId, clientIp, isGuest } = await extractAuthContext(req);
 
   if (!userId) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized. Please sign in to use this feature." }),
-      { status: 401, headers: { "Content-Type": "application/json" } },
+    return createJsonResponse(
+      { error: "Unauthorized. Please sign in to use this feature." },
+      401,
     );
   }
 
-  // ── Rate Limiting (per-minute, differentiated: Pro > Free) ──
-  let rateLimitResult: { remaining: number; resetTime: number } | null = null;
-  try {
-    const identifier = getClientIdentifier(userId, clientIp);
-
-    const tier = await getUserTier(userId);
-    const rateLimitConfig =
-      tier === "pro"
-        ? { windowMs: 60_000, maxRequests: 60 }
-        : { windowMs: 60_000, maxRequests: 20 };
-
-    const result = await rateLimitAsync(identifier, rateLimitConfig);
-    rateLimitResult = { remaining: result.remaining, resetTime: result.resetTime };
-
-    if (!result.success) {
-      return new Response(
-        JSON.stringify({
-          error: "Too many requests. Please try again later.",
-          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000),
-        }),
-        {
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            ...getRateLimitHeaders(result),
-          },
-        },
-      );
-    }
-  } catch (rateLimitError) {
-    logger.warn("Rate limiting failed in summarize stream", {
-      error: rateLimitError instanceof Error ? rateLimitError.message : String(rateLimitError),
-    });
-  }
+  // ── Rate Limiting (via shared helper — uses resolveRateLimit internally) ──
+  const rateGuard = await applyRateLimitGuard(userId, clientIp);
+  if (rateGuard.errorResponse) return rateGuard.errorResponse;
+  const rateLimitResult = rateGuard.data;
 
   // ── Parse Request Body ──
   let body: { content?: string; documentId?: string; provider?: string; language?: string };
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Invalid request body. Please provide document content or documentId." }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
+    return createJsonResponse(
+      { error: "Invalid request body. Please provide document content or documentId." },
+      400,
     );
   }
 
   let { content, documentId, provider = "deepseek", language = "multilingual" } = body;
 
-  // ── Resolve content: direct or from DB ──
+  // ── Resolve content: direct or from DB (via shared helper) ──
   if (!content || typeof content !== "string" || content.trim().length === 0) {
     if (documentId) {
-      try {
-        const document = await prisma.document.findUnique({
-          where: { id: documentId },
-          select: { content: true, userId: true },
-        });
-        if (!document) {
-          return new Response(
-            JSON.stringify({ error: "Document not found." }),
-            { status: 404, headers: { "Content-Type": "application/json" } },
-          );
-        }
-        if (document.userId !== userId) {
-          return new Response(
-            JSON.stringify({ error: "Access denied." }),
-            { status: 403, headers: { "Content-Type": "application/json" } },
-          );
-        }
-        content = document.content || "";
-      } catch (dbErr) {
-        logger.error("Failed to load document from DB in stream", dbErr instanceof Error ? dbErr : new Error(String(dbErr)));
-        return new Response(
-          JSON.stringify({ error: "Failed to load document." }),
-          { status: 500, headers: { "Content-Type": "application/json" } },
+      const resolution = await resolveDocumentContent(documentId, userId, true);
+      if (resolution.error) {
+        return createJsonResponse(
+          { error: resolution.error.message },
+          resolution.error.status,
         );
       }
+      content = resolution.content || "";
     }
   }
 
   if (!content || typeof content !== "string" || content.trim().length === 0) {
-    return new Response(
-      JSON.stringify({ error: "Document content is required and must be a non-empty string." }),
-      { status: 400, headers: { "Content-Type": "application/json" } },
+    return createJsonResponse(
+      { error: "Document content is required and must be a non-empty string." },
+      400,
     );
   }
 
-  // ── Determine max content length (Pro: 50k, Free: 15k) ──
-  let maxLength = MAX_CONTENT_LENGTH;
-  try {
-    const tier = await getUserTier(userId);
-    if (tier === "pro") {
-      maxLength = PRO_MAX_CONTENT_LENGTH;
-    }
-  } catch {
-    // Fallback to free limit
-  }
+  // ── Max content length (via shared helper — Pro: 50k, Free: 15k) ──
+  const maxLength = await getMaxContentLength(userId);
 
-  // ── Daily Usage Limit (bypass-proof: atomic counter) ──
-  try {
-    const usageCheck = await checkAndIncrementDailyUsage(userId, FREE_DAILY_LIMIT);
-    if (!usageCheck.allowed) {
-      return new Response(
-        JSON.stringify({
-          error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Upgrade to Pro for unlimited access.`,
-          code: "usage_limit_reached",
-          upgradeUrl: "/pricing",
-        }),
-        { status: 402, headers: { "Content-Type": "application/json" } },
-      );
-    }
-  } catch (limitError) {
-    logger.warn("Failed to check daily usage limit in stream", {
-      error: limitError instanceof Error ? limitError.message : String(limitError),
-    });
-    // Fail open
-  }
+  // ── Daily Usage Limit (via shared helper) ──
+  const usageGuard = await checkDailyUsageLimit(userId, clientIp, isGuest);
+  if (usageGuard.errorResponse) return usageGuard.errorResponse;
 
   // ── Summarize with automatic provider fallback (shared service) ──
   try {
@@ -151,21 +84,14 @@ export async function POST(req: NextRequest) {
         maxContentLength: maxLength,
       });
 
-    // ── Record AI usage for cost tracking ──
+    // ── Record AI usage for cost tracking (via shared helper) ──
     if (usage.model !== "cache") {
-      const userType = await getUserType(userId);
-      await saveUsageLog({
-        userId,
-        provider: usage.provider,
-        model: usage.model,
+      await logAIUsage(userId, usage.provider, usage.model, {
         inputTokens: usage.inputTokens,
         outputTokens: usage.outputTokens > 0 ? usage.outputTokens : 0,
         totalTokens: usage.totalTokens > 0 ? usage.totalTokens : usage.inputTokens,
         costUSD: usage.costUSD,
-        userType,
-        route: "stream",
-        ip: clientIp ?? undefined,
-      });
+      }, clientIp, "stream");
     }
 
     const headers = new Headers({
@@ -190,44 +116,14 @@ export async function POST(req: NextRequest) {
     const errMsg = err instanceof Error ? err.message : String(err);
     logger.error("All AI providers failed for streaming", new Error(errMsg));
 
-    // Log error for real error rate tracking
-    const errUserType = await getUserType(userId);
-    await saveUsageLog({
-      userId,
-      provider: provider as string,
-      model: "unknown",
-      inputTokens: 0,
-      outputTokens: 0,
-      totalTokens: 0,
-      costUSD: 0,
-      userType: errUserType,
-      route: "stream",
-      status: "error",
-      ip: clientIp ?? undefined,
-    });
+    // Log error for real error rate tracking (via shared helper)
+    await logAIUsage(userId, provider, "unknown", {
+      inputTokens: 0, outputTokens: 0, totalTokens: 0, costUSD: 0,
+    }, clientIp, "stream");
 
     // Refund the daily usage quota — AI failure shouldn't consume user's allowance
-    try {
-      const tier = await getUserTier(userId);
-      if (tier !== "pro") {
-        await prisma.user.updateMany({
-          where: { id: userId, usageCount: { gt: 0 } },
-          data: { usageCount: { decrement: 1 } },
-        });
-        logger.info("Refunded usage quota after AI failure (stream)", { userId });
-      }
-    } catch (refundErr) {
-      logger.warn("Failed to refund usage quota after AI failure (stream)", {
-        error: refundErr instanceof Error ? refundErr.message : String(refundErr),
-      });
-    }
+    await refundUsageQuota(userId);
 
-    return new Response(
-      JSON.stringify({
-        error: "AI service is temporarily unavailable. Please try again in a moment.",
-        details: process.env.NODE_ENV === "development" ? errMsg : undefined,
-      }),
-      { status: 503, headers: { "Content-Type": "application/json" } },
-    );
+    return createAIUnavailableError(errMsg);
   }
 }

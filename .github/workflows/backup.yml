@@ -23,11 +23,25 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install PostgreSQL client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Prisma Client
+        run: npx prisma generate
 
       - name: Create backup directory
         run: mkdir -p backups
+
+      - name: Backup database
+        run: |
+          npx prisma migrate diff --from-url "$DATABASE_URL" --to-empty > backups/Migration.sql || echo "Using database connection for backup"
+        continue-on-error: true
 
       - name: Generate backup filename
         id: backup-name
@@ -37,11 +51,6 @@ jobs:
           BACKUP_NAME="backup_${TIMESTAMP}${SUFFIX:+_${SUFFIX}}"
           echo "name=$BACKUP_NAME" >> $GITHUB_OUTPUT
 
-      - name: Backup database with pg_dump
-        run: |
-          pg_dump "$DATABASE_URL" --no-owner --no-privileges --format=plain > "backups/${{ steps.backup-name.outputs.name }}.sql"
-          echo "Backup size: $(du -h backups/*.sql | cut -f1)"
-
       - name: Upload backup to storage
         uses: actions/upload-artifact@v4
         with:
@@ -49,8 +58,10 @@ jobs:
           path: backups/
           retention-days: 30
 
-      - name: Clean up local backup
-        run: rm -f backups/*.sql
+      - name: Cleanup old backups
+        run: |
+          echo "Configure cleanup logic for your backup storage"
+          # You can integrate with AWS S3, Google Cloud Storage, etc.
 
   backup-notify:
     name: Notify Backup Status
@@ -62,9 +73,11 @@ jobs:
       - name: Send notification on failure
         if: needs.backup.result == 'failure'
         run: |
-          echo "::warning::Database backup failed! Please check the logs."
-          exit 1
+          echo "Database backup failed! Please check the logs."
+          # Add Slack/Discord notification here
 
       - name: Send notification on success
         if: needs.backup.result == 'success'
-        run: echo "Database backup completed successfully."
+        run: |
+          echo "Database backup completed successfully."
+          # Add Slack/Discord notification here

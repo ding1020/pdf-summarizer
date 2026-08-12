@@ -60,7 +60,7 @@ export default function SubscriptionPage() {
         window.location.assign(data.url);
       } else {
         // Map API error codes to localized messages
-        const localized = mapPortalError(t, data.code, data.error);
+        const localized = mapPortalError(data.code, data.error);
         toast.error(localized);
       }
     } catch {
@@ -72,21 +72,20 @@ export default function SubscriptionPage() {
 
   // Translate API error codes into the user's locale.
   const mapPortalError = (
-    tr: ReturnType<typeof useTranslations<"subscription">>,
     code?: string,
     fallback?: string
   ): string => {
     switch (code) {
       case "trial_no_portal":
-        return tr("errorTrialNoPortal");
+        return t("errorTrialNoPortal");
       case "manual_subscription":
-        return tr("errorManualSubscription");
+        return t("errorManualSubscription");
       case "no_subscription":
-        return tr("errorNoSubscription");
+        return t("errorNoSubscription");
       case "creem_not_configured":
-        return tr("errorPaymentConfig");
+        return t("errorPaymentConfig");
       default:
-        return fallback || tr("errorPortal") || "Failed to open subscription management.";
+        return fallback || t("errorPortal") || "Failed to open subscription management.";
     }
   };
 

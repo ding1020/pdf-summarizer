@@ -116,13 +116,21 @@ async function renderPdfToImages(
 
 /**
  * OCR fallback for scanned PDFs.
- * Renders pages to images, sends each to Tencent Cloud OCR, concatenates text.
+ * Renders pages to images, sends each to the configured OCR provider, concatenates text.
+ *
+ * Uses the OCR provider abstraction layer (lib/ocr-provider.ts) to support
+ * Tencent, Google Vision, AWS Textract, and Azure Computer Vision.
  */
 export async function pdfOcrFallback(
   buffer: Buffer,
   maxPages: number = MAX_OCR_PAGES
 ): Promise<PdfOcrResult> {
-  const { ocrImage } = await import("./tencent-ocr");
+  const { getOcrProvider } = await import("./ocr-provider");
+
+  const provider = getOcrProvider();
+  if (!provider) {
+    throw new Error("OCR provider is not configured. Set OCR_PROVIDER and corresponding credentials.");
+  }
 
   const { images, totalPages } = await renderPdfToImages(buffer, maxPages);
 
@@ -131,11 +139,11 @@ export async function pdfOcrFallback(
   for (let i = 0; i < images.length; i++) {
     const base64 = images[i].toString("base64");
     try {
-      const pageText = await ocrImage(base64);
+      const pageText = await provider.ocrImage(base64);
       textParts.push(pageText);
     } catch (err) {
       // Log but continue — partial OCR is better than nothing
-      console.error(`OCR failed for page ${i + 1}:`, err instanceof Error ? err.message : err);
+      console.error(`[OCR:${provider.name}] failed for page ${i + 1}:`, err instanceof Error ? err.message : err);
     }
   }
 

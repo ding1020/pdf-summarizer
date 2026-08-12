@@ -116,7 +116,7 @@ export async function GET(req: NextRequest) {
       prisma.user.count({ where: { subscriptionStatus: "free" } }),
       prisma.usageLog
         .groupBy({ by: ["userId"], where: { createdAt: { gte: startOfToday } }, _count: true })
-        .then((g) => g.length),
+        .then((g: any) => g.length),
       prisma.document.count(),
     ]);
 
@@ -149,7 +149,7 @@ export async function GET(req: NextRequest) {
       users: { total: totalUsers, pro: proUsers, free: freeUsers },
       documents: totalDocuments,
       recentCalls,
-      providerBreakdown: providerBreakdown.map((p) => ({
+      providerBreakdown: providerBreakdown.map((p: any) => ({
         provider: p.provider,
         calls: p._count.id,
         tokens: p._sum.totalTokens ?? 0,

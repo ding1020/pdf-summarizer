@@ -36,8 +36,8 @@ interface AdminStats {
   providerBreakdown: Array<{ provider: string; calls: number; tokens: number; cost: number }>;
 }
 
-// ── Stats Card macro (declared at module level to avoid re-creation on each render) ──
-const colorStyles: Record<string, { border: string; text: string }> = {
+// ── StatCard (declared outside render to avoid re-creation) ──
+const statCardColorStyles: Record<string, { border: string; text: string }> = {
   blue:    { border: "border-blue-100",    text: "text-blue-600" },
   green:   { border: "border-green-100",   text: "text-green-600" },
   purple:  { border: "border-purple-100",  text: "text-purple-600" },
@@ -46,7 +46,7 @@ const colorStyles: Record<string, { border: string; text: string }> = {
 };
 
 function StatCard({ label, value, sub, color = "blue" }: { label: string; value: string; sub?: string; color?: string }) {
-  const cs = colorStyles[color] || colorStyles.blue;
+  const cs = statCardColorStyles[color] || statCardColorStyles.blue;
   return (
     <div className={`bg-white rounded-lg border ${cs.border} p-4`}>
       <p className="text-xs text-gray-500 mb-1">{label}</p>
@@ -107,11 +107,17 @@ export default function AdminClient({
     }
   }, []);
 
-  // Auth redirect: standard pattern for protecting admin pages
   useEffect(() => {
     if (isSignedIn) {
-      fetchPayments();
-      fetchStats();
+      // Defer data fetching to a microtask to avoid synchronous setState in effect
+      let cancelled = false;
+      queueMicrotask(() => {
+        if (!cancelled) {
+          fetchPayments();
+          fetchStats();
+        }
+      });
+      return () => { cancelled = true; };
     } else if (isLoaded) {
       router.push("/sign-in");
     }
@@ -160,8 +166,6 @@ export default function AdminClient({
   }
 
   if (!isSignedIn) return null;
-
-  // StatCard moved to module level (see below)
 
   return (
     <main className="min-h-[80vh] py-8 px-4 max-w-5xl mx-auto" id="main-content">

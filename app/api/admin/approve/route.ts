@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
-import { prisma } from "@/lib/db";
+import { prisma, Prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { sendEmail, paymentSuccessEmail } from "@/lib/email";
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     // ── Atomic approve: check status INSIDE transaction to prevent TOCTOU race ──
     // Two concurrent admin approvals must not both succeed.
-    const payment = await prisma.$transaction(async (tx) => {
+    const payment = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const record = await tx.paymentRequest.findUnique({
         where: { id: paymentId },
         include: { user: { select: { id: true, email: true } } },

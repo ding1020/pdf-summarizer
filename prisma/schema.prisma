@@ -42,6 +42,8 @@ model User {
   // ── Engagement tracking ──
   lastActiveAt         DateTime? // Updated on each authenticated page visit
   lastWinBackSentAt    DateTime? // Prevents duplicate win-back emails
+  // ── Token revocation ──
+  tokenVersion         Int       @default(1) // Increment to revoke all active sessions
   createdAt            DateTime  @default(now())
   updatedAt            DateTime  @updatedAt
   documents            Document[]

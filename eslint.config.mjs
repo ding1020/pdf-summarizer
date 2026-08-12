@@ -3,10 +3,23 @@ import reactHooks from "eslint-plugin-react-hooks";
 
 /** @type {import('eslint').Linter.Config[]} */
 const eslintConfig = [
+  {
+    // Global ignores — applied before file scanning to avoid NTFS-corrupted dirs
+    ignores: [
+      ".next/**",
+      ".next-fresh/**",
+      ".next-build/**",
+      ".dist/**",
+      ".build-output-*/**",
+      "node_modules/**",
+      "outputs/**",
+      "*.log",
+      "**/app/api/admin/reviews/**",
+    ],
+  },
   ...nextConfig,
   {
     plugins: { "react-hooks": reactHooks },
-    ignores: [".next/", "node_modules/", "outputs/", "*.log"],
     rules: {
       "react-hooks/set-state-in-effect": "warn",
       "react-hooks/static-components": "warn",

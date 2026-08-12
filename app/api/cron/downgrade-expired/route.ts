@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
       select: { id: true, email: true, subscriptionEndDate: true, subscriptionStatus: true },
     });
 
-    const ids = expiredUsers.map((u) => u.id);
+    const ids = expiredUsers.map((u: any) => u.id);
     if (ids.length > 0) {
       // Re-check subscriptionEndDate at update time to prevent race with
       // concurrent webhook renewals (user renews between findMany and updateMany)
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
       logger.info(`Cron: Downgraded ${downgradedCount} expired subscriptions`, {
         expiredCount: expiredUsers.length,
         downgradedCount,
-        trialCount: expiredUsers.filter(u => u.subscriptionStatus === "pro_trial").length,
+        trialCount: expiredUsers.filter((u: any) => u.subscriptionStatus === "pro_trial").length,
       });
     } else {
       logger.info("Cron: No expired PRO subscriptions found");

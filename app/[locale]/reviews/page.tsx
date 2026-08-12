@@ -70,14 +70,14 @@ export default async function ReviewsPage({
   ]);
 
   // Serialize dates
-  const serializedReviews = reviews.map((r) => ({
+  const serializedReviews = reviews.map((r: any) => ({
     ...r,
     createdAt: r.createdAt.toISOString(),
   }));
 
   // JSON-LD structured data for SEO
   const avgRating = reviews.length > 0
-    ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+    ? reviews.reduce((sum: number, r: any) => sum + r.rating, 0) / reviews.length
     : 0;
   const reviewJsonLd = {
     "@context": "https://schema.org",
@@ -91,7 +91,7 @@ export default async function ReviewsPage({
       bestRating: "5",
       worstRating: "1",
     },
-    review: serializedReviews.slice(0, 10).map((r) => ({
+    review: serializedReviews.slice(0, 10).map((r: any) => ({
       "@type": "Review",
       author: { "@type": "Person", name: r.userName },
       datePublished: r.createdAt,

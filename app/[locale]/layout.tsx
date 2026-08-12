@@ -1,5 +1,5 @@
 ﻿import type { Metadata, Viewport } from "next";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { Inter } from "next/font/google";
 import Script from "next/script";
 import { NextIntlClientProvider } from "next-intl";
@@ -139,9 +139,10 @@ export default async function LocaleLayout({
   setRequestLocale(locale);
   const messages = await getMessages({ locale });
 
-  // Read CSP nonce from middleware (via short-lived cookie)
+  // Read CSP nonce from middleware (via request header, with cookie fallback)
+  const headerStore = await headers();
   const cookieStore = await cookies();
-  const nonce = cookieStore.get("__csp_nonce")?.value;
+  const nonce = headerStore.get("x-nonce") || cookieStore.get("__csp_nonce")?.value;
   const em = {
     title: messages.error?.title || "Error",
     description: "Something went wrong",

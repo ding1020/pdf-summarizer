@@ -40,8 +40,10 @@ export function isProviderAvailable(provider: AIProvider): boolean {
   return Boolean(key);
 }
 
-// Cache OpenAI client instances to avoid repeated construction
-const clientCache = new Map<string, OpenAI>();
+// ── Connection pool: reuse OpenAI clients across requests ──
+// Avoids creating a new HTTP client (and new keep-alive connection pool)
+// on every single API call. Keyed by provider name.
+const clientPool = new Map<AIProvider, OpenAI>();
 
 export function getAIProvider(provider: AIProvider) {
   const config = providerConfigs[provider];
@@ -57,10 +59,19 @@ export function getAIProvider(provider: AIProvider) {
     throw new Error(`API key not configured for ${config.provider}`);
   }
 
-  return new OpenAI({
+  // Return cached client if available (connection reuse)
+  const cached = clientPool.get(provider);
+  if (cached) return cached;
+
+  const client = new OpenAI({
     apiKey,
     baseURL: config.baseURL,
+    timeout: 30_000,
+    maxRetries: 2,
   });
+
+  clientPool.set(provider, client);
+  return client;
 }
 
 /** 集中式模型名解析 — 单一来源，所有路由统一使用 */

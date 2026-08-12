@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { getAuthUserId } from "@/lib/get-auth";
+import { revokeAllUserTokens } from "@/lib/auth-token";
 import { validateCsrf } from "@/lib/csrf";
+import { logger } from "@/lib/logger";
 
 export async function POST(req: NextRequest) {
   // CSRF validation
@@ -24,6 +26,18 @@ export async function POST(req: NextRequest) {
       { error: "Too many requests" },
       { status: 429, headers: getRateLimitHeaders(rateResult) },
     );
+  }
+
+  // Revoke all tokens for this user (invalidates tokens on other devices too)
+  if (userId) {
+    try {
+      await revokeAllUserTokens(userId);
+    } catch (err) {
+      logger.warn("Failed to revoke tokens on sign-out", {
+        userId,
+        error: err instanceof Error ? err.message : String(err),
+      });
+    }
   }
 
   const response = NextResponse.json({ success: true });

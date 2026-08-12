@@ -3,17 +3,20 @@
  * Provides consistent, structured logging format for easier debugging and log aggregation
  */
 
-import { AsyncLocalStorage } from "async_hooks";
-
-// ── Request ID tracing support (per-request isolation via AsyncLocalStorage) ──
-const requestIdStore = new AsyncLocalStorage<string>();
+// ── Request ID tracing support ──
+// Uses a simple variable instead of AsyncLocalStorage for cross-runtime compatibility
+// (Edge Runtime doesn't support async_hooks or dynamic code evaluation).
+// In Edge, each request runs in its own isolate so isolation is preserved.
+// In Node.js, the logger still works but request IDs may not be perfectly isolated
+// under high concurrency — acceptable for structured logging purposes.
+let currentRequestId: string | undefined = undefined;
 
 export function setLoggerRequestId(id: string): void {
-  requestIdStore.enterWith(id);
+  currentRequestId = id;
 }
 
 export function getLoggerRequestId(): string | undefined {
-  return requestIdStore.getStore();
+  return currentRequestId;
 }
 
 export type LogLevel = "debug" | "info" | "warn" | "error";

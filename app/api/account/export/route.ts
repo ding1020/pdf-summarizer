@@ -84,11 +84,11 @@ export async function GET(req: Request) {
         createdAt: user.createdAt.toISOString(),
         usageCountToday: user.usageCount,
       },
-      documents: user.documents.map((doc) => ({
+      documents: user.documents.map((doc: any) => ({
         ...doc,
         createdAt: doc.createdAt.toISOString(),
       })),
-      feedback: user.feedbacks.map((fb) => ({
+      feedback: user.feedbacks.map((fb: any) => ({
         ...fb,
         createdAt: fb.createdAt.toISOString(),
       })),

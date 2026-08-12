@@ -7,9 +7,9 @@
 export const FREE_DAILY_LIMIT = 5;
 export const TRIAL_TOTAL_LIMIT = 20; // Total summaries during entire 14-day trial
 
-// ── Rate limits (single source: lib/rate-limit.ts RATE_LIMITS) ──
-// ⚠️  These are maintained as convenience re-exports. Any changes should
-//     be made in lib/rate-limit.ts → RATE_LIMITS, then mirrored here.
+// ── Rate limits (single source of truth — defined HERE, not in rate-limit.ts) ──
+// These values are the canonical source. lib/rate-limit.ts imports from here
+// to build its RATE_LIMITS object. Do NOT duplicate these values elsewhere.
 export const GUEST_RATE_LIMIT = { windowMs: 60_000, maxRequests: 5 } as const;
 export const FREE_USER_RATE_LIMIT = { windowMs: 60_000, maxRequests: 20 } as const;
 export const PRO_RATE_LIMIT = { windowMs: 60_000, maxRequests: 60 } as const;

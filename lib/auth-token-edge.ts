@@ -1,6 +1,6 @@
 /**
  * Edge-compatible token verification using Web Crypto API.
- * Use in middleware.ts (Edge Runtime) instead of auth-token.ts (Node.js crypto).
+ * Use in proxy.ts (Edge Runtime) instead of auth-token.ts (Node.js crypto).
  */
 import type { AuthToken } from "./auth-token-types";
 

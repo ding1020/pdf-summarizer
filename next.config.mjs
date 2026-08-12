@@ -22,7 +22,7 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react"],
   },
 
-  // 🔒 Security headers (CSP is set dynamically in middleware with per-request nonce)
+  // 🔒 Security headers (CSP is set dynamically in middleware.ts with per-request nonce)
   async headers() {
     return [
       {

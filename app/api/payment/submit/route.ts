@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthUserId } from "@/lib/get-auth";
-import { prisma } from "@/lib/db";
+import { prisma, Prisma } from "@/lib/db";
 import { logger } from "@/lib/logger";
 import { z } from "zod";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier } from "@/lib/rate-limit";
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
     // within 30 minutes, reject. Otherwise create in the same transaction.
     const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
 
-    const payment = await prisma.$transaction(async (tx) => {
+    const payment = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
       const existing = await tx.paymentRequest.findFirst({
         where: {
           userId,

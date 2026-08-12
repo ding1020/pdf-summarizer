@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
         emailVerified: true,
         verifyToken: true,
         verifyExpires: true,
+        tokenVersion: true,
       },
     });
 
@@ -73,14 +74,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    // Auto-verify any unverified account on sign-in, since email verification
-    // has been removed from the registration flow. Users who prove they have
-    // the correct password are trusted.
+    // Block unverified users from signing in
     if (!user.emailVerified) {
-      await prisma.user.update({
-        where: { id: user.id },
-        data: { emailVerified: true, verifyToken: null, verifyExpires: null },
-      });
+      return NextResponse.json(
+        {
+          error: "Please verify your email address before signing in. Check your inbox for the verification link.",
+          requiresVerification: true,
+          email: normalizedEmail,
+        },
+        { status: 403 },
+      );
     }
 
     // Issue auth token
@@ -89,6 +92,7 @@ export async function POST(req: NextRequest) {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      tokenVersion: user.tokenVersion,
     });
 
     const response = NextResponse.json({ success: true });

@@ -40,7 +40,7 @@ export async function GET(req: NextRequest) {
         verifyToken: tokenHash,
         verifyExpires: { gt: new Date() },
       },
-      select: { id: true, email: true, firstName: true, lastName: true },
+      select: { id: true, email: true, firstName: true, lastName: true, tokenVersion: true },
     });
 
     if (!user) {
@@ -67,6 +67,7 @@ export async function GET(req: NextRequest) {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
+      tokenVersion: user.tokenVersion,
     });
 
     const response = NextResponse.redirect(

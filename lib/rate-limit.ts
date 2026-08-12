@@ -144,6 +144,8 @@ export async function rateLimitAsync(
 }
 
 // ── Predefined rate limit tiers ──
+// NOTE: These values mirror lib/constants.ts (GUEST_RATE_LIMIT, FREE_USER_RATE_LIMIT, PRO_RATE_LIMIT).
+// constants.ts is the canonical source — keep values in sync when changing.
 export const RATE_LIMITS = {
   /** Free registered users: 20 req/min */
   free: { windowMs: 60_000, maxRequests: 20 } as RateLimitConfig,

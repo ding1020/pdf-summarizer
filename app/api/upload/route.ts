@@ -3,7 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { detectFileType, extractText, SUPPORTED_EXTENSIONS } from "@/lib/file-processor";
+import { detectFileType, extractText, validateMagicBytes, SUPPORTED_EXTENSIONS } from "@/lib/file-processor";
 import { MAX_FILE_SIZE } from "@/lib/constants";
 import { getClientIP } from "@/lib/api-utils";
 import { validateCsrf } from "@/lib/csrf";
@@ -111,6 +111,22 @@ export async function POST(req: NextRequest) {
 
   if (buffer.length === 0) {
     return NextResponse.json({ error: "Uploaded file is empty or corrupted." }, { status: 400 });
+  }
+
+  // ── Validate magic bytes ──
+  // Ensures file content matches its claimed type, preventing malicious
+  // uploads disguised with wrong extensions (e.g., .exe renamed to .pdf)
+  if (!validateMagicBytes(buffer, fileType!)) {
+    logger.warn("Magic bytes validation failed", {
+      filename: file.name,
+      fileType,
+      fileSize: file.size,
+      declaredMime: file.type,
+    });
+    return NextResponse.json(
+      { error: "File content does not match its extension. The file may be corrupted or disguised." },
+      { status: 415 },
+    );
   }
 
   // ── Extract text ──

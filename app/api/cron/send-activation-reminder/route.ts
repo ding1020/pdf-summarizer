@@ -67,7 +67,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Filter to only users with no documents
-    const inactiveUsers = candidates.filter((u) => u._count.documents === 0);
+    const inactiveUsers = candidates.filter((u: any) => u._count.documents === 0);
 
     for (const user of inactiveUsers) {
       const name = user.firstName || user.email.split("@")[0] || "there";

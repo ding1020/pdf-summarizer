@@ -22,8 +22,8 @@ import { trackPdfUpload, trackSummaryCompleted } from "@/lib/analytics";
 const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
 const MAX_FILE_SIZE_DISPLAY = "20MB";
 
-// CSRF: read cookie set by middleware, send it as a header on every POST.
-// (The middleware sets __csrf_token on all page GETs — see middleware.ts.)
+// CSRF: read cookie set by proxy, send it as a header on every POST.
+// (The proxy sets __csrf_token on all page GETs — see proxy.ts.)
 function getCsrfHeaders(): Record<string, string> {
   if (typeof document === "undefined") return {};
   const token = document.cookie

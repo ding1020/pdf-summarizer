@@ -38,6 +38,47 @@ export function detectFileType(
   return null;
 }
 
+// ── Magic Bytes Signatures ──
+// Used to validate that file content matches its claimed type,
+// preventing malicious uploads disguised with wrong extensions.
+const MAGIC_BYTES: Record<SupportedExtension, number[]> = {
+  ".pdf": [0x25, 0x50, 0x44, 0x46], // %PDF
+  ".docx": [0x50, 0x4b, 0x03, 0x04], // PK (ZIP/OOXML)
+  ".txt": [], // No magic bytes — validated separately
+};
+
+/**
+ * Validate that a buffer's magic bytes match the expected file type.
+ * Returns true if the content matches the claimed type.
+ *
+ * For PDF: checks first 4 bytes are %PDF
+ * For DOCX: checks first 4 bytes are PK\x03\x04 (ZIP signature)
+ * For TXT: validates content is valid UTF-8 or ASCII text (no null bytes in first 1KB)
+ */
+export function validateMagicBytes(
+  buffer: Buffer,
+  fileType: SupportedExtension,
+): boolean {
+  if (buffer.length === 0) return false;
+
+  const expected = MAGIC_BYTES[fileType];
+  if (expected.length === 0) {
+    // TXT: check first 1KB for binary content (null bytes indicate non-text)
+    const checkLength = Math.min(buffer.length, 1024);
+    for (let i = 0; i < checkLength; i++) {
+      if (buffer[i] === 0x00) return false; // Null byte = binary content
+    }
+    return true;
+  }
+
+  // Check if buffer starts with the expected magic bytes
+  if (buffer.length < expected.length) return false;
+  for (let i = 0; i < expected.length; i++) {
+    if (buffer[i] !== expected[i]) return false;
+  }
+  return true;
+}
+
 /**
  * Main entry: extract text from a Buffer based on detected file type.
  */
@@ -117,7 +158,7 @@ async function extractPdf(buffer: Buffer): Promise<ExtractResult> {
  * Extract text from DOCX buffer via mammoth.
  */
 async function extractDocx(buffer: Buffer): Promise<ExtractResult> {
-  const result = await mammoth.extractRawText({ buffer });
+  const result = await mammoth.extractRawText({ buffer } as unknown as Buffer);
   return {
     text: result.value,
     metadata: {

@@ -1,42 +1,33 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getAuthUserId } from "@/lib/get-auth";
-import { summarizeWithFallback, checkAndIncrementDailyUsage, type AIProvider, type TokenUsage } from "@/lib/ai";
-import { rateLimitAsync, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
+import {
+  summarizeWithFallback,
+  type AIProvider,
+} from "@/lib/ai";
 import { logger } from "@/lib/logger";
 import { prisma } from "@/lib/db";
 import { summarizeSchema } from "@/lib/schemas";
-import { FREE_DAILY_LIMIT, MAX_CONTENT_LENGTH } from "@/lib/constants";
-import { getClientIP, resolveRateLimit } from "@/lib/api-utils";
-import { saveUsageLog, getUserType } from "@/lib/usage-log";
+import { getRateLimitHeaders } from "@/lib/rate-limit";
+import {
+  extractAuthContext,
+  applyRateLimitGuard,
+  resolveDocumentContent,
+  checkDailyUsageLimit,
+  refundUsageQuota,
+  logAIUsage,
+  getMaxContentLength,
+  createAIUnavailableError,
+} from "@/lib/summarize-helpers";
 
 export async function POST(req: NextRequest) {
   let userId: string | null = null;
   try {
-    // ==================== Rate Limiting ====================
-    const clientIp = getClientIP(req);
-    userId = await getAuthUserId();
-    const isGuest = !userId;
-    const identifier = getClientIdentifier(userId, clientIp);
+    // ==================== Auth + Rate Limiting (via shared helpers) ====================
+    const { userId: uid, clientIp, isGuest } = await extractAuthContext(req);
+    userId = uid;
 
-    // Differentiate rate limits: Pro > Free > Guest
-    const { config: usageRateConfig } = await resolveRateLimit(userId);
-    const rateLimitResult = await rateLimitAsync(identifier, usageRateConfig);
-    
-    if (!rateLimitResult.success) {
-      return NextResponse.json(
-        { 
-          error: "Rate limit exceeded. Please wait a moment.",
-          retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
-        },
-        { 
-          status: 429,
-          headers: {
-            "Content-Type": "application/json",
-            ...getRateLimitHeaders(rateLimitResult),
-          }
-        }
-      );
-    }
+    const rateGuard = await applyRateLimitGuard(userId, clientIp);
+    if (rateGuard.errorResponse) return rateGuard.errorResponse;
+    const rateLimitResult = rateGuard.data;
 
     // ==================== Input Validation (Zod) ====================
     const body = await req.json();
@@ -55,20 +46,12 @@ export async function POST(req: NextRequest) {
     let resolvedContent = content;
 
     if (!isGuest && documentId && !streamSummary) {
-      // Signed-in: load content from DB (avoids sending full content through client)
-      try {
-        const doc = await prisma.document.findUnique({
-          where: { id: documentId },
-          select: { content: true, userId: true },
-        });
-        if (doc && doc.userId === userId!) {
-          resolvedContent = doc.content;
-          logger.info("Content loaded from DB for summarization", { documentId, contentLength: doc.content.length });
-        } else {
-          logger.warn("Document not found or access denied, falling back to provided content", { documentId });
-        }
-      } catch (dbErr) {
-        logger.warn("Failed to load content from DB, falling back to provided content", { documentId });
+      const resolution = await resolveDocumentContent(documentId, userId!, false);
+      if (resolution.content) {
+        resolvedContent = resolution.content;
+        logger.info("Content loaded from DB for summarization", { documentId, contentLength: resolution.content.length });
+      } else {
+        logger.warn("Document not found or access denied, falling back to provided content", { documentId });
       }
     }
 
@@ -80,46 +63,9 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // ==================== Daily Usage Limit (moved before streamSummary to prevent bypass) ====================
-    if (!isGuest) {
-      try {
-        const usageCheck = await checkAndIncrementDailyUsage(userId!, FREE_DAILY_LIMIT);
-        if (!usageCheck.allowed) {
-          return NextResponse.json(
-            {
-              error: `Daily free limit reached (${FREE_DAILY_LIMIT}/day). Upgrade to Pro for unlimited access.`,
-              code: "usage_limit_reached",
-              upgradeUrl: "/pricing",
-            },
-            {
-              status: 402,
-              headers: { ...getRateLimitHeaders(rateLimitResult), "Content-Type": "application/json" },
-            }
-          );
-        }
-      } catch (limitError) {
-        logger.warn("Failed to check daily usage limit", {
-          error: limitError instanceof Error ? limitError.message : String(limitError),
-        });
-        // Fail open — don't block the request on limit-check failure
-      }
-    }
-
-    // Also enforce daily limit for guests via cookie/ip tracking
-    if (isGuest) {
-      const guestKey = `guest_daily:${clientIp}`;
-      const guestDailyResult = await rateLimitAsync(guestKey, { windowMs: 24 * 60 * 60 * 1000, maxRequests: FREE_DAILY_LIMIT });
-      if (!guestDailyResult.success) {
-        return NextResponse.json(
-          {
-            error: "Daily free limit reached. Sign up for more summaries.",
-            code: "usage_limit_reached",
-            upgradeUrl: "/sign-up",
-          },
-          { status: 402, headers: { "Content-Type": "application/json" } },
-        );
-      }
-    }
+    // ==================== Daily Usage Limit (via shared helper) ====================
+    const usageGuard = await checkDailyUsageLimit(userId, clientIp, isGuest);
+    if (usageGuard.errorResponse) return usageGuard.errorResponse;
 
     // ==================== If stream already generated summary, skip AI re-generation ====================
     if (streamSummary) {
@@ -128,7 +74,6 @@ export async function POST(req: NextRequest) {
       // Still save to DB if signed-in — WITH ownership verification
       if (!isGuest && documentId) {
         try {
-          // Verify ownership before updating (prevents IDOR)
           const doc = await prisma.document.findUnique({
             where: { id: documentId },
             select: { userId: true },
@@ -151,7 +96,7 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(
         { success: true, summary: streamSummary, documentId, provider: "stream" },
-        { headers: getRateLimitHeaders(rateLimitResult) }
+        { headers: rateLimitResult ? getRateLimitHeaders(rateLimitResult) : undefined }
       );
     }
 
@@ -162,21 +107,21 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const maxLength = MAX_CONTENT_LENGTH;
-    const truncatedContent = resolvedContent.length > maxLength 
+    const maxLength = await getMaxContentLength(userId);
+    const truncatedContent = resolvedContent.length > maxLength
       ? resolvedContent.substring(0, maxLength) + "..."
       : resolvedContent;
 
     // ── Summarize with automatic provider fallback ──
     let summary: string;
     let usedProvider: AIProvider;
-    let aiUsage: TokenUsage;
+    let aiUsage: { provider: string; model: string; inputTokens: number; outputTokens: number; totalTokens: number; costUSD: number };
     try {
       const result = await summarizeWithFallback({
         content: truncatedContent,
         language,
         preferredProvider: provider as AIProvider,
-        maxContentLength: MAX_CONTENT_LENGTH,
+        maxContentLength: maxLength,
       });
       summary = result.summary;
       usedProvider = result.provider;
@@ -189,43 +134,19 @@ export async function POST(req: NextRequest) {
         { isGuest, contentLength: truncatedContent.length },
       );
       // Log error for real error rate tracking
-      const errUserType = await getUserType(userId);
-      await saveUsageLog({
-        userId,
-        provider: provider as string,
-        model: "unknown",
-        inputTokens: 0,
-        outputTokens: 0,
-        totalTokens: 0,
-        costUSD: 0,
-        userType: errUserType,
-        route: "web",
-        status: "error",
-        ip: clientIp ?? undefined,
-      });
-      return NextResponse.json(
-        {
-          error: "AI service is temporarily unavailable. Please try again in a moment.",
-          code: "ai_service_unavailable",
-          details: process.env.NODE_ENV === "development" ? errMsg : undefined,
-        },
-        { status: 503, headers: { "Content-Type": "application/json" } },
-      );
+      await logAIUsage(userId, provider, "unknown", {
+        inputTokens: 0, outputTokens: 0, totalTokens: 0, costUSD: 0,
+      }, clientIp, "web");
+      return createAIUnavailableError(errMsg);
     }
 
-    const userType = await getUserType(userId);
-    await saveUsageLog({
-      userId,
-      provider: aiUsage.provider,
-      model: aiUsage.model,
+    // Log AI usage (via shared helper)
+    await logAIUsage(userId, aiUsage.provider, aiUsage.model, {
       inputTokens: aiUsage.inputTokens,
       outputTokens: aiUsage.outputTokens,
       totalTokens: aiUsage.totalTokens,
       costUSD: aiUsage.costUSD,
-      userType,
-      route: "web",
-      ip: clientIp ?? undefined,
-    });
+    }, clientIp, "web");
 
     logger.info("Summary generated", {
       documentId,
@@ -248,33 +169,19 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { 
-        success: true, 
-        summary, 
+      {
+        success: true,
+        summary,
         documentId: documentId || `${Date.now()}`,
         provider: usedProvider,
       },
-      { headers: getRateLimitHeaders(rateLimitResult) }
+      { headers: rateLimitResult ? getRateLimitHeaders(rateLimitResult) : undefined }
     );
   } catch (error) {
     logger.error("Summarize error:", error instanceof Error ? error : new Error(String(error)));
 
     // Refund the daily usage quota — AI failure shouldn't consume user's allowance
-    try {
-      if (userId) {
-        const user = await prisma.user.findUnique({ where: { id: userId }, select: { subscriptionStatus: true } });
-        if (user && user.subscriptionStatus !== "pro" && user.subscriptionStatus !== "pro_trial") {
-          await prisma.user.updateMany({
-            where: { id: userId, usageCount: { gt: 0 } },
-            data: { usageCount: { decrement: 1 } },
-          });
-        }
-      }
-    } catch (refundErr) {
-      logger.warn("Failed to refund usage quota after AI failure", {
-        error: refundErr instanceof Error ? refundErr.message : String(refundErr),
-      });
-    }
+    await refundUsageQuota(userId);
 
     return NextResponse.json(
       { error: "Failed to generate summary" },

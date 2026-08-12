@@ -8,11 +8,11 @@ import {
   type AIProvider,
 } from "@/lib/ai";
 
-// Set mock API keys so getProviderFallbackChain returns all providers in tests
+// Ensure AI provider keys exist so getProviderFallbackChain returns providers in tests
 beforeAll(() => {
-  process.env.DEEPSEEK_API_KEY = "test-key-deepseek";
-  process.env.GROQ_API_KEY = "test-key-groq";
-  process.env.SILICONFLOW_API_KEY = "test-key-siliconflow";
+  process.env.DEEPSEEK_API_KEY ||= "test-deepseek-key";
+  process.env.GROQ_API_KEY ||= "test-groq-key";
+  process.env.SILICONFLOW_API_KEY ||= "test-siliconflow-key";
 });
 
 // ── estimateTokens ──

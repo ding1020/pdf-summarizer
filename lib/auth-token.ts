@@ -13,7 +13,7 @@ function getSecret(): string {
 
 export { type AuthToken };
 
-export function createToken(user: { id: string; email: string; firstName?: string | null; lastName?: string | null }): string {
+export function createToken(user: { id: string; email: string; firstName?: string | null; lastName?: string | null; tokenVersion?: number }): string {
   const payload: AuthToken = {
     userId: user.id,
     email: user.email,
@@ -21,6 +21,7 @@ export function createToken(user: { id: string; email: string; firstName?: strin
     lastName: user.lastName || null,
     iat: Math.floor(Date.now() / 1000),
     exp: Math.floor(Date.now() / 1000) + 60 * 60 * 24 * 7, // 7 days — must match cookie maxAge in sign-in route
+    ver: user.tokenVersion || 1, // Default to 1 for backward compatibility
   };
   
   const secret = getSecret();
@@ -57,4 +58,30 @@ function timingSafeEqual(a: string, b: string): boolean {
     result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
   return result === 0;
+}
+
+// ── Token revocation ──
+
+/**
+ * Revoke all active tokens for a user by incrementing their tokenVersion.
+ * This invalidates all previously-issued tokens — the user must re-authenticate.
+ *
+ * Should be called on:
+ *   - Password change/reset
+ *   - Explicit "sign out all devices"
+ *   - Account ban/suspension
+ *
+ * @returns the new tokenVersion value
+ */
+export async function revokeAllUserTokens(userId: string): Promise<number> {
+  const { prisma } = await import("./db");
+  const user = await prisma.user.update({
+    where: { id: userId },
+    data: { tokenVersion: { increment: 1 } },
+    select: { tokenVersion: true },
+  });
+  // Clear the auth cache so the revoked token is immediately rejected
+  const { clearAuthCache } = await import("./get-auth");
+  clearAuthCache(userId);
+  return user.tokenVersion;
 }
