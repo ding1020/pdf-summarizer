@@ -1,4 +1,4 @@
-﻿import { withSentryConfig } from "@sentry/nextjs";
+import { withSentryConfig } from "@sentry/nextjs";
 import createNextIntlPlugin from "next-intl/plugin";
 
 const withNextIntl = createNextIntlPlugin("./i18n.ts");
@@ -18,6 +18,7 @@ const nextConfig = {
   serverExternalPackages: ["pdf-parse", "@napi-rs/canvas", "pdfjs-dist"],
 
   // ⚡ Performance
+  output: 'standalone',
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },

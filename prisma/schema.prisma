@@ -219,3 +219,19 @@ model Subscriber {
   @@index([email])
   @@index([createdAt])
 }
+
+model WebVital {
+  id             String   @id @default(uuid())
+  metric         String   // LCP, FID, CLS, INP, TTFB, FCP
+  value          Float
+  rating         String   // good, needs-improvement, poor
+  pathname       String   @default("/")
+  navigationType String?  // navigate, reload, back_forward, prerender
+  sessionId      String?
+  createdAt      DateTime @default(now())
+
+  @@index([metric, createdAt])
+  @@index([rating])
+  @@index([createdAt])
+  @@index([pathname])
+}

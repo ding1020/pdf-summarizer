@@ -1,4 +1,4 @@
-﻿/**
+/**
  * POST /api/web-vitals
  *
  * Receives Core Web Vitals metrics (LCP, FID, CLS, INP, TTFB, FCP)
@@ -43,10 +43,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ ok: false, error: "Invalid value" }, { status: 400 });
     }
 
-    // Log metric for server-side monitoring
-    const logLevel = rating === "poor" ? "warn" : rating === "needs-improvement" ? "info" : "debug";
-
-    logger[logLevel](`[Web Vitals] ${name}: ${value} (${rating})`, {
+    const ctx = {
       metric: name,
       value,
       rating,
@@ -54,7 +51,18 @@ export async function POST(req: NextRequest) {
       delta: typeof delta === "number" ? delta : 0,
       navigationType: typeof navigationType === "string" ? navigationType : "unknown",
       pathname: typeof pathname === "string" ? pathname : "/",
-    });
+    };
+
+    const msg = `[Web Vitals] ${name}: ${value} (${rating})`;
+
+    // Log metric for server-side monitoring
+    if (rating === "poor") {
+      logger.warn(msg, ctx);
+    } else if (rating === "needs-improvement") {
+      logger.info(msg, ctx);
+    } else {
+      logger.debug(msg, ctx);
+    }
 
     // Send poor metrics to Sentry for proactive alerting
     if (rating === "poor") {
