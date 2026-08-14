@@ -112,7 +112,10 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         body: JSON.stringify({ documentId, content }),
       });
         const data = await response.json();
-        if (!response.ok) throw new Error(data.error || t("summarizeFailed"));
+        if (!response.ok) {
+          const msg = data.code === "RATE_LIMIT_USER" ? t("rateLimitUser") : (data.error || t("summarizeFailed"));
+          throw new Error(msg);
+        }
         if (isMountedRef.current) {
           setSummary(data.summary);
         }
@@ -143,9 +146,9 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || t("summarizeFailed"));
+        const msg = errorData.code === "RATE_LIMIT_USER" ? t("rateLimitUser") : (errorData.error || t("summarizeFailed"));
+        throw new Error(msg);
       }
-
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
 
@@ -329,9 +332,20 @@ export default function FileUpload({ onUploadComplete }: FileUploadProps) {
         const data = await response.json();
 
         if (!response.ok) {
-          throw new Error(data.error || t("uploadFailed"));
+          const errorMessages: Record<string, string> = {
+            RATE_LIMIT_GUEST: t("rateLimitGuest"),
+            RATE_LIMIT_USER: t("rateLimitUser"),
+            FILE_TOO_LARGE: t("fileTooLarge"),
+            FILE_EMPTY: t("fileEmpty"),
+            FILE_CORRUPTED: t("fileCorrupted"),
+            GUEST_PDF_ONLY: t("guestPdfOnly"),
+            UNSUPPORTED_FORMAT: t("unsupportedFormat"),
+            EXTRACT_EMPTY: t("extractEmpty"),
+            EXTRACT_FAILED: t("extractFailed"),
+            PASSWORD_PROTECTED: t("passwordProtected"),
+          };
+          throw new Error((data.code && errorMessages[data.code]) || data.error || t("uploadFailed"));
         }
-
         const uploadResult = {
           documentId: data.documentId,
           filename: data.filename,

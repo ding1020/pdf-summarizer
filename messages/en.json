@@ -311,7 +311,18 @@
     "copied": "Copied!",
     "shareEnabled": "Share link copied!",
     "shareDisabled": "Share",
-    "downloadProOnly": "Pro feature — Click to upgrade"
+    "downloadProOnly": "Pro feature — Click to upgrade",
+    "rateLimitGuest": "Free trial limit reached. Sign up for 5 summaries/day.",
+    "rateLimitUser": "Upload rate limit exceeded. Please wait a moment.",
+    "fileTooLarge": "File too large. Maximum size is 20MB.",
+    "fileEmpty": "The uploaded file is empty.",
+    "fileCorrupted": "Uploaded file is empty or corrupted.",
+    "guestPdfOnly": "Only PDF files are supported. Sign up for Word & TXT support.",
+    "unsupportedFormat": "Unsupported file format.",
+    "extractEmpty": "Could not extract text from this document. The file may be scanned or password-protected.",
+    "extractFailed": "Failed to extract text from the document.",
+    "passwordProtected": "This document is password-protected. Please remove the password and try again."
+
   },
   "footer": {
     "brand": "PDF Summary",

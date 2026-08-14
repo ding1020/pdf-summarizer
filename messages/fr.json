@@ -290,7 +290,18 @@
     "shareSummary": "Partager",
     "copied": "Copié !",
     "shareEnabled": "Lien de partage copié !",
-    "shareDisabled": "Partager"
+    "shareDisabled": "Partager",
+    "rateLimitGuest": "Limite d'essai atteinte. Inscrivez-vous pour 5 resumes/jour.",
+    "rateLimitUser": "Limite de telechargement depassee. Veuillez patienter.",
+    "fileTooLarge": "Fichier trop volumineux. Taille maximum : 20 Mo.",
+    "fileEmpty": "Le fichier telecharge est vide.",
+    "fileCorrupted": "Le fichier est vide ou corrompu.",
+    "guestPdfOnly": "Seuls les fichiers PDF sont pris en charge. Inscrivez-vous pour Word et TXT.",
+    "unsupportedFormat": "Format de fichier non pris en charge.",
+    "extractEmpty": "Impossible de extraire le texte. Le fichier pourrait etre numerise ou protege.",
+    "extractFailed": "Echec de lextraction du texte du document.",
+    "passwordProtected": "Document protege par mot de passe. Supprimez le mot de passe et reessayez."
+
   },
   "footer": {
     "brand": "PDF Summary",

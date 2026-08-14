@@ -290,7 +290,18 @@
     "shareSummary": "共有",
     "copied": "コピーしました！",
     "shareEnabled": "共有リンクをコピーしました！",
-    "shareDisabled": "共有"
+    "shareDisabled": "共有",
+    "rateLimitGuest": "無料試用回数の上限に達しました。登録すると1日5回までご利用いただけます。",
+    "rateLimitUser": "アップロードのレート制限を超えました。しばらくお待ちください。",
+    "fileTooLarge": "ファイルが大きすぎます。最大サイズは20MBです。",
+    "fileEmpty": "アップロードされたファイルは空です。",
+    "fileCorrupted": "ファイルが空か、破損しています。",
+    "guestPdfOnly": "PDFファイルのみサポートされています。登録するとWord・TXTも利用可能です。",
+    "unsupportedFormat": "サポートされていないファイル形式です。",
+    "extractEmpty": "このドキュメントからテキストを抽出できませんでした。スキャンされた画像ベースのファイルか、パスワードで保護されている可能性があります。",
+    "extractFailed": "ドキュメントからのテキスト抽出に失敗しました。",
+    "passwordProtected": "このドキュメントはパスワードで保護されています。パスワードを解除して再試行してください。"
+
   },
   "footer": {
     "brand": "PDF Summary",

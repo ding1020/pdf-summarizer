@@ -86,7 +86,7 @@ export async function applyRateLimitGuard(
         data: null,
         errorResponse: createJsonResponse(
           {
-            error: "Rate limit exceeded. Please wait a moment.",
+            error: "Rate limit exceeded. Please wait a moment.", code: "RATE_LIMIT_USER",
             retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000),
           },
           429,

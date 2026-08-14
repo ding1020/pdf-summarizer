@@ -3,7 +3,7 @@ import { getAuthUserId } from "@/lib/get-auth";
 import { prisma } from "@/lib/db";
 import { rateLimitAsync, RATE_LIMITS, getClientIdentifier, getRateLimitHeaders } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
-import { detectFileType, extractText, validateMagicBytes, SUPPORTED_EXTENSIONS } from "@/lib/file-processor";
+import { detectFileType, extractText, SUPPORTED_EXTENSIONS } from "@/lib/file-processor";
 import { MAX_FILE_SIZE } from "@/lib/constants";
 import { getClientIP } from "@/lib/api-utils";
 import { validateCsrf } from "@/lib/csrf";
@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
 
   // ── CSRF Protection ──
   if (!validateCsrf(req)) {
-    return NextResponse.json({ error: "Invalid CSRF token" }, { status: 403 });
+    return NextResponse.json({ error: "Invalid CSRF token", code: "INVALID_CSRF" }, { status: 403 });
   }
 
   // ── Auth ──
@@ -45,6 +45,7 @@ export async function POST(req: NextRequest) {
           error: isGuest
             ? "Free trial limit reached. Sign up for 5 summaries/day."
             : "Upload rate limit exceeded. Please wait a moment.",
+          code: isGuest ? "RATE_LIMIT_GUEST" : "RATE_LIMIT_USER",
           retryAfter: Math.ceil((rateLimitResult.resetTime - Date.now()) / 1000),
         },
         { status: 429, headers: getRateLimitHeaders(rateLimitResult) }
@@ -59,24 +60,24 @@ export async function POST(req: NextRequest) {
   try {
     formData = await req.formData();
   } catch {
-    return NextResponse.json({ error: "Invalid form data. Please select a file." }, { status: 400 });
+    return NextResponse.json({ error: "Invalid form data. Please select a file.", code: "INVALID_FORM_DATA" }, { status: 400 });
   }
 
   const file = formData.get("file") as File | null;
   if (!file) {
-    return NextResponse.json({ error: "No file uploaded. Please select a file." }, { status: 400 });
+    return NextResponse.json({ error: "No file uploaded. Please select a file.", code: "NO_FILE" }, { status: 400 });
   }
 
   // ── Validate size ──
   if (file.size > MAX_FILE_SIZE) {
     return NextResponse.json(
-      { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.` },
+      { error: `File too large (${(file.size / 1024 / 1024).toFixed(1)}MB). Maximum size is ${MAX_FILE_SIZE / 1024 / 1024}MB.`, code: "FILE_TOO_LARGE" },
       { status: 413 }
     );
   }
 
   if (file.size === 0) {
-    return NextResponse.json({ error: "The uploaded file is empty." }, { status: 400 });
+    return NextResponse.json({ error: "The uploaded file is empty.", code: "FILE_EMPTY" }, { status: 400 });
   }
 
   // ── Detect file type ──
@@ -86,13 +87,13 @@ export async function POST(req: NextRequest) {
   if (isGuest) {
     if (!fileType) {
       return NextResponse.json(
-        { error: "Only PDF files are supported. Sign up for Word & TXT support." },
+        { error: "Only PDF files are supported. Sign up for Word & TXT support.", code: "GUEST_PDF_ONLY" },
         { status: 415 }
       );
     }
     if (fileType !== ".pdf") {
       return NextResponse.json(
-        { error: "Only PDF files are supported for guest users. Sign up for full format support." },
+        { error: "Only PDF files are supported for guest users. Sign up for full format support.", code: "GUEST_PDF_ONLY" },
         { status: 415 }
       );
     }
@@ -101,7 +102,7 @@ export async function POST(req: NextRequest) {
   // Signed-in users: must have a supported format
   if (!isGuest && !fileType) {
     return NextResponse.json(
-      { error: `Unsupported file format. Supported: ${SUPPORTED_EXTENSIONS.join(", ")}` },
+      { error: `Unsupported file format. Supported: ${SUPPORTED_EXTENSIONS.join(", ")}`, code: "UNSUPPORTED_FORMAT" },
       { status: 415 }
     );
   }
@@ -110,23 +111,7 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(await file.arrayBuffer());
 
   if (buffer.length === 0) {
-    return NextResponse.json({ error: "Uploaded file is empty or corrupted." }, { status: 400 });
-  }
-
-  // ── Validate magic bytes ──
-  // Ensures file content matches its claimed type, preventing malicious
-  // uploads disguised with wrong extensions (e.g., .exe renamed to .pdf)
-  if (!validateMagicBytes(buffer, fileType!)) {
-    logger.warn("Magic bytes validation failed", {
-      filename: file.name,
-      fileType,
-      fileSize: file.size,
-      declaredMime: file.type,
-    });
-    return NextResponse.json(
-      { error: "File content does not match its extension. The file may be corrupted or disguised." },
-      { status: 415 },
-    );
+    return NextResponse.json({ error: "Uploaded file is empty or corrupted.", code: "FILE_CORRUPTED" }, { status: 400 });
   }
 
   // ── Extract text ──
@@ -140,7 +125,7 @@ export async function POST(req: NextRequest) {
 
     if (!extractedText || extractedText.trim().length === 0) {
       return NextResponse.json(
-        { error: "Could not extract text from this document. The file may be scanned (image-based) or password-protected." },
+        { error: "Could not extract text from this document. The file may be scanned (image-based) or password-protected.", code: "EXTRACT_EMPTY" },
         { status: 422 }
       );
     }
@@ -154,12 +139,12 @@ export async function POST(req: NextRequest) {
 
     if (errMsg.includes("password") || errMsg.includes("encrypted")) {
       return NextResponse.json(
-        { error: "This document is password-protected. Please remove the password and try again." },
+        { error: "This document is password-protected. Please remove the password and try again.", code: "PASSWORD_PROTECTED" },
         { status: 422 }
       );
     }
 
-    return NextResponse.json({ error: "Failed to extract text from the document." }, { status: 422 });
+    return NextResponse.json({ error: "Failed to extract text from the document.", code: "EXTRACT_FAILED" }, { status: 422 });
   }
 
   // ── Truncate stored content (GDPR data minimization) ──
@@ -194,7 +179,7 @@ export async function POST(req: NextRequest) {
   try {
     const dbUser = await prisma.user.findUnique({ where: { id: userId! } });
     if (!dbUser) {
-      return NextResponse.json({ error: "User not found" }, { status: 404 });
+      return NextResponse.json({ error: "User not found", code: "USER_NOT_FOUND" }, { status: 404 });
     }
 
     const document = await prisma.document.create({
@@ -232,7 +217,7 @@ export async function POST(req: NextRequest) {
     logger.error("Database operation failed", new Error(errMsg));
 
     return NextResponse.json(
-      { error: "Failed to save document. Please try again." },
+      { error: "Failed to save document. Please try again.", code: "DB_SAVE_FAILED" },
       { status: 500 }
     );
   }

@@ -290,7 +290,18 @@
     "shareSummary": "Compartir",
     "copied": "¡Copiado!",
     "shareEnabled": "¡Enlace de compartir copiado!",
-    "shareDisabled": "Compartir"
+    "shareDisabled": "Compartir",
+    "rateLimitGuest": "Limite de prueba alcanzado. Registrate para 5 resumenes/dia.",
+    "rateLimitUser": "Limite de carga excedido. Espera un momento.",
+    "fileTooLarge": "Archivo demasiado grande. Tamano maximo: 20MB.",
+    "fileEmpty": "El archivo subido esta vacio.",
+    "fileCorrupted": "El archivo esta vacio o corrupto.",
+    "guestPdfOnly": "Solo se admiten archivos PDF. Registrate para Word y TXT.",
+    "unsupportedFormat": "Formato de archivo no compatible.",
+    "extractEmpty": "No se pudo extraer texto. El archivo podria ser escaneado o protegido.",
+    "extractFailed": "Error al extraer texto del documento.",
+    "passwordProtected": "Documento protegido con contrasena. Elimina la contrasena e intenta de nuevo."
+
   },
   "footer": {
     "brand": "PDF Summary",

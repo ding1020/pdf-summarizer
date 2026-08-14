@@ -296,7 +296,18 @@
     "copied": "已复制！",
     "shareEnabled": "分享链接已复制！",
     "shareDisabled": "分享",
-    "downloadProOnly": "Pro 功能 — 点击升级"
+    "downloadProOnly": "Pro 功能 — 点击升级",
+    "rateLimitGuest": "免费试用次数已达上限。注册后每天可使用5次。",
+    "rateLimitUser": "上传频率超限，请稍后再试。",
+    "fileTooLarge": "文件过大。最大支持20MB。",
+    "fileEmpty": "上传的文件为空。",
+    "fileCorrupted": "文件为空或已损坏。",
+    "guestPdfOnly": "仅支持PDF文件。注册后可支持Word和TXT格式。",
+    "unsupportedFormat": "不支持此文件格式。",
+    "extractEmpty": "无法从文档中提取文本。文件可能是扫描件或受密码保护。",
+    "extractFailed": "从文档提取文本失败。",
+    "passwordProtected": "此文档受密码保护。请移除密码后重试。"
+
   },
   "footer": {
     "brand": "PDF智能摘要",

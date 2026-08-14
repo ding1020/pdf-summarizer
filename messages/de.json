@@ -290,7 +290,18 @@
     "shareSummary": "Teilen",
     "copied": "Kopiert!",
     "shareEnabled": "Freigabelink kopiert!",
-    "shareDisabled": "Teilen"
+    "shareDisabled": "Teilen",
+    "rateLimitGuest": "Kostenloses Limit erreicht. Registrieren Sie sich fuer 5 Zusammenfassungen/Tag.",
+    "rateLimitUser": "Upload-Ratenlimit ueberschritten. Bitte warten Sie einen Moment.",
+    "fileTooLarge": "Datei zu gross. Maximale Groesse: 20MB.",
+    "fileEmpty": "Die hochgeladene Datei ist leer.",
+    "fileCorrupted": "Datei ist leer oder beschaedigt.",
+    "guestPdfOnly": "Nur PDF-Dateien werden unterstuetzt. Registrieren Sie sich fuer Word- und TXT-Unterstuetzung.",
+    "unsupportedFormat": "Nicht unterstuetztes Dateiformat.",
+    "extractEmpty": "Text konnte nicht extrahiert werden. Die Datei koennte gescannt oder passwortgeschuetzt sein.",
+    "extractFailed": "Textextraktion fehlgeschlagen.",
+    "passwordProtected": "Dieses Dokument ist passwortgeschuetzt. Bitte entfernen Sie das Passwort."
+
   },
   "footer": {
     "brand": "PDF Summary",

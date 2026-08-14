@@ -290,7 +290,18 @@
     "shareSummary": "공유",
     "copied": "복사됨!",
     "shareEnabled": "공유 링크가 복사되었습니다!",
-    "shareDisabled": "공유"
+    "shareDisabled": "공유",
+    "rateLimitGuest": "무료 체험 한도에 도달했습니다. 가입하면 하루 5회 요약이 가능합니다.",
+    "rateLimitUser": "업로드 속도 제한을 초과했습니다. 잠시 기다려 주세요.",
+    "fileTooLarge": "파일이 너무 큽니다. 최대 크기: 20MB.",
+    "fileEmpty": "업로드된 파일이 비어 있습니다.",
+    "fileCorrupted": "파일이 비어 있거나 손상되었습니다.",
+    "guestPdfOnly": "PDF 파일만 지원됩니다. 가입하면 Word 및 TXT 지원이 제공됩니다.",
+    "unsupportedFormat": "지원되지 않는 파일 형식입니다.",
+    "extractEmpty": "이 문서에서 텍스트를 추출할 수 없습니다. 스캔된 파일이거나 비밀번호로 보호되어 있을 수 있습니다.",
+    "extractFailed": "문서에서 텍스트 추출에 실패했습니다.",
+    "passwordProtected": "이 문서는 비밀번호로 보호되어 있습니다. 비밀번호를 제거하고 다시 시도해 주세요."
+
   },
   "footer": {
     "brand": "PDF Summary",
